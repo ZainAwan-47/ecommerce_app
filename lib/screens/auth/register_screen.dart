@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -15,7 +17,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
@@ -24,6 +27,51 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> registerUser() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Passwords do not match"),
+        ),
+      );
+      return;
+    }
+
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(userCredential.user!.uid)
+          .set({
+        "name": fullNameController.text.trim(),
+        "email": emailController.text.trim(),
+        "role": "customer",
+        "createdAt": FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Account Created Successfully!"),
+        ),
+      );
+
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message ?? "Registration Failed",
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -69,7 +117,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
               const SizedBox(height: 35),
 
-              /// Full Name
               TextField(
                 controller: fullNameController,
                 decoration: InputDecoration(
@@ -85,7 +132,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
               const SizedBox(height: 18),
 
-              /// Email
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -102,7 +148,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
               const SizedBox(height: 18),
 
-              /// Password
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -131,7 +176,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 
               const SizedBox(height: 18),
 
-              /// Confirm Password
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
@@ -160,42 +204,11 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
               ),
 
               const SizedBox(height: 30),
-
-              SizedBox(
+                            SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed:() async {
-                    if (passwordController.text != confirmPasswordController.text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Passwords do not match"),
-      ),
-    );
-    return;
-  }
-
-  try {
-    await _auth.createUserWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Account Created Successfully!"),
-      ),
-    );
-
-    Navigator.pop(context);
-  } on FirebaseAuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.message ?? "Registration Failed"),
-      ),
-    );
-  }
-                  },
+                  onPressed: registerUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),
                     shape: RoundedRectangleBorder(
