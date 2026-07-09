@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -15,6 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
@@ -164,8 +165,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Firebase Authentication will be added later.
+                  onPressed:() async {
+                    if (passwordController.text != confirmPasswordController.text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Passwords do not match"),
+      ),
+    );
+    return;
+  }
+
+  try {
+    await _auth.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Account Created Successfully!"),
+      ),
+    );
+
+    Navigator.pop(context);
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.message ?? "Registration Failed"),
+      ),
+    );
+  }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),

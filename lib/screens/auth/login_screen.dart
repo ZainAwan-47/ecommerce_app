@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +132,27 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                     try {
+    await _auth.signInWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const HomeScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.message ?? "Login Failed"),
+      ),
+    );
+  }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),
                     shape: RoundedRectangleBorder(
