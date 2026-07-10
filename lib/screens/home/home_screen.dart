@@ -80,7 +80,9 @@ class HomeScreen extends StatelessWidget {
       ),
 
       /// Bottom Navigation
-      bottomNavigationBar: const BottomNav(),
+     bottomNavigationBar: const BottomNav(
+  currentIndex: 0,
+),
     );
   }
 }

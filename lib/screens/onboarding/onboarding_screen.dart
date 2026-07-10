@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../auth/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -40,21 +41,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void nextPage() {
-    if (currentPage < pages.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
-      );
-    }
+  Future<void> nextPage() async {
+  if (currentPage < pages.length - 1) {
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+  } else {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool(
+      'onboardingCompleted',
+      true,
+    );
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

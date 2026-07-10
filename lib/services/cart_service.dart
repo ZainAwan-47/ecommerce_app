@@ -8,36 +8,41 @@ class CartService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Add Product to Cart
-  Future<void> addToCart(ProductModel product) async {
-    final user = _auth.currentUser;
+ Future<void> addToCart(
+  ProductModel product,
+  int quantity,
+) async {
+  final user = _auth.currentUser;
 
-    if (user == null) return;
+  if (user == null) return;
 
-    final cartRef = _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('cart')
-        .doc(product.id);
+  final cartRef = _firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('cart')
+      .doc(product.id);
 
-    final doc = await cartRef.get();
+  final doc = await cartRef.get();
 
-    if (doc.exists) {
-      final currentQuantity = doc['quantity'] ?? 1;
+  if (doc.exists) {
+    final currentQuantity =
+        (doc['quantity'] as num).toInt();
 
-      await cartRef.update({
-        'quantity': currentQuantity + 1,
-      });
-    } else {
-      await cartRef.set({
-        'name': product.name,
-        'image': product.image,
-        'price': product.price,
-        'quantity': 1,
-        'addedAt': FieldValue.serverTimestamp(),
-      });
-    }
+    final newQuantity = currentQuantity + quantity;
+
+    await cartRef.update({
+      'quantity': newQuantity,
+    });
+  } else {
+    await cartRef.set({
+      'name': product.name,
+      'image': product.image,
+      'price': product.price,
+      'quantity': quantity,
+      'addedAt': FieldValue.serverTimestamp(),
+    });
   }
-
+}
   /// Get Cart Items
   Stream<QuerySnapshot> getCart() {
     final user = _auth.currentUser;

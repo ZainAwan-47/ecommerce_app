@@ -339,7 +339,10 @@ final CartService _cartService = CartService();
                     height: 58,
                     child: ElevatedButton(
                       onPressed: () async {
-  await _cartService.addToCart(product);
+  await _cartService.addToCart(
+  product,
+  quantity,
+);
 
   if (!mounted) return;
 
@@ -373,7 +376,13 @@ final CartService _cartService = CartService();
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text("Buy Now will be available soon."),
+    ),
+  );
+                      },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
                           color: Color(0xff7F4F4F),
