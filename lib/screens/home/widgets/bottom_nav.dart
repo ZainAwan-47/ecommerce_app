@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../wishlist/wishlist_screen.dart';
 import '../home_screen.dart';
 import '../../orders/orders_screen.dart';
 
@@ -32,32 +32,35 @@ class BottomNav extends StatelessWidget {
         elevation: 0,
         selectedIndex: currentIndex,
 
-        onDestinationSelected: (index) {
+       onDestinationSelected: (index) {
+  if (index == currentIndex) return;
 
-          if (index == currentIndex) return;
+  Widget screen;
 
-          Widget screen;
+  switch (index) {
+    case 0:
+      screen = const HomeScreen();
+      break;
 
-         switch (index) {
-  case 0:
-    screen = const HomeScreen();
-    break;
+    case 2:
+      screen = WishlistScreen();
+      break;
 
-  case 3:
-    screen = const OrdersScreen();
-    break;
+    case 3:
+      screen = const OrdersScreen();
+      break;
 
-  default:
-    return;
-}
+    default:
+      return;
+  }
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => screen,
-            ),
-          );
-        },
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => screen,
+    ),
+  );
+},
 
         destinations: const [
 

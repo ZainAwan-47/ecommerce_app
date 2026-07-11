@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/cart_service.dart';
 import '../../models/product_model.dart';
 import '../auth/login_screen.dart';
+import '../../services/wishlist_service.dart';
+import '../../utils/app_notifier.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
@@ -22,6 +24,7 @@ class _ProductDetailsScreenState
 
   int quantity = 1;
 final CartService _cartService = CartService();
+final WishlistService _wishlistService = WishlistService();
   @override
   Widget build(BuildContext context) {
 
@@ -57,16 +60,79 @@ final CartService _cartService = CartService();
 
             actions: [
 
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.favorite_border,
-                    color: Colors.redAccent,
-                  ),
+             StreamBuilder<bool>(
+  stream: _wishlistService.isWishlisted(product.id),
+  builder: (context, snapshot) {
+    final isWishlisted = snapshot.data ?? false;
+
+    return CircleAvatar(
+      backgroundColor: Colors.white,
+      child: IconButton(
+        icon: Icon(
+          isWishlisted
+              ? Icons.favorite
+              : Icons.favorite_border,
+          color: Colors.redAccent,
+        ),
+       onPressed: () async {
+  final wasWishlisted = isWishlisted;
+
+  final success = await _wishlistService.toggleWishlist(
+    product,
+  );
+
+  if (!mounted) return;
+
+  if (!success) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Sign In Required"),
+        content: const Text(
+          "Please sign in to use Wishlist.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LoginScreen(),
                 ),
-              ),
+              );
+            },
+            child: const Text("Sign In"),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  if (wasWishlisted) {
+    AppNotifier.remove(
+      context,
+      "Removed from Wishlist",
+    );
+  } else {
+    AppNotifier.wishlist(
+      context,
+      "Added to Wishlist",
+    );
+  }
+},
+      ),
+    );
+  },
+),
 
               const SizedBox(width: 10),
 
@@ -382,12 +448,10 @@ SizedBox(
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Added to Cart"),
-          backgroundColor: Colors.green,
-        ),
-      );
+      AppNotifier.cart(
+  context,
+  "Added to Cart",
+);
     },
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color(0xff7F4F4F),

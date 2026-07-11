@@ -51,6 +51,9 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.5.3
 
+  # Top Snackbar
+  top_snackbar_flutter: ^3.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

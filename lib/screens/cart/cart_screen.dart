@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../checkout/checkout_screen.dart';
 import '../../services/cart_service.dart';
+import '../../utils/app_notifier.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -299,12 +300,10 @@ class CartScreen extends StatelessWidget {
     await cartService.removeFromCart(item.id);
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Item removed from cart"),
-          backgroundColor: Colors.red,
-        ),
-      );
+     AppNotifier.remove(
+  context,
+  "Item removed from cart",
+);
     }
   }
 },
