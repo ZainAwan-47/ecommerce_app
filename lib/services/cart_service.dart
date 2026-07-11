@@ -8,13 +8,15 @@ class CartService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Add Product to Cart
- Future<void> addToCart(
+ Future<bool> addToCart(
   ProductModel product,
   int quantity,
 ) async {
   final user = _auth.currentUser;
 
-  if (user == null) return;
+  if (user == null) {
+    return false;
+  }
 
   final cartRef = _firestore
       .collection('users')
@@ -28,10 +30,8 @@ class CartService {
     final currentQuantity =
         (doc['quantity'] as num).toInt();
 
-    final newQuantity = currentQuantity + quantity;
-
     await cartRef.update({
-      'quantity': newQuantity,
+      'quantity': currentQuantity + quantity,
     });
   } else {
     await cartRef.set({
@@ -42,6 +42,8 @@ class CartService {
       'addedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  return true;
 }
   /// Get Cart Items
   Stream<QuerySnapshot> getCart() {

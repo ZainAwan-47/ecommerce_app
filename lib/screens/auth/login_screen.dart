@@ -195,7 +195,14 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 55,
                 child: OutlinedButton(
-                  onPressed: () {},
+                 onPressed: () {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const HomeScreen(),
+    ),
+  );
+},
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.grey),
                     shape: RoundedRectangleBorder(

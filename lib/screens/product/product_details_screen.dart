@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/cart_service.dart';
 import '../../models/product_model.dart';
+import '../auth/login_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
@@ -290,86 +291,120 @@ final CartService _cartService = CartService();
 
                   const SizedBox(height: 28),
 
-                  Text(
-                    "Quantity",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                 Text(
+  "Quantity",
+  style: GoogleFonts.playfairDisplay(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
-                  const SizedBox(height: 18),
+const SizedBox(height: 18),
 
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          if (quantity > 1) {
-                            setState(() {
-                              quantity--;
-                            });
-                          }
-                        },
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
-
-                      Text(
-                        quantity.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            quantity++;
-                          });
-                        },
-                        icon: const Icon(Icons.add_circle_outline),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: ElevatedButton(
-                      onPressed: () async {
-  await _cartService.addToCart(
-  product,
-  quantity,
-);
-
-  if (!mounted) return;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text("Added to Cart"),
-      backgroundColor: Colors.green,
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    IconButton(
+      onPressed: () {
+        if (quantity > 1) {
+          setState(() {
+            quantity--;
+          });
+        }
+      },
+      icon: const Icon(Icons.remove_circle_outline),
     ),
-  );
-},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff7F4F4F),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      child: Text(
-                        "Add to Cart",
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
 
+    Text(
+      quantity.toString(),
+      style: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+
+    IconButton(
+      onPressed: () {
+        setState(() {
+          quantity++;
+        });
+      },
+      icon: const Icon(Icons.add_circle_outline),
+    ),
+  ],
+),
+
+const SizedBox(height: 30),
+
+SizedBox(
+  width: double.infinity,
+  height: 58,
+  child: ElevatedButton(
+    onPressed: () async {
+      final added = await _cartService.addToCart(
+        product,
+        quantity,
+      );
+
+      if (!mounted) return;
+
+      if (!added) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Sign In Required"),
+            content: const Text(
+              "Please sign in to add products to your cart.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(),
+                    ),
+                  );
+                },
+                child: const Text("Sign In"),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Added to Cart"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xff7F4F4F),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+    ),
+    child: Text(
+      "Add to Cart",
+      style: GoogleFonts.poppins(
+        fontSize: 18,
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  ),
+),
                   const SizedBox(height: 16),
 
                   SizedBox(
