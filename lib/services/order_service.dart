@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class OrderService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+import '../models/product_model.dart';
 
+class OrderService {
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
+
+  final FirebaseAuth _auth =
+      FirebaseAuth.instance;
+
+  /// CART ORDER
   Future<void> placeOrder({
     required String address,
     required String phone,
@@ -30,14 +36,11 @@ class OrderService {
     for (var cartItem in cartSnapshot.docs) {
       final data = cartItem.data();
 
-      final price = (data['price'] as num).toDouble();
-      final quantity = (data['quantity'] as num).toInt();
+      final price =
+          (data['price'] as num).toDouble();
 
-      print("========");
-      print("Product: ${data['name']}");
-      print("Price: $price");
-      print("Quantity: $quantity");
-      print("Subtotal: ${price * quantity}");
+      final quantity =
+          (data['quantity'] as num).toInt();
 
       total += price * quantity;
 
@@ -50,9 +53,7 @@ class OrderService {
       });
     }
 
-    print("FINAL TOTAL = $total");
-
-    final orderDoc = await _firestore.collection('orders').add({
+    await _firestore.collection('orders').add({
       'userId': user.uid,
       'address': address,
       'phone': phone,
@@ -63,10 +64,48 @@ class OrderService {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    print("ORDER CREATED: ${orderDoc.id}");
-
     for (var cartItem in cartSnapshot.docs) {
       await cartItem.reference.delete();
     }
   }
+
+  /// BUY NOW ORDER
+  Future<void> placeBuyNowOrder({
+    required ProductModel product,
+    required String address,
+    required String phone,
+  }) async {
+    final user = _auth.currentUser;
+
+    if (user == null) return;
+
+    await _firestore.collection('orders').add({
+      'userId': user.uid,
+      'address': address,
+      'phone': phone,
+      'paymentMethod': 'Cash on Delivery',
+      'status': 'Pending',
+      'total': product.price,
+      'products': [
+        {
+          'productId': product.id,
+          'name': product.name,
+          'image': product.image,
+          'price': product.price,
+          'quantity': 1,
+        }
+      ],
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+  /// GET USER ORDERS (Newest First)
+Stream<QuerySnapshot> getOrders() {
+  final user = _auth.currentUser;
+
+  return _firestore
+      .collection('orders')
+      .where('userId', isEqualTo: user!.uid)
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+}
 }

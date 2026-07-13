@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../services/buy_now_service.dart';
 import '../../services/cart_service.dart';
 import '../../services/order_service.dart';
+import '../../models/checkout_item.dart';
+import '../../models/product_model.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -36,7 +38,11 @@ class _CheckoutScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+  onPopInvoked: (didPop) {
+    BuyNowService().clear();
+  },
+  child: Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
       appBar: AppBar(
@@ -50,7 +56,7 @@ class _CheckoutScreenState
 
         title: Text(
           "Checkout",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.dmSerifDisplay(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -70,8 +76,17 @@ class _CheckoutScreenState
             );
           }
 
-          if (!snapshot.hasData ||
-              snapshot.data!.docs.isEmpty) {
+final buyNowItem = BuyNowService().item;
+
+if (!snapshot.hasData && buyNowItem == null) {
+  return const Center(
+    child: CircularProgressIndicator(),
+  );
+}
+
+if (snapshot.hasData &&
+    snapshot.data!.docs.isEmpty &&
+    buyNowItem == null){
             return Center(
               child: Column(
                 mainAxisAlignment:
@@ -88,7 +103,7 @@ class _CheckoutScreenState
 
                   Text(
                     "Your Cart is Empty",
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.dmSerifDisplay(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
@@ -98,8 +113,7 @@ class _CheckoutScreenState
 
                   Text(
                     "Add products before checking out.",
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
+  style: GoogleFonts.manrope(                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -107,10 +121,26 @@ class _CheckoutScreenState
             );
           }
 
-          final cartItems = snapshot.data!.docs;
+List<CheckoutItem> checkoutItems = [];
 
-          final subtotal =
-              _cartService.calculateTotal(cartItems);
+if (buyNowItem != null) {
+  checkoutItems = [buyNowItem];
+} else {
+  checkoutItems = snapshot.data!.docs.map((doc) {
+final data = doc.data() as Map<String, dynamic>;
+    return CheckoutItem(
+      productId: doc.id,
+      name: data['name'],
+      image: data['image'],
+      price: (data['price'] as num).toDouble(),
+      quantity: (data['quantity'] as num).toInt(),
+    );
+  }).toList();
+}
+         final subtotal = checkoutItems.fold(
+  0.0,
+  (sum, item) => sum + item.subtotal,
+);
 
           const delivery = 0.0;
 
@@ -126,7 +156,7 @@ class _CheckoutScreenState
               children: [
                                 Text(
                   "Shipping Address",
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -168,7 +198,7 @@ class _CheckoutScreenState
 
                 Text(
                   "Phone Number",
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -208,7 +238,7 @@ class _CheckoutScreenState
                 const SizedBox(height: 35),
                                 Text(
                   "Payment Method",
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -247,8 +277,7 @@ class _CheckoutScreenState
 
                             Text(
                               "Cash on Delivery",
-                              style: GoogleFonts.poppins(
-                                fontSize: 17,
+  style: GoogleFonts.manrope(                                fontSize: 17,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -257,8 +286,7 @@ class _CheckoutScreenState
 
                             Text(
                               "Pay when your order arrives.",
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey,
+  style: GoogleFonts.manrope(                                color: Colors.grey,
                                 fontSize: 13,
                               ),
                             ),
@@ -308,8 +336,7 @@ class _CheckoutScreenState
 
                             Text(
                               "Stripe",
-                              style: GoogleFonts.poppins(
-                                fontSize: 17,
+  style: GoogleFonts.manrope(                                fontSize: 17,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -318,8 +345,7 @@ class _CheckoutScreenState
 
                             Text(
                               "Coming Soon",
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey,
+  style: GoogleFonts.manrope(                                color: Colors.grey,
                                 fontSize: 13,
                               ),
                             ),
@@ -338,8 +364,7 @@ class _CheckoutScreenState
                         ),
                         child: Text(
                           "Soon",
-                          style: GoogleFonts.poppins(
-                            color: Colors.orange.shade800,
+  style: GoogleFonts.manrope(                            color: Colors.orange.shade800,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -353,7 +378,7 @@ class _CheckoutScreenState
 
                 Text(
                   "Order Summary",
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -376,23 +401,89 @@ class _CheckoutScreenState
                   ),
                   child: Column(
                     children: [
+                     const Divider(),
 
+const SizedBox(height: 15),
+
+Align(
+  alignment: Alignment.centerLeft,
+  child: Text(
+    "Items",
+    style: GoogleFonts.dmSerifDisplay(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+),
+
+const SizedBox(height: 15),
+
+...checkoutItems.map(
+  (item) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            item.image,
+            width: 55,
+            height: 55,
+            fit: BoxFit.contain,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.name,
+  style: GoogleFonts.manrope(                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              Text(
+                "Quantity: ${item.quantity}",
+  style: GoogleFonts.manrope(                  color: Colors.grey,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Text(
+          "Rs ${(item.price * item.quantity).toStringAsFixed(0)}",
+  style: GoogleFonts.manrope(            fontWeight: FontWeight.bold,
+            color: const Color(0xff7F4F4F),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
+const Divider(),
+
+const SizedBox(height: 15),
                       Row(
                         mainAxisAlignment:
                             MainAxisAlignment.spaceBetween,
                         children: [
+                        
 
                           Text(
                             "Subtotal",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
+  style: GoogleFonts.manrope(                              fontSize: 16,
                             ),
                           ),
 
                           Text(
                             "Rs ${subtotal.toStringAsFixed(0)}",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
+  style: GoogleFonts.manrope(                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -408,8 +499,7 @@ class _CheckoutScreenState
 
                           Text(
                             "Delivery",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
+  style: GoogleFonts.manrope(                              fontSize: 16,
                             ),
                           ),
 
@@ -417,8 +507,7 @@ class _CheckoutScreenState
                             delivery == 0
                                 ? "Free"
                                 : "Rs ${delivery.toStringAsFixed(0)}",
-                            style: GoogleFonts.poppins(
-                              color: Colors.green,
+  style: GoogleFonts.manrope(                              color: Colors.green,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -440,7 +529,7 @@ class _CheckoutScreenState
 
                           Text(
                             "Total",
-                            style: GoogleFonts.playfairDisplay(
+                            style: GoogleFonts.oswald(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -448,7 +537,7 @@ class _CheckoutScreenState
 
                           Text(
                             "Rs ${total.toStringAsFixed(0)}",
-                            style: GoogleFonts.playfairDisplay(
+                            style: GoogleFonts.dmSerifDisplay(
                               fontSize: 24,
                               color: const Color(0xff7F4F4F),
                               fontWeight: FontWeight.bold,
@@ -503,15 +592,34 @@ class _CheckoutScreenState
 
                             try {
 
-                              await _orderService.placeOrder(
-                                address: addressController
-                                    .text
-                                    .trim(),
-                                phone: phoneController
-                                    .text
-                                    .trim(),
-                              );
+                        if (BuyNowService().item != null) {
+  final item = BuyNowService().item!;
 
+  await _orderService.placeBuyNowOrder(
+    product: ProductModel(
+      id: item.productId,
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      oldPrice: item.price,
+      rating: 0,
+      category: "",
+      description: "",
+      featured: false,
+      discount: 0,
+      inStock: true,
+    ),
+    address: addressController.text.trim(),
+    phone: phoneController.text.trim(),
+  );
+
+  BuyNowService().clear();
+} else {
+  await _orderService.placeOrder(
+    address: addressController.text.trim(),
+    phone: phoneController.text.trim(),
+  );
+}
                               if (!mounted) return;
 
                               setState(() {
@@ -545,7 +653,7 @@ showDialog(
 
             Text(
               "Order Placed!",
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.dmSerifDisplay(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
@@ -556,8 +664,7 @@ showDialog(
             Text(
               "Thank you for shopping with us.\nYour order has been placed successfully.",
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: Colors.grey,
+  style: GoogleFonts.manrope(                color: Colors.grey,
               ),
             ),
 
@@ -640,16 +747,14 @@ showDialog(
 
                               const SizedBox(width: 10),
 
-                              Text(
-                                "Place Order",
-                                style:
-                                    GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight:
-                                      FontWeight.w600,
-                                ),
-                              ),
+                            Text(
+  "Place Order",
+  style: GoogleFonts.manrope(
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+  ),
+),
                             ],
                           ),
                   ),
@@ -659,17 +764,17 @@ showDialog(
 Text(
   "By placing your order, you agree to our Terms & Conditions.",
   textAlign: TextAlign.center,
-  style: GoogleFonts.poppins(
-    color: Colors.grey,
+  style: GoogleFonts.manrope(    color: Colors.grey,
     fontSize: 12,
   ),
 ),
 const SizedBox(height: 20),
                             ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }
+            }

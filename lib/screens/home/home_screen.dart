@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children:[
               SizedBox(height: 15),
 
               /// App Bar

@@ -71,43 +71,35 @@ class ProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Hero(
-                          tag: product.id,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(24),
-                            ),
-                            child: Image.network(
-                              product.image,
-                              width: double.infinity,
-                              fit: BoxFit.contain,
+  child: ClipRRect(
+    borderRadius: const BorderRadius.vertical(
+      top: Radius.circular(24),
+    ),
+    child: Image.network(
+      product.image,
+      width: double.infinity,
+      fit: BoxFit.contain,
 
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                if (loadingProgress == null) {
-                                  return child;
-                                }
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
 
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
 
-                              errorBuilder:
-                                  (context, error, stackTrace) {
-                                return const Center(
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 70,
-                                    color: Colors.grey,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            size: 70,
+            color: Colors.grey,
+          ),
+        );
+      },
+    ),
+  ),
+),
                       Padding(
                         padding: const EdgeInsets.all(15),
                         child: Column(

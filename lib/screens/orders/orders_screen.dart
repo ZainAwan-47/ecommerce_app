@@ -47,12 +47,16 @@ class OrdersScreen extends StatelessWidget {
       ),
 
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("orders")
-            .where(
-              "userId",
-              isEqualTo: user!.uid,
-            )
+       stream: FirebaseFirestore.instance
+    .collection("orders")
+    .where(
+      "userId",
+      isEqualTo: user!.uid,
+    )
+    .orderBy(
+      "createdAt",
+      descending: true,
+    )
             .snapshots(),
 
         builder: (context, snapshot) {

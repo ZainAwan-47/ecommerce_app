@@ -37,22 +37,22 @@ class BottomNav extends StatelessWidget {
 
   Widget screen;
 
-  switch (index) {
-    case 0:
-      screen = const HomeScreen();
-      break;
+ switch (index) {
+  case 0:
+    screen = const HomeScreen();
+    break;
 
-    case 2:
-      screen = WishlistScreen();
-      break;
+  case 1:
+    screen = WishlistScreen();
+    break;
 
-    case 3:
-      screen = const OrdersScreen();
-      break;
+  case 2:
+    screen = const OrdersScreen();
+    break;
 
-    default:
-      return;
-  }
+  default:
+    return;
+}
 
   Navigator.pushReplacement(
     context,
@@ -68,12 +68,6 @@ class BottomNav extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: "Home",
-          ),
-
-          NavigationDestination(
-            icon: Icon(Icons.category_outlined),
-            selectedIcon: Icon(Icons.category),
-            label: "Categories",
           ),
 
           NavigationDestination(

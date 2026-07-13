@@ -40,8 +40,7 @@ leading: IconButton(
 ),
         title: Text(
           "My Wishlist",
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 30,
+ style: GoogleFonts.dmSerifDisplay(            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -87,22 +86,20 @@ leading: IconButton(
 
                   const SizedBox(height: 20),
 
-                  Text(
-                    "Your Wishlist is Empty",
-                    style:
-                        GoogleFonts.playfairDisplay(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                 Text(
+  "Your Wishlist is Empty",
+  style: GoogleFonts.dmSerifDisplay(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
                   const SizedBox(height: 10),
 
                   Text(
                     "Save products you love\nand they'll appear here.",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
+  style: GoogleFonts.manrope(                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -189,8 +186,7 @@ leading: IconButton(
               item['name'],
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 20,
+ style: GoogleFonts.dmSerifDisplay(                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -199,8 +195,7 @@ leading: IconButton(
 
             Text(
               "Rs ${item['price']}",
-              style: GoogleFonts.poppins(
-                color: const Color(0xff7F4F4F),
+  style: GoogleFonts.manrope(                color: const Color(0xff7F4F4F),
                 fontWeight: FontWeight.w600,
                 fontSize: 17,
               ),
@@ -220,13 +215,12 @@ Row(
 
     const SizedBox(width: 5),
 
-    Text(
-      item['rating'].toString(),
-      style: GoogleFonts.poppins(),
-    ),
+   Text(
+  item['rating'].toString(),
+  style: GoogleFonts.manrope(),
+),
   ],
 ),
-
 const SizedBox(height: 14),
 
 SizedBox(
@@ -279,14 +273,6 @@ await Future.delayed(
 await wishlistService.removeFromWishlist(
   item.id,
 );
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text(
-        "Added to Cart",
-      ),
-      backgroundColor: Colors.green,
-    ),
-  );
 },
 
     style: ElevatedButton.styleFrom(
@@ -305,8 +291,7 @@ await wishlistService.removeFromWishlist(
 
     label: Text(
       "Add to Cart",
-      style: GoogleFonts.poppins(
-        color: Colors.white,
+  style: GoogleFonts.manrope(        color: Colors.white,
         fontWeight: FontWeight.w600,
       ),
     ),

@@ -5,6 +5,9 @@ import '../../models/product_model.dart';
 import '../auth/login_screen.dart';
 import '../../services/wishlist_service.dart';
 import '../../utils/app_notifier.dart';
+import '../../services/buy_now_service.dart';
+import '../checkout/checkout_screen.dart';
+import '../../models/checkout_item.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
@@ -209,13 +212,13 @@ final WishlistService _wishlistService = WishlistService();
                         borderRadius:
                             BorderRadius.circular(30),
                       ),
-                      child: Text(
-                        "20% OFF",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                     child: Text(
+  "20% OFF",
+  style: GoogleFonts.manrope(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+  ),
+),
                     ),
                   ),
                 ],
@@ -233,8 +236,7 @@ final WishlistService _wishlistService = WishlistService();
 
                   Text(
                     "Shop by Tehreem",
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
+  style: GoogleFonts.manrope(                      color: Colors.grey,
                       fontSize: 15,
                     ),
                   ),
@@ -243,8 +245,7 @@ final WishlistService _wishlistService = WishlistService();
 
                   Text(
                     product.name,
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 30,
+ style: GoogleFonts.dmSerifDisplay(                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -263,8 +264,7 @@ final WishlistService _wishlistService = WishlistService();
 
                       Text(
                         product.rating.toString(),
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
+  style: GoogleFonts.manrope(                          fontWeight: FontWeight.w600,
                         ),
                       ),
 
@@ -283,8 +283,7 @@ final WishlistService _wishlistService = WishlistService();
                         ),
                         child: Text(
                           "In Stock",
-                          style: GoogleFonts.poppins(
-                            color: Colors.green,
+  style: GoogleFonts.manrope(                            color: Colors.green,
                             fontWeight:
                                 FontWeight.w600,
                           ),
@@ -298,24 +297,20 @@ final WishlistService _wishlistService = WishlistService();
                   Row(
                     children: [
 
-                      Text(
-                        "Rs ${product.price.toStringAsFixed(0)}",
-                        style:
-                            GoogleFonts.playfairDisplay(
-                          color:
-                              const Color(0xff7F4F4F),
-                          fontWeight:
-                              FontWeight.bold,
-                          fontSize: 34,
-                        ),
-                      ),
+                    Text(
+  "Rs ${product.price.toStringAsFixed(0)}",
+  style: GoogleFonts.dmSerifDisplay(
+    color: const Color(0xff7F4F4F),
+    fontWeight: FontWeight.bold,
+    fontSize: 34,
+  ),
+),
 
                       const SizedBox(width: 12),
 
                       Text(
                         "Rs ${(product.price * 1.2).toStringAsFixed(0)}",
-                        style: GoogleFonts.poppins(
-                          decoration:
+  style: GoogleFonts.manrope(                          decoration:
                               TextDecoration.lineThrough,
                           color: Colors.grey,
                         ),
@@ -335,8 +330,7 @@ final WishlistService _wishlistService = WishlistService();
                       children: [
                         Text(
                           "Description",
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 24,
+ style: GoogleFonts.dmSerifDisplay(                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -345,8 +339,7 @@ final WishlistService _wishlistService = WishlistService();
 
                         Text(
                           product.description,
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
+  style: GoogleFonts.manrope(                            fontSize: 15,
                             height: 1.7,
                             color: Colors.black87,
                           ),
@@ -359,8 +352,7 @@ final WishlistService _wishlistService = WishlistService();
 
                  Text(
   "Quantity",
-  style: GoogleFonts.playfairDisplay(
-    fontSize: 24,
+ style: GoogleFonts.dmSerifDisplay(    fontSize: 24,
     fontWeight: FontWeight.bold,
   ),
 ),
@@ -383,8 +375,7 @@ Row(
 
     Text(
       quantity.toString(),
-      style: GoogleFonts.poppins(
-        fontSize: 20,
+  style: GoogleFonts.manrope(        fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -461,8 +452,7 @@ SizedBox(
     ),
     child: Text(
       "Add to Cart",
-      style: GoogleFonts.poppins(
-        fontSize: 18,
+  style: GoogleFonts.manrope(        fontSize: 18,
         color: Colors.white,
         fontWeight: FontWeight.w600,
       ),
@@ -475,13 +465,22 @@ SizedBox(
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text("Buy Now will be available soon."),
+                   onPressed: () {
+BuyNowService().item = CheckoutItem(
+  productId: product.id,
+  name: product.name,
+  image: product.image,
+  price: product.price,
+  quantity: quantity,
+);
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const CheckoutScreen(),
     ),
   );
-                      },
+},
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
                           color: Color(0xff7F4F4F),
@@ -493,8 +492,7 @@ SizedBox(
                       ),
                       child: Text(
                         "Buy Now",
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
+  style: GoogleFonts.manrope(                          fontSize: 18,
                           color: const Color(0xff7F4F4F),
                           fontWeight: FontWeight.w600,
                         ),
