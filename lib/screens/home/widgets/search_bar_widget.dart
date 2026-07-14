@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../search/search_screen.dart';
-
+import 'filter_bottom_sheet.dart';
 class SearchBarWidget extends StatelessWidget {
   const SearchBarWidget({super.key});
 
@@ -31,30 +31,43 @@ class SearchBarWidget extends StatelessWidget {
               ),
             ],
           ),
-          child: IgnorePointer(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Search luxury beauty products...",
-                prefixIcon: const Icon(
-                  Icons.search_rounded,
-                  color: Color(0xff7F4F4F),
-                ),
-                suffixIcon: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff7F4F4F),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.tune,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 18),
+          child: TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: "Search luxury beauty products...",
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: Color(0xff7F4F4F),
               ),
+             suffixIcon: GestureDetector(
+  onTap: () {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(30),
+        ),
+      ),
+      builder: (_) => const FilterBottomSheet(),
+    );
+  },
+  child: Container(
+    margin: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: const Color(0xff7F4F4F),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: const Icon(
+      Icons.tune,
+      color: Colors.white,
+      size: 20,
+    ),
+  ),
+),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 18),
             ),
           ),
         ),

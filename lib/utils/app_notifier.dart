@@ -7,7 +7,7 @@ class AppNotifier {
     _show(
       context,
       message,
-      const Color(0xff7F4F4F),
+ const Color(0xff2E7D32),
     );
   }
 

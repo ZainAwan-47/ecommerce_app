@@ -22,7 +22,7 @@ class CartScreen extends StatelessWidget {
 
         title: Text(
           "My Cart",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.dmSerifDisplay(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -64,7 +64,7 @@ class CartScreen extends StatelessWidget {
 
                   Text(
                     "Your Cart is Empty",
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.dmSerifDisplay(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
@@ -75,7 +75,7 @@ class CartScreen extends StatelessWidget {
                   Text(
                     "Looks like you haven't\nadded anything yet.",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.manrope(
                       color: Colors.grey,
                       fontSize: 15,
                     ),
@@ -182,7 +182,7 @@ class CartScreen extends StatelessWidget {
                                   maxLines: 2,
                                   overflow:
                                       TextOverflow.ellipsis,
-                                  style: GoogleFonts.playfairDisplay(
+                                  style: GoogleFonts.dmSerifDisplay(
                                     fontSize: 21,
                                     fontWeight:
                                         FontWeight.bold,
@@ -193,8 +193,7 @@ class CartScreen extends StatelessWidget {
 
                                 Text(
                                   "Rs ${item['price']}",
-                                  style: GoogleFonts.poppins(
-                                    color:
+  style: GoogleFonts.manrope(                                    color:
                                         const Color(0xff7F4F4F),
                                     fontWeight:
                                         FontWeight.w600,
@@ -208,13 +207,18 @@ class CartScreen extends StatelessWidget {
                                   children: [
 
                                     InkWell(
-                                      onTap: () {
-                                        cartService
-                                            .decreaseQuantity(
-                                          item.id,
-                                        );
-                                      },
+onTap: () async {
+  final removed = await cartService.decreaseQuantity(item.id);
 
+  if (!context.mounted) return;
+
+  if (removed) {
+    AppNotifier.remove(
+      context,
+      "Item removed from cart",
+    );
+  }
+},
                                       child: const CircleAvatar(
                                         radius: 15,
                                         backgroundColor:
@@ -233,9 +237,8 @@ class CartScreen extends StatelessWidget {
                                     Text(
                                       item['quantity']
                                           .toString(),
-                                      style:
-                                          GoogleFonts.poppins(
-                                        fontWeight:
+  style: GoogleFonts.manrope(                  
+                          fontWeight:
                                             FontWeight.bold,
                                         fontSize: 17,
                                       ),
@@ -344,15 +347,13 @@ class CartScreen extends StatelessWidget {
 
                         Text(
                           "Subtotal",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
+  style: GoogleFonts.manrope(                            fontSize: 16,
                           ),
                         ),
 
                         Text(
                           "Rs ${subtotal.toStringAsFixed(0)}",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
+  style: GoogleFonts.manrope(                            fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
@@ -368,15 +369,13 @@ class CartScreen extends StatelessWidget {
 
                         Text(
                           "Delivery",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
+  style: GoogleFonts.manrope(                            fontSize: 16,
                           ),
                         ),
 
                         Text(
                           "Free",
-                          style: GoogleFonts.poppins(
-                            color: Colors.green,
+  style: GoogleFonts.manrope(                            color: Colors.green,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -398,7 +397,7 @@ class CartScreen extends StatelessWidget {
 
                         Text(
                           "Total",
-                          style: GoogleFonts.playfairDisplay(
+                          style: GoogleFonts.dmSerifDisplay(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -406,7 +405,7 @@ class CartScreen extends StatelessWidget {
 
                         Text(
                           "Rs ${subtotal.toStringAsFixed(0)}",
-                          style: GoogleFonts.playfairDisplay(
+                          style: GoogleFonts.dmSerifDisplay(
                             color: const Color(0xff7F4F4F),
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -439,8 +438,7 @@ class CartScreen extends StatelessWidget {
                         ),
                         child: Text(
                           "Proceed to Checkout",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
+  style: GoogleFonts.manrope(                            color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
