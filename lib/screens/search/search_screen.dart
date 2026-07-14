@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../models/product_model.dart';
 import '../../services/firestore_service.dart';
 import '../product/product_details_screen.dart';

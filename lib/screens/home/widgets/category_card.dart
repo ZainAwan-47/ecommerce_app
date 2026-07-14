@@ -54,8 +54,7 @@ class CategoryCard extends StatelessWidget {
             itemBuilder: (context, index) {
               final category = categories[index];
 
-              final selected = index == 0;
-
+final selected = false;
               return GestureDetector(
                onTap: () {
   Navigator.push(
@@ -114,8 +113,7 @@ class CategoryCard extends StatelessWidget {
                         category.name,
                         textAlign: TextAlign.center,
                         maxLines: 2,
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
+  style: GoogleFonts.manrope(                          fontSize: 13,
                           fontWeight:
                               FontWeight.w600,
                           color: selected

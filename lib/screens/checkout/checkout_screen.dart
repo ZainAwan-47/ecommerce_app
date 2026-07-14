@@ -6,7 +6,7 @@ import '../../services/cart_service.dart';
 import '../../services/order_service.dart';
 import '../../models/checkout_item.dart';
 import '../../models/product_model.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -28,7 +28,32 @@ class _CheckoutScreenState
       TextEditingController();
 
   bool placingOrder = false;
+  bool editingDetails = false;
+Future<void> loadUserDetails() async {
+  final user = FirebaseAuth.instance.currentUser;
 
+  if (user == null) return;
+
+  final doc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .get();
+
+  if (!doc.exists) return;
+
+  final data = doc.data()!;
+
+  addressController.text =
+      data['address'] ?? "";
+
+  phoneController.text =
+      data['phoneNumber'] ?? "";
+}
+@override
+void initState() {
+  super.initState();
+  loadUserDetails();
+}
   @override
   void dispose() {
     addressController.dispose();

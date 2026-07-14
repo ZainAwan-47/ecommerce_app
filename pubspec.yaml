@@ -1,7 +1,7 @@
 name: ecommerce_app
 description: "Shop by Tehreem - Cosmetics E-commerce App"
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -67,13 +67,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/logo/
-
-  # Uncomment after adding custom fonts
-  # fonts:
-  #   - family: PlayfairDisplay
-  #     fonts:
-  #       - asset: assets/fonts/PlayfairDisplay-Regular.ttf
-  #
-  #   - family: PlusJakartaSans
-  #     fonts:
-  #       - asset: assets/fonts/PlusJakartaSans-Regular.ttf

@@ -45,16 +45,20 @@ class CartService {
 
   return true;
 }
-  /// Get Cart Items
-  Stream<QuerySnapshot> getCart() {
-    final user = _auth.currentUser;
+ /// Get Cart Items
+Stream<QuerySnapshot> getCart() {
+  final user = _auth.currentUser;
 
-    return _firestore
-        .collection('users')
-        .doc(user!.uid)
-        .collection('cart')
-        .snapshots();
+  if (user == null) {
+    return const Stream.empty();
   }
+
+  return _firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('cart')
+      .snapshots();
+}
 
   /// Remove Product
   Future<void> removeFromCart(String productId) async {

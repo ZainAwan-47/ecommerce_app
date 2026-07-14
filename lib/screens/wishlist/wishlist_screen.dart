@@ -5,16 +5,15 @@ import '../../utils/app_notifier.dart';
 import '../../models/product_model.dart';
 import '../../services/cart_service.dart';
 import '../../services/wishlist_service.dart';
-import '../home/home_screen.dart';
-
+import '../../core/tab_controller.dart';
 class WishlistScreen extends StatelessWidget {
   WishlistScreen({super.key});
 
   final WishlistService wishlistService =
       WishlistService();
-      final CartService cartService =
-    CartService();
 
+  final CartService cartService =
+      CartService();  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,12 +29,7 @@ leading: IconButton(
     color: Colors.black,
   ),
   onPressed: () {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>const HomeScreen(),
-      ),
-    );
+    selectedTab.value = previousTab;
   },
 ),
         title: Text(

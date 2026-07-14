@@ -26,7 +26,13 @@ class AppNotifier {
       Colors.grey.shade700,
     );
   }
-
+static void success(BuildContext context, String message) {
+  _show(
+    context,
+    message,
+    const Color(0xff2E7D32),
+  );
+}
   static void _show(
     BuildContext context,
     String message,

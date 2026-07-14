@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import '../onboarding/onboarding_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../auth/login_screen.dart';
-import '../home/home_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../auth/login_screen.dart';
+import '../main/main_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -49,13 +50,14 @@ Future<void> _checkAppState() async {
   }
 
   if (user != null) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const HomeScreen(),
-      ),
-    );
-  } else {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+    builder: (_) => const MainScreen(),
+    ),
+  );
+}
+  else {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

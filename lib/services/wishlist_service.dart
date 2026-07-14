@@ -106,14 +106,17 @@ class WishlistService {
   }
 
   /// Wishlist Stream
-  Stream<QuerySnapshot> getWishlist() {
-    final user = _auth.currentUser;
+ Stream<QuerySnapshot> getWishlist() {
+  final user = _auth.currentUser;
 
-    return _firestore
-        .collection('users')
-        .doc(user!.uid)
-        .collection('wishlist')
-        .orderBy('addedAt', descending: true)
-        .snapshots();
+  if (user == null) {
+    return const Stream.empty();
   }
+
+  return _firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('wishlist')
+      .snapshots();
+}
 }

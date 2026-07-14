@@ -8,6 +8,8 @@ import '../../utils/app_notifier.dart';
 import '../../services/buy_now_service.dart';
 import '../checkout/checkout_screen.dart';
 import '../../models/checkout_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/login_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
@@ -465,14 +467,26 @@ SizedBox(
                     width: double.infinity,
                     height: 58,
                     child: OutlinedButton(
-                   onPressed: () {
-BuyNowService().item = CheckoutItem(
-  productId: product.id,
-  name: product.name,
-  image: product.image,
-  price: product.price,
-  quantity: quantity,
-);
+onPressed: () {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+    );
+    return;
+  }
+
+  BuyNowService().item = CheckoutItem(
+    productId: product.id,
+    name: product.name,
+    image: product.image,
+    price: product.price,
+    quantity: quantity,
+  );
 
   Navigator.push(
     context,

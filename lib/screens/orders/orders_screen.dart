@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../home/home_screen.dart';
+import '../../core/tab_controller.dart';
+import '../auth/login_screen.dart';
 import 'order_details_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
@@ -12,7 +12,95 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+   
+if (user == null) {
+  return Scaffold(
+    backgroundColor: const Color(0xffFFF9F7),
 
+    appBar: AppBar(
+      backgroundColor: const Color(0xffFFF9F7),
+      elevation: 0,
+      centerTitle: true,
+     leading: IconButton(
+  icon: const Icon(
+    Icons.arrow_back_ios_new,
+    color: Colors.black,
+  ),
+ onPressed: () {
+  selectedTab.value = previousTab;
+},
+),
+
+title: Text(
+  "My Orders",
+  style: GoogleFonts.dmSerifDisplay(
+    fontSize: 30,
+    fontWeight: FontWeight.bold,
+  ),
+),
+    ),
+
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            const Icon(
+              Icons.lock_outline,
+              size: 90,
+              color: Color(0xff7F4F4F),
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Login Required",
+              style: GoogleFonts.dmSerifDisplay(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              "Please sign in to view your orders.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                color: Colors.grey,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            SizedBox(
+              width: 220,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  "Login",
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
@@ -21,25 +109,19 @@ class OrdersScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
 
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-          ),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const HomeScreen(),
-              ),
-            );
-          },
-        ),
+       leading: IconButton(
+  icon: const Icon(
+    Icons.arrow_back_ios_new,
+    color: Colors.black,
+  ),
+  onPressed: () {
+    selectedTab.value = previousTab;
+  },
+),
 
         title: Text(
           "My Orders",
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 30,
+ style: GoogleFonts.dmSerifDisplay(            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -91,8 +173,7 @@ class OrdersScreen extends StatelessWidget {
 
                   Text(
                     "No Orders Yet",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 28,
+ style: GoogleFonts.dmSerifDisplay(                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -102,8 +183,7 @@ class OrdersScreen extends StatelessWidget {
                   Text(
                     "Place your first order\nand it will appear here.",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
+  style: GoogleFonts.manrope(                      color: Colors.grey,
                     ),
                   ),
 
@@ -113,15 +193,9 @@ class OrdersScreen extends StatelessWidget {
                     width: 220,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const HomeScreen(),
-                          ),
-                        );
-                      },
+                     onPressed: () {
+  Navigator.pop(context);
+},
                       style:
                           ElevatedButton.styleFrom(
                         backgroundColor:
@@ -132,15 +206,13 @@ class OrdersScreen extends StatelessWidget {
                               BorderRadius.circular(15),
                         ),
                       ),
-                      child: Text(
-                        "Continue Shopping",
-                        style:
-                            GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight:
-                              FontWeight.w600,
-                        ),
-                      ),
+                     child: Text(
+  "Continue Shopping",
+  style: GoogleFonts.manrope(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+  ),
+),
                     ),
                   ),
                 ],
@@ -241,15 +313,13 @@ class OrdersScreen extends StatelessWidget {
 
                     children: [
 
-                      Text(
-                        "Order #${order.id.substring(0, 6).toUpperCase()}",
-                        style:
-                            GoogleFonts.playfairDisplay(
-                          fontSize: 20,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
+                    Text(
+  "Order #${order.id.substring(0, 6).toUpperCase()}",
+  style: GoogleFonts.dmSerifDisplay(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
                       const SizedBox(height: 4),
 
@@ -257,9 +327,8 @@ class OrdersScreen extends StatelessWidget {
                         date == null
                             ? "Just now"
                             : "${date.day}-${date.month}-${date.year} • ${date.hour}:${date.minute.toString().padLeft(2, '0')}",
-                        style:
-                            GoogleFonts.poppins(
-                          color: Colors.grey,
+  style: GoogleFonts.manrope(   
+                           color: Colors.grey,
                           fontSize: 13,
                         ),
                       ),
@@ -281,9 +350,7 @@ class OrdersScreen extends StatelessWidget {
                   ),
                   child: Text(
                     order['status'],
-                    style:
-                        GoogleFonts.poppins(
-                      color: statusColor,
+  style: GoogleFonts.manrope(                      color: statusColor,
                       fontWeight:
                           FontWeight.w600,
                     ),
@@ -304,8 +371,8 @@ class OrdersScreen extends StatelessWidget {
 
           Text(
             "$itemCount Item${itemCount > 1 ? "s" : ""}",
-            style: GoogleFonts.poppins(
-              color: Colors.grey,
+  style: GoogleFonts.manrope(   
+               color: Colors.grey,
               fontSize: 14,
             ),
           ),
@@ -314,9 +381,8 @@ class OrdersScreen extends StatelessWidget {
 
           Text(
             "Rs ${(order['total'] as num).toStringAsFixed(0)}",
-            style:
-                GoogleFonts.playfairDisplay(
-              fontSize: 24,
+ style: GoogleFonts.dmSerifDisplay(      
+          fontSize: 24,
               fontWeight: FontWeight.bold,
               color: const Color(0xff7F4F4F),
             ),
@@ -361,8 +427,7 @@ SizedBox(
 
     label: Text(
   "View Details",
-  style: GoogleFonts.poppins(
-    color: const Color(0xff7F4F4F),
+  style: GoogleFonts.manrope(    color: const Color(0xff7F4F4F),
     fontWeight: FontWeight.w600,
   ),
 ),

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../wishlist/wishlist_screen.dart';
-import '../home_screen.dart';
-import '../../orders/orders_screen.dart';
-
+import '../../../core/tab_controller.dart';
 class BottomNav extends StatelessWidget {
   final int currentIndex;
+  final ValueChanged<int> onTap;
 
   const BottomNav({
     super.key,
     required this.currentIndex,
+    required this.onTap,
   });
 
   @override
@@ -31,36 +30,11 @@ class BottomNav extends StatelessWidget {
         indicatorColor: const Color(0xffF2E5E5),
         elevation: 0,
         selectedIndex: currentIndex,
-
-       onDestinationSelected: (index) {
-  if (index == currentIndex) return;
-
-  Widget screen;
-
- switch (index) {
-  case 0:
-    screen = const HomeScreen();
-    break;
-
-  case 1:
-    screen = WishlistScreen();
-    break;
-
-  case 2:
-    screen = const OrdersScreen();
-    break;
-
-  default:
-    return;
-}
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => screen,
-    ),
-  );
+          onDestinationSelected: (index) {
+  previousTab = currentIndex;
+  onTap(index);
 },
+      
 
         destinations: const [
 

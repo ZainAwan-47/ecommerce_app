@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../home/home_screen.dart';
+import '../main/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -115,12 +115,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                      Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const ForgotPasswordScreen(),
-      ),
-    );
+                     Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) =>
+        const ForgotPasswordScreen(),
+  ),
+);
                   },
                   child: const Text("Forgot Password?"),
                 ),
@@ -140,11 +141,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const HomeScreen(),
-      ),
-    );
+  context,
+  MaterialPageRoute(
+    builder: (_) => const MainScreen(),
+  ),
+);
   } on FirebaseAuthException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -196,12 +197,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 55,
                 child: OutlinedButton(
                  onPressed: () {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const HomeScreen(),
-    ),
-  );
+ Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => const MainScreen(),
+  ),
+);
 },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.grey),
