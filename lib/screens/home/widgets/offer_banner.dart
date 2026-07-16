@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../offers/offers_screen.dart';
 class OfferBanner extends StatelessWidget {
   const OfferBanner({super.key});
 
@@ -97,7 +97,14 @@ class OfferBanner extends StatelessWidget {
                   SizedBox(
                     height: 42,
                     child: ElevatedButton(
-                      onPressed: () {},
+                     onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const OffersScreen(),
+    ),
+  );
+},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xff7F4F4F),

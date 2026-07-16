@@ -1,0 +1,351 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../models/product_model.dart';
+import '../services/cart_service.dart';
+import '../services/wishlist_service.dart';
+import '../utils/app_notifier.dart';
+import '../screens/product/product_details_screen.dart';
+
+class ProductCardWidget extends StatelessWidget {
+  final ProductModel product;
+
+  const ProductCardWidget({
+    super.key,
+    required this.product,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cartService = CartService();
+    final wishlistService = WishlistService();
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                ProductDetailsScreen(
+              product: product,
+            ),
+          ),
+        );
+      },
+
+      child: Container(
+        width: 220,
+        margin:
+            const EdgeInsets.only(right: 18),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius:
+              BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  Colors.black.withOpacity(.08),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+
+            Expanded(
+              child: Stack(
+                children: [
+
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+
+                    child: Image.network(
+                      product.image,
+                      width: double.infinity,
+                      fit: BoxFit.contain,
+
+                      loadingBuilder:
+                          (context, child, progress) {
+                        if (progress == null) {
+                          return child;
+                        }
+
+                        return const Center(
+                          child:
+                              CircularProgressIndicator(),
+                        );
+                      },
+
+                      errorBuilder:
+                          (_, __, ___) {
+                        return const Center(
+                          child: Icon(
+                            Icons
+                                .image_not_supported_outlined,
+                            size: 70,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                                    if (product.discount > 0)
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          "${product.discount}% OFF",
+                          style: GoogleFonts.manrope(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  if (product.featured)
+                    Positioned(
+                      top: 12,
+                      right: 55,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          "Featured",
+                          style: GoogleFonts.manrope(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: StreamBuilder<bool>(
+                      stream: wishlistService
+                          .isWishlisted(product.id),
+                      builder: (context, snapshot) {
+                        final wishlisted =
+                            snapshot.data ?? false;
+
+                        return CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.white,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              wishlisted
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: wishlisted
+                                  ? Colors.red
+                                  : Colors.grey,
+                              size: 20,
+                            ),
+                            onPressed: () async {
+                              final success =
+                                  await wishlistService
+                                      .toggleWishlist(
+                                          product);
+
+                              if (!context.mounted) {
+                                return;
+                              }
+
+                              if (!success) {
+                                AppNotifier.remove(
+                                  context,
+                                  "Please sign in first.",
+                                );
+                                return;
+                              }
+
+                              AppNotifier.wishlist(
+                                context,
+                                wishlisted
+                                    ? "Removed from Wishlist"
+                                    : "Added to Wishlist",
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  if (!product.inStock)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color:
+                              Colors.black.withOpacity(.55),
+                          borderRadius:
+                              const BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "OUT OF STOCK",
+                            style:
+                                GoogleFonts.manrope(
+                              color: Colors.white,
+                              fontWeight:
+                                  FontWeight.bold,
+                              fontSize: 18,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+  padding: const EdgeInsets.all(15),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
+      Text(
+        product.name,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: GoogleFonts.dmSerifDisplay(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+
+      const SizedBox(height: 8),
+
+      Row(
+        children: [
+
+          const Icon(
+            Icons.star,
+            color: Colors.amber,
+            size: 18,
+          ),
+
+          const SizedBox(width: 4),
+
+          Text(
+            product.rating.toString(),
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+            ),
+          ),
+
+          const Spacer(),
+
+          if (product.discount > 0)
+            Text(
+              "Rs ${product.oldPrice.toStringAsFixed(0)}",
+              style: GoogleFonts.manrope(
+                decoration:
+                    TextDecoration.lineThrough,
+                color: Colors.grey,
+                fontSize: 13,
+              ),
+            ),
+        ],
+      ),
+
+      const SizedBox(height: 10),
+
+      Row(
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
+        children: [
+
+          Text(
+            "Rs ${product.price.toStringAsFixed(0)}",
+            style: GoogleFonts.manrope(
+              color: const Color(0xff7F4F4F),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+
+          CircleAvatar(
+            radius: 20,
+            backgroundColor:
+                const Color(0xffA86A6A),
+            child: IconButton(
+              icon: const Icon(
+                Icons.shopping_cart_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+
+              onPressed: product.inStock
+                  ? () async {
+
+                      final added =
+                          await cartService.addToCart(
+                        product,
+                        1,
+                      );
+
+                      if (!context.mounted) {
+                        return;
+                      }
+
+                      if (!added) {
+                        AppNotifier.remove(
+                          context,
+                          "Please sign in to use the cart.",
+                        );
+                        return;
+                      }
+
+                      AppNotifier.cart(
+                        context,
+                        "Added to Cart",
+                      );
+                    }
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+          ],
+        ),
+      ),
+    );
+  }
+}
