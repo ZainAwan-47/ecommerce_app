@@ -76,42 +76,67 @@ Future<void> loadProfile() async {
 });
 }
 Future<void> pickProfileImage() async {
-  final picked = await _picker.pickImage(
-    source: ImageSource.gallery,
-    imageQuality: 80,
-  );
+  try {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
 
-  if (picked == null) return;
+    if (picked == null) return;
 
-  setState(() {
-    uploading = true;
-    profileImage = File(picked.path);
-  });
+    setState(() {
+      uploading = true;
+      profileImage = File(picked.path);
+    });
 
-  final ref = FirebaseStorage.instance
-      .ref()
-      .child('profile_images')
-      .child('${user!.uid}.jpg');
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child("profile_images")
+        .child("${user!.uid}.jpg");
 
-  await ref.putFile(profileImage!);
+    final uploadTask =
+        await storageRef.putFile(profileImage!);
 
-  final url = await ref.getDownloadURL();
+    final url = await uploadTask.ref.getDownloadURL();
 
-  await FirebaseFirestore.instance
-    .collection('users')
-    .doc(user!.uid)
-    .set({
-  'photoUrl': url,
-  'displayName': nameController.text.trim(),
-  'email': user!.email,
-  'phoneNumber': phoneController.text.trim(),
-  'address': addressController.text.trim(),
-}, SetOptions(merge: true));
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user!.uid)
+        .set({
+      "photoUrl": url,
+      "displayName": nameController.text.trim(),
+      "email": user!.email,
+      "phoneNumber": phoneController.text.trim(),
+      "address": addressController.text.trim(),
+    }, SetOptions(merge: true));
 
-  setState(() {
-    photoUrl = url;
-    uploading = false;
-  });
+    setState(() {
+      photoUrl = url;
+      uploading = false;
+    });
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Profile picture updated"),
+      ),
+    );
+  } catch (e) {
+    setState(() {
+      uploading = false;
+    });
+
+    debugPrint(e.toString());
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+      ),
+    );
+  }
 }
   @override
   Widget build(BuildContext context) {
