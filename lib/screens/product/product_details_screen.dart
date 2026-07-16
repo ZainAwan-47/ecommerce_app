@@ -10,7 +10,7 @@ import '../checkout/checkout_screen.dart';
 import '../../models/checkout_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/login_screen.dart';
-
+import 'package:share_plus/share_plus.dart';
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
 
@@ -141,16 +141,41 @@ final WishlistService _wishlistService = WishlistService();
 
               const SizedBox(width: 10),
 
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.share,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
+           CircleAvatar(
+  backgroundColor: Colors.white,
+  child: IconButton(
+    icon: const Icon(
+      Icons.share,
+      color: Colors.black87,
+    ),
+   onPressed: () {
+  final productLink =
+      "https://shopbytehreem.com/products/${product.id}";
+
+  SharePlus.instance.share(
+    ShareParams(
+      subject: product.name,
+      text: '''
+Shop by Tehreem
+
+${product.name}
+
+Price: Rs ${product.price.toStringAsFixed(0)}
+Rating: ${product.rating}/5
+
+${product.description}
+
+View Product
+$productLink
+
+Download the Shop by Tehreem App
+https://shopbytehreem.com
+''',
+    ),
+  );
+},
+  ),
+),
 
               const SizedBox(width: 14),
             ],
