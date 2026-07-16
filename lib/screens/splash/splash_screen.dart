@@ -124,7 +124,7 @@ Future<void> _checkAppState() async {
                     /// Logo
                     Image.asset(
                       "assets/logo/applogo.png",
-                      width: 140,
+                      width: 220,
                     ),
 
                     const SizedBox(height: 30),

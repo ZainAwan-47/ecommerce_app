@@ -93,7 +93,7 @@ await AppNotificationService().addWelcomeNotification(
 
               Image.asset(
                 "assets/logo/applogo.png",
-                height: 120,
+                height: 400,
               ),
 
               const SizedBox(height: 20),
