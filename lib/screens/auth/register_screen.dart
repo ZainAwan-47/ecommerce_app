@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../services/app_notification_service.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -55,7 +55,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "role": "customer",
         "createdAt": FieldValue.serverTimestamp(),
       });
-
+await AppNotificationService().addWelcomeNotification(
+  userId: userCredential.user!.uid,
+);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Account Created Successfully!"),

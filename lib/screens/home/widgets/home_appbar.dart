@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../cart/cart_screen.dart';
 import '../../auth/login_screen.dart';
-
+import '../../notification/notification_screen.dart';
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
 
@@ -31,8 +31,7 @@ class HomeAppBar extends StatelessWidget {
               children: [
                 Text(
                   "Welcome Back",
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey.shade600,
+  style: GoogleFonts.manrope(                    color: Colors.grey.shade600,
                     fontSize: 14,
                   ),
                 ),
@@ -41,7 +40,7 @@ class HomeAppBar extends StatelessWidget {
 
                 Text(
                   "Tehreem Store",
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 27,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xff3A2B2B),
@@ -175,26 +174,36 @@ Builder(
   },
 ),
 
-          /// Notification Button
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 15,
-                  color: Colors.black.withOpacity(.04),
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.notifications_none,
-              color: Color(0xff7F4F4F),
-            ),
-          ),
+        /// Notification Button
+GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const NotificationScreen(),
+      ),
+    );
+  },
+  child: Container(
+    height: 48,
+    width: 48,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          blurRadius: 15,
+          color: Colors.black.withOpacity(.04),
+          offset: const Offset(0, 5),
+        ),
+      ],
+    ),
+    child: const Icon(
+      Icons.notifications_none,
+      color: Color(0xff7F4F4F),
+    ),
+  ),
+),
         ],
       ),
     );

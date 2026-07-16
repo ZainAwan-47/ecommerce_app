@@ -410,10 +410,63 @@ SizedBox(
       ),
     ),
     onPressed: () async {
-      await FirebaseAuth.instance.signOut();
+  final shouldLogout = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.logout_rounded,
+              color: Color(0xff7F4F4F),
+            ),
+            SizedBox(width: 10),
+            Text(
+              "Logout",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          "Are you sure you want to log out of your account?",
+          style: TextStyle(height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: const Text(
+              "Cancel",
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xff7F4F4F),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: const Text("Logout"),
+          ),
+        ],
+      );
+    },
+  );
 
-      if (!context.mounted) return;
+  if (shouldLogout == true) {
+    await FirebaseAuth.instance.signOut();
 
+    if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -421,7 +474,9 @@ SizedBox(
         ),
         (route) => false,
       );
-    },
+    }
+  }
+},
     icon: const Icon(
       Icons.logout,
       color: Colors.white,

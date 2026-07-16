@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'core/app_theme.dart';
 import 'firebase_options.dart';
 import 'screens/splash/splash_screen.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,7 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     debugPrint("✅ Firebase Initialized Successfully");
-
+await NotificationService().initialize();
     // Firestore Test
     await FirebaseFirestore.instance
         .collection("test")
