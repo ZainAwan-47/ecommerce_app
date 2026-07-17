@@ -226,28 +226,28 @@ https://shopbytehreem.com
                     ),
                   ),
 
-                  Positioned(
-                    top: 110,
-                    left: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius:
-                            BorderRadius.circular(30),
-                      ),
-                     child: Text(
-  "20% OFF",
-  style: GoogleFonts.manrope(
-    color: Colors.white,
-    fontWeight: FontWeight.w600,
+                 if (product.discount > 0)
+  Positioned(
+    top: 110,
+    left: 20,
+    child: Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        "${product.discount}% OFF",
+        style: GoogleFonts.manrope(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
   ),
-),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -335,13 +335,14 @@ https://shopbytehreem.com
 
                       const SizedBox(width: 12),
 
-                      Text(
-                        "Rs ${(product.price * 1.2).toStringAsFixed(0)}",
-  style: GoogleFonts.manrope(                          decoration:
-                              TextDecoration.lineThrough,
-                          color: Colors.grey,
-                        ),
-                      ),
+                  if (product.discount > 0)
+  Text(
+    "Rs ${product.oldPrice.toStringAsFixed(0)}",
+    style: GoogleFonts.manrope(
+      decoration: TextDecoration.lineThrough,
+      color: Colors.grey,
+    ),
+  ),
                     ],
                   ),
 

@@ -9,17 +9,17 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        height: 58,
+        height: 52,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(.05),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(.04),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -28,7 +28,7 @@ class SearchBarWidget extends StatelessWidget {
             /// SEARCH BAR
             Expanded(
               child: InkWell(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -37,24 +37,26 @@ class SearchBarWidget extends StatelessWidget {
                     ),
                   );
                 },
-                child: Row(
-                  children: const [
-                    SizedBox(width: 16),
+                child: const Row(
+                  children: [
+                    SizedBox(width: 14),
 
                     Icon(
                       Icons.search_rounded,
                       color: Color(0xff7F4F4F),
+                      size: 22,
                     ),
 
-                    SizedBox(width: 12),
+                    SizedBox(width: 10),
 
                     Expanded(
                       child: Text(
-                        "Search luxury beauty products...",
+                        "Search beauty products...",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 16,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -65,11 +67,9 @@ class SearchBarWidget extends StatelessWidget {
 
             /// FILTER BUTTON
             Padding(
-              padding: const EdgeInsets.only(
-                right: 8,
-              ),
+              padding: const EdgeInsets.only(right: 6),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
@@ -77,23 +77,23 @@ class SearchBarWidget extends StatelessWidget {
                     backgroundColor: Colors.white,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(30),
+                        top: Radius.circular(24),
                       ),
                     ),
                     builder: (_) => const FilterBottomSheet(),
                   );
                 },
                 child: Container(
-                  width: 42,
-                  height: 42,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: const Color(0xff7F4F4F),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.tune,
                     color: Colors.white,
-                    size: 20,
+                    size: 18,
                   ),
                 ),
               ),

@@ -59,7 +59,10 @@ class ProductCard extends StatelessWidget {
                     ) {
                       List<ProductModel> products =
                           List.from(snapshot.data!);
-
+                      products.shuffle();
+                      if (products.length > 5) {
+  products = products.sublist(0, 5);
+}
                       if (selectedCategory.value !=
                           null) {
                         products = products.where(

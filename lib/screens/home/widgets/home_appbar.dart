@@ -2,28 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../cart/cart_screen.dart';
+
 import '../../auth/login_screen.dart';
+import '../../cart/cart_screen.dart';
 import '../../notification/notification_screen.dart';
+
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: const Color(0xffF0E5E1),
-            child: const Icon(
+          const CircleAvatar(
+            radius: 24,
+            backgroundColor: Color(0xffF0E5E1),
+            child: Icon(
               Icons.person,
               color: Color(0xff7F4F4F),
             ),
           ),
 
-          const SizedBox(width: 15),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
@@ -31,17 +33,18 @@ class HomeAppBar extends StatelessWidget {
               children: [
                 Text(
                   "Welcome Back",
-  style: GoogleFonts.manrope(                    color: Colors.grey.shade600,
-                    fontSize: 14,
+                  style: GoogleFonts.manrope(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
                   ),
                 ),
 
-                const SizedBox(height: 3),
+                const SizedBox(height: 1),
 
                 Text(
                   "Tehreem Store",
                   style: GoogleFonts.dmSerifDisplay(
-                    fontSize: 27,
+                    fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xff3A2B2B),
                   ),
@@ -49,161 +52,159 @@ class HomeAppBar extends StatelessWidget {
               ],
             ),
           ),
-         /// Cart Button
-Builder(
-  builder: (context) {
-    final user = FirebaseAuth.instance.currentUser;
 
-    // Guest User
-    if (user == null) {
-      return GestureDetector(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: const Text("Sign In Required"),
-              content: const Text(
-                "Please sign in to access your cart.",
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+          /// CART
+          Builder(
+            builder: (context) {
+              final user = FirebaseAuth.instance.currentUser;
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
+              /// Guest
+              if (user == null) {
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Sign In Required"),
+                        content: const Text(
+                          "Please sign in to access your cart.",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text("Sign In"),
+                          ),
+                        ],
                       ),
                     );
                   },
-                  child: const Text("Sign In"),
-                ),
-              ],
-            ),
-          );
-        },
-
-        child: Container(
-          height: 48,
-          width: 48,
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(
-            Icons.shopping_cart_outlined,
-            color: Color(0xff7F4F4F),
-          ),
-        ),
-      );
-    }
-
-    // Logged-in User
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('cart')
-          .snapshots(),
-
-      builder: (context, snapshot) {
-        final count = snapshot.data?.docs.length ?? 0;
-
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const CartScreen(),
-              ),
-            );
-          },
-
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                height: 48,
-                width: 48,
-                margin: const EdgeInsets.only(right: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Color(0xff7F4F4F),
-                ),
-              ),
-
-              if (count > 0)
-                Positioned(
-                  right: 5,
-                  top: -5,
                   child: Container(
-                    width: 22,
-                    height: 22,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+                    height: 42,
+                    width: 42,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      count.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: const Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 21,
+                      color: Color(0xff7F4F4F),
                     ),
                   ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  },
-),
+                );
+              }
 
-        /// Notification Button
-GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const NotificationScreen(),
-      ),
-    );
-  },
-  child: Container(
-    height: 48,
-    width: 48,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          blurRadius: 15,
-          color: Colors.black.withOpacity(.04),
-          offset: const Offset(0, 5),
-        ),
-      ],
-    ),
-    child: const Icon(
-      Icons.notifications_none,
-      color: Color(0xff7F4F4F),
-    ),
-  ),
-),
+              /// Logged In
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('cart')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  final count = snapshot.data?.docs.length ?? 0;
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CartScreen(),
+                        ),
+                      );
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 42,
+                          width: 42,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 21,
+                            color: Color(0xff7F4F4F),
+                          ),
+                        ),
+
+                        if (count > 0)
+                          Positioned(
+                            right: 4,
+                            top: -4,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                count.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+
+          /// Notification
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationScreen(),
+                ),
+              );
+            },
+            child: Container(
+              height: 42,
+              width: 42,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 12,
+                    color: Colors.black.withOpacity(.04),
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.notifications_none,
+                size: 21,
+                color: Color(0xff7F4F4F),
+              ),
+            ),
+          ),
         ],
       ),
     );

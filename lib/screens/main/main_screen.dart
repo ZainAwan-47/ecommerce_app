@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../../core/tab_controller.dart';
 
 import '../home/home_screen.dart';
+import '../product/products_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 import '../orders/orders_screen.dart';
 import '../profile/profile_screen.dart';
@@ -29,10 +31,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const HomeScreen(),
-      WishlistScreen(),
-      const OrdersScreen(),
-      const ProfileScreen(),
+      const HomeScreen(),        // 0
+      const ProductsScreen(),    // 1
+      WishlistScreen(),          // 2
+      const OrdersScreen(),      // 3
+      const ProfileScreen(),     // 4
     ];
 
     return ValueListenableBuilder<int>(
