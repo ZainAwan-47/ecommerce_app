@@ -60,7 +60,30 @@ class ProductCardWidget extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-
+                     if (product.discount > 0)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          "${product.discount}% OFF",
+                          style: GoogleFonts.manrope(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ),
+                    ),
                   ClipRRect(
                     borderRadius:
                         const BorderRadius.vertical(
@@ -97,56 +120,6 @@ class ProductCardWidget extends StatelessWidget {
                       },
                     ),
                   ),
-                                    if (product.discount > 0)
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius:
-                              BorderRadius.circular(18),
-                        ),
-                        child: Text(
-                          "${product.discount}% OFF",
-                          style: GoogleFonts.manrope(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  if (product.featured)
-                    Positioned(
-                      top: 12,
-                      right: 55,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade700,
-                          borderRadius:
-                              BorderRadius.circular(18),
-                        ),
-                        child: Text(
-                          "Featured",
-                          style: GoogleFonts.manrope(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    ),
-
                   Positioned(
                     top: 10,
                     right: 10,
@@ -189,12 +162,17 @@ class ProductCardWidget extends StatelessWidget {
                                 return;
                               }
 
-                              AppNotifier.wishlist(
-                                context,
-                                wishlisted
-                                    ? "Removed from Wishlist"
-                                    : "Added to Wishlist",
-                              );
+                             if (wishlisted) {
+  AppNotifier.remove(
+    context,
+    "Removed from Wishlist",
+  );
+} else {
+  AppNotifier.wishlist(
+    context,
+    "Added to Wishlist",
+  );
+}
                             },
                           ),
                         );

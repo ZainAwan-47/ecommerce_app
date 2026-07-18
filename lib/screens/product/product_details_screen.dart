@@ -226,26 +226,51 @@ https://shopbytehreem.com
                     ),
                   ),
 
-                 if (product.discount > 0)
+          if (product.discount > 0)
   Positioned(
     top: 110,
     left: 20,
-    child: Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Text(
-        "${product.discount}% OFF",
-        style: GoogleFonts.manrope(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
+    right: 20,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Text(
+            "${product.discount}% OFF",
+            style: GoogleFonts.manrope(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
+
+        if (product.featured)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              "Featured",
+              style: GoogleFonts.manrope(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
     ),
   ),
                 ],

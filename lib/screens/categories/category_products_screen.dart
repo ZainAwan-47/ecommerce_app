@@ -21,13 +21,10 @@ class CategoryProductsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         elevation: 0,
-
         iconTheme: const IconThemeData(
           color: Colors.black,
         ),
-
         centerTitle: true,
-
         title: Text(
           category,
           style: GoogleFonts.playfairDisplay(
@@ -39,9 +36,7 @@ class CategoryProductsScreen extends StatelessWidget {
       ),
 
       body: StreamBuilder<List<ProductModel>>(
-        stream: FirestoreService()
-            .getProductsByCategory(category),
-
+        stream: FirestoreService().getProductsByCategory(category),
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
@@ -69,15 +64,16 @@ class CategoryProductsScreen extends StatelessWidget {
           }
 
           final products = snapshot.data!;
-                    return GridView.builder(
+
+          return GridView.builder(
             padding: const EdgeInsets.all(18),
             itemCount: products.length,
             gridDelegate:
                 const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 18,
-              childAspectRatio: .62,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: .74,
             ),
             itemBuilder: (context, index) {
               final product = products[index];
@@ -99,7 +95,7 @@ class CategoryProductsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
-                        BorderRadius.circular(24),
+                        BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(.06),
@@ -110,126 +106,130 @@ class CategoryProductsScreen extends StatelessWidget {
                   ),
 
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
                     children: [
 
-                      Expanded(
-                        child: Hero(
-                          tag: product.id,
-                          child: ClipRRect(
-                            borderRadius:
-                                const BorderRadius.vertical(
-                              top: Radius.circular(24),
-                            ),
-                            child: Image.network(
-                              product.image,
-                              width: double.infinity,
-                              fit: BoxFit.contain,
-
-                              loadingBuilder:
-                                  (context, child, progress) {
-                                if (progress == null) {
-                                  return child;
-                                }
-
-                                return const Center(
-                                  child:
-                                      CircularProgressIndicator(),
-                                );
-                              },
-
-                              errorBuilder:
-                                  (context, error, stackTrace) {
-                                return const Center(
-                                  child: Icon(
-                                    Icons
-                                        .image_not_supported_outlined,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Padding(
-                        padding:
-                            const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                      /// IMAGE + BADGE
+                      SizedBox(
+                        height: 135,
+                        child: Stack(
                           children: [
 
-                            Text(
-                              product.name,
-                              maxLines: 2,
-                              overflow:
-                                  TextOverflow.ellipsis,
-                              style: GoogleFonts
-                                  .playfairDisplay(
-                                fontSize: 17,
-                                fontWeight:
-                                    FontWeight.bold,
+                            Center(
+                              child: Hero(
+                                tag: product.id,
+                                child: Image.network(
+                                  product.image,
+                                  height: 95,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
 
-                            const SizedBox(height: 8),
-
-                            Row(
-                              children: [
-
-                                const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 17,
+                            if (product.discount > 0)
+                              Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent,
+                                    borderRadius:
+                                        BorderRadius.circular(18),
+                                  ),
+                                  child: Text(
+                                    "${product.discount}% OFF",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
+                              ),
+                          ],
+                        ),
+                      ),
 
-                                const SizedBox(width: 5),
+                      Expanded(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(
+                            10,
+                            0,
+                            10,
+                            10,
+                          ),
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            mainAxisAlignment:
+                                MainAxisAlignment
+                                    .spaceBetween,
+                            children: [
 
-                                Text(
-                                  product.rating
-                                      .toString(),
-                                  style:
-                                      GoogleFonts.poppins(),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .spaceBetween,
-                              children: [
-
-                                Text(
-                                  "Rs ${product.price.toStringAsFixed(0)}",
+                              SizedBox(
+                                height: 46,
+                                child: Text(
+                                  product.name,
+                                  maxLines: 2,
+                                  overflow:
+                                      TextOverflow.ellipsis,
                                   style: GoogleFonts
-                                      .poppins(
-                                    color: const Color(
-                                        0xff7F4F4F),
+                                      .playfairDisplay(
+                                    fontSize: 17,
                                     fontWeight:
                                         FontWeight.bold,
                                   ),
                                 ),
+                              ),
 
-                                                               CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor:
-                                      const Color(0xff7F4F4F),
-                                  child: const Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: Colors.white,
-                                    size: 16,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment
+                                        .spaceBetween,
+                                children: [
+
+                                  Text(
+                                    "Rs ${product.price.toStringAsFixed(0)}",
+                                    style:
+                                        GoogleFonts.manrope(
+                                      color:
+                                          const Color(0xff7F4F4F),
+                                      fontWeight:
+                                          FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        product.rating
+                                            .toStringAsFixed(1),
+                                        style:
+                                            GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight:
+                                              FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -243,4 +243,3 @@ class CategoryProductsScreen extends StatelessWidget {
     );
   }
 }
-                            

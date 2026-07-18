@@ -38,8 +38,7 @@ class OffersScreen extends StatelessWidget {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
             return const Center(
-              child:
-                  CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             );
           }
 
@@ -61,33 +60,33 @@ class OffersScreen extends StatelessWidget {
           }
 
           final docs = snapshot.data!.docs;
-         return ListView.builder(
- padding: const EdgeInsets.symmetric(
-  horizontal: 18,
-  vertical: 12,
-),
-  itemCount: docs.length,
-  itemBuilder: (context, index) {
-    final product =
-        ProductModel.fromFirestore(
-      docs[index].id,
-      docs[index].data()
-          as Map<String, dynamic>,
-    );
 
-   return Padding(
-  padding: const EdgeInsets.only(
-    bottom: 18,
-  ),
-  child: SizedBox(
-    height: 340,
-    child: ProductCardWidget(
-      product: product,
-    ),
-  ),
-);
-  },
-);
+          return GridView.builder(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 12,
+            ),
+            itemCount: docs.length,
+            gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: .68,
+            ),
+            itemBuilder: (context, index) {
+              final product =
+                  ProductModel.fromFirestore(
+                docs[index].id,
+                docs[index].data()
+                    as Map<String, dynamic>,
+              );
+
+              return ProductCardWidget(
+                product: product,
+              );
+            },
+          );
         },
       ),
     );

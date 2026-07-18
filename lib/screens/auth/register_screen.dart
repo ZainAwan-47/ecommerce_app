@@ -54,7 +54,7 @@ await FirebaseFirestore.instance
     .collection("users")
     .doc(userCredential.user!.uid)
     .set({
-   "uid": user.uid,
+  "uid": userCredential.user!.uid,
   "name": fullNameController.text.trim(),
   "email": emailController.text.trim(),
   "role": "customer",

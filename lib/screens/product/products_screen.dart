@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/tab_controller.dart';
 import '../../models/product_model.dart';
 import 'product_details_screen.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
 
@@ -681,7 +681,7 @@ return ValueListenableBuilder<String>(
                             crossAxisCount: 2,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
-                            childAspectRatio: .95,
+                            childAspectRatio: .88,
                           ),
                           itemBuilder:
                               (context, index) {
@@ -729,81 +729,110 @@ return ValueListenableBuilder<String>(
                                   crossAxisAlignment:
                                       CrossAxisAlignment
                                           .start,
-                                  children: [
-                                    SizedBox(
-                                      height: 110,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius
-                                                .vertical(
-                                          top: Radius
-                                              .circular(
-                                                  18),
-                                        ),
-                                        child:
-                                            Image.network(
-                                          product.image,
-                                          width: double
-                                              .infinity,
-                                          fit: BoxFit
-                                              .contain,
-                                        ),
-                                      ),
-                                    ),
+   children: [
+  SizedBox(
+    height: 140,
+    child: Stack(
+      children: [
+      Padding(
+  padding: const EdgeInsets.only(top: 12),
+  child: Center(
+    child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(18),
+            ),
+            child: Image.network(
+              product.image,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+        if (product.discount > 0)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text(
+                "${product.discount}% OFF",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  ),
 
-                                    Expanded(
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets
-                                                .fromLTRB(
-                                          8,
-                                          6,
-                                          8,
-                                          8,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment
-                                                  .start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                          children: [
-                                            Text(
-                                              product
-                                                  .name,
-                                              maxLines: 2,
-                                              overflow:
-                                                  TextOverflow
-                                                      .ellipsis,
-                                              style:
-                                                  const TextStyle(
-                                                fontWeight:
-                                                    FontWeight
-                                                        .bold,
-                                                fontSize:
-                                                    13,
-                                              ),
-                                            ),
+  Expanded(
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(8, 3, 8, 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 38,
+            child: Text(
+              product.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ),
 
-                                            Text(
-                                              "Rs ${product.price}",
-                                              style:
-                                                  const TextStyle(
-                                                color: Color(
-                                                    0xff7F4F4F),
-                                                fontWeight:
-                                                    FontWeight
-                                                        .bold,
-                                                fontSize:
-                                                    14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Rs ${product.price.toStringAsFixed(0)}",
+                style: GoogleFonts.manrope(
+                  color: const Color(0xff7F4F4F),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+
+              Row(
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    product.rating.toStringAsFixed(1),
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+],
                                 ),
                               ),
                             );

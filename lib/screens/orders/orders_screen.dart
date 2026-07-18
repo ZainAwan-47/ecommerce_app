@@ -5,7 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/tab_controller.dart';
 import '../auth/login_screen.dart';
 import 'order_details_screen.dart';
-
+import '../main/main_screen.dart';
+import '../product/products_screen.dart';
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
@@ -193,8 +194,15 @@ title: Text(
                     width: 220,
                     height: 50,
                     child: ElevatedButton(
-                     onPressed: () {
-  Navigator.pop(context);
+         onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const MainScreen(
+        initialIndex: 1,
+      ),
+    ),
+  );
 },
                       style:
                           ElevatedButton.styleFrom(
