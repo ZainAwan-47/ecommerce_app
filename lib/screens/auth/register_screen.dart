@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/app_notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -46,15 +47,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: passwordController.text.trim(),
       );
 
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(userCredential.user!.uid)
-          .set({
-        "name": fullNameController.text.trim(),
-        "email": emailController.text.trim(),
-        "role": "customer",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
+     final String? fcmToken =
+    await FirebaseMessaging.instance.getToken();
+
+await FirebaseFirestore.instance
+    .collection("users")
+    .doc(userCredential.user!.uid)
+    .set({
+   "uid": user.uid,
+  "name": fullNameController.text.trim(),
+  "email": emailController.text.trim(),
+  "role": "customer",
+  "fcmToken": fcmToken ?? "",
+  "createdAt": FieldValue.serverTimestamp(),
+});
 await AppNotificationService().addWelcomeNotification(
   userId: userCredential.user!.uid,
 );
@@ -93,7 +99,7 @@ await AppNotificationService().addWelcomeNotification(
 
               Image.asset(
                 "assets/logo/applogo.png",
-                height: 400,
+                height: 220,
               ),
 
               const SizedBox(height: 20),

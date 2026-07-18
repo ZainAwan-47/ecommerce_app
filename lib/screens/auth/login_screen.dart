@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_service.dart';
 import '../main/main_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+bool isGoogleLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -192,33 +195,113 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 25),
 
-              // Guest Button
-              SizedBox(
-                height: 55,
-                child: OutlinedButton(
-                 onPressed: () {
- Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => const MainScreen(),
-  ),
-);
-},
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.grey),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+        SizedBox(
+  height: 55,
+  child: OutlinedButton.icon(
+    onPressed: isGoogleLoading
+        ? null
+        : () async {
+            setState(() {
+              isGoogleLoading = true;
+            });
+
+            try {
+              final user =
+                  await AuthService.instance
+                      .signInWithGoogle();
+
+              if (!mounted) return;
+
+              if (user != null) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const MainScreen(),
                   ),
-                  child: const Text(
-                    "Continue as Guest",
-                    style: TextStyle(fontSize: 17),
+                );
+              }
+            } catch (e) {
+              if (!mounted) return;
+
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(
+                SnackBar(
+                  content: Text(
+                    e.toString(),
                   ),
                 ),
-              ),
+              );
+            }
 
-              const SizedBox(height: 15),
+            if (mounted) {
+              setState(() {
+                isGoogleLoading = false;
+              });
+            }
+          },
+    icon: isGoogleLoading
+        ? const SizedBox(
+            width: 20,
+            height: 20,
+            child:
+                CircularProgressIndicator(
+              strokeWidth: 2,
+            ),
+          )
+        : Image.asset(
+            "assets/icons/google.png",
+            height: 22,
+          ),
+    label: const Text(
+      "Continue with Google",
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    style: OutlinedButton.styleFrom(
+      backgroundColor: Colors.white,
+      side: const BorderSide(
+        color: Color(0xffDDDDDD),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(15),
+      ),
+    ),
+  ),
+),
 
+const SizedBox(height: 25),
+
+SizedBox(
+  height: 55,
+  child: OutlinedButton(
+    onPressed: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const MainScreen(),
+        ),
+      );
+    },
+    style: OutlinedButton.styleFrom(
+      side:
+          const BorderSide(color: Colors.grey),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(15),
+      ),
+    ),
+    child: const Text(
+      "Continue as Guest",
+      style: TextStyle(fontSize: 17),
+    ),
+  ),
+),
+const SizedBox(height: 25),
               // Create Account Button
               SizedBox(
                 height: 55,
