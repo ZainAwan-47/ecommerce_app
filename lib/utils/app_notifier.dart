@@ -33,6 +33,13 @@ static void success(BuildContext context, String message) {
     const Color(0xff2E7D32),
   );
 }
+static void error(BuildContext context, String message) {
+  _show(
+    context,
+    message,
+    const Color(0xffD32F2F), // Material Red 700
+  );
+}
   static void _show(
     BuildContext context,
     String message,

@@ -6,7 +6,7 @@ import '../../services/auth_service.dart';
 import '../main/main_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../utils/app_notifier.dart';
 import '../../services/otp_service.dart';
 
 import 'otp_verification_screen.dart';
@@ -198,20 +198,56 @@ bool isGoogleLoading = false;
         ),
       ),
     );
-  } on FirebaseAuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text(e.message ?? "Login Failed"),
-      ),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-      ),
-    );
+  }on FirebaseAuthException catch (e) {
+  String message;
+
+  switch (e.code) {
+    case "invalid-email":
+      message = "Please enter a valid email address.";
+      break;
+
+    case "invalid-credential":
+      message = "Incorrect email or password.";
+      break;
+
+    case "wrong-password":
+      message = "Incorrect password.";
+      break;
+
+    case "user-not-found":
+      message = "No account found with this email.";
+      break;
+
+    case "email-already-in-use":
+      message = "This email is already registered.";
+      break;
+
+    case "user-disabled":
+      message = "This account has been disabled.";
+      break;
+
+    case "too-many-requests":
+      message = "Too many login attempts. Please try again later.";
+      break;
+
+    case "network-request-failed":
+      message = "No internet connection.";
+      break;
+
+    default:
+      message = "Login failed. Please try again.";
   }
+
+  AppNotifier.error(
+    context,
+    message,
+  );
+} catch (e) {
+  AppNotifier.error(
+    context,
+    "Something went wrong.",
+  );
+}
 },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),

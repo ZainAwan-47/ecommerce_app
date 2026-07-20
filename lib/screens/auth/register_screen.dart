@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/app_notification_service.dart';
+import '../../utils/app_notifier.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -64,22 +65,50 @@ await FirebaseFirestore.instance
 await AppNotificationService().addWelcomeNotification(
   userId: userCredential.user!.uid,
 );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Account Created Successfully!"),
-        ),
-      );
+     AppNotifier.success(
+  context,
+  "Account created. Please sign in.",
+);
 
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.message ?? "Registration Failed",
-          ),
-        ),
-      );
-    }
+  String message;
+
+  switch (e.code) {
+    case "email-already-in-use":
+      message = "An account with this email already exists.";
+      break;
+
+    case "invalid-email":
+      message = "Please enter a valid email address.";
+      break;
+
+    case "weak-password":
+      message = "Password must be at least 6 characters.";
+      break;
+
+    case "network-request-failed":
+      message = "No internet connection.";
+      break;
+
+    case "too-many-requests":
+      message = "Too many attempts. Please try again later.";
+      break;
+
+    default:
+      message = "Registration failed. Please try again.";
+  }
+
+  AppNotifier.error(
+    context,
+    message,
+  );
+} catch (_) {
+  AppNotifier.error(
+    context,
+    "Something went wrong.",
+  );
+}
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import '../../utils/app_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -77,7 +77,7 @@ class _OtpVerificationScreenState
           .get();
 
       if (!doc.exists) {
-        throw "OTP not found.";
+    throw "Please request a new OTP.";
       }
 
       final data = doc.data()!;
@@ -87,7 +87,7 @@ class _OtpVerificationScreenState
       final Timestamp expiresAt = data["expiresAt"];
 
       if (DateTime.now().isAfter(expiresAt.toDate())) {
-        throw "OTP has expired.";
+        throw "OTP has expired. Please request a new OTP.";
       }
 
       if (otpController.text.trim() != savedOtp) {
@@ -111,11 +111,10 @@ class _OtpVerificationScreenState
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
+     AppNotifier.error(
+  context,
+  e.toString(),
+);
     }
 
     if (mounted) {
@@ -133,21 +132,18 @@ class _OtpVerificationScreenState
 
     if (!mounted) return;
 
-    if (success) {
-      startTimer();
+   if (success) {
+  startTimer();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("OTP sent successfully."),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to send OTP."),
-        ),
-      );
-    }
+  AppNotifier.success(
+    context,
+    "OTP sent successfully.",
+  );
+}
+AppNotifier.error(
+  context,
+  "Failed to send OTP.",
+);
   }
     @override
   Widget build(BuildContext context) {
