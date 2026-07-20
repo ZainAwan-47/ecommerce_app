@@ -22,7 +22,6 @@ dependencies:
   firebase_storage: ^13.0.1
   firebase_messaging: ^16.0.1
 
-
   # Notifications
   flutter_local_notifications: ^19.4.2
 
@@ -49,7 +48,7 @@ dependencies:
   # Toast Messages
   fluttertoast: ^9.1.0
 
-  # Network
+  # HTTP (Used for EmailJS API)
   http: ^1.5.0
 
   # UUID Generator
@@ -84,4 +83,4 @@ flutter_launcher_icons:
   ios: true
   image_path: assets/logo/playstore-icon.png
   min_sdk_android: 21
-  adaptive_icon_background: "#000000" 
+  adaptive_icon_background: "#000000"

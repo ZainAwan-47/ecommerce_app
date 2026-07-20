@@ -5,6 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../main/main_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../services/otp_service.dart';
+
+import 'otp_verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -136,27 +141,78 @@ bool isGoogleLoading = false;
               SizedBox(
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: () async {
-                     try {
-    await _auth.signInWithEmailAndPassword(
+           onPressed: () async {
+  try {
+    final credential =
+        await _auth.signInWithEmailAndPassword(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
     );
 
-    Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => const MainScreen(),
-  ),
-);
+    final user = credential.user;
+
+    if (user == null) {
+      throw Exception("Login failed.");
+    }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+    final userData = userDoc.data() ?? {};
+
+    final name =
+        userData["name"] ?? "Customer";
+
+    final email =
+        userData["email"] ?? user.email!;
+
+    final sent =
+        await OtpService.createAndSendOtp(
+      userName: name,
+      email: email,
+    );
+
+    if (!mounted) return;
+
+    if (!sent) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Failed to send OTP.",
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            OtpVerificationScreen(
+          uid: user.uid,
+          name: name,
+          email: email,
+        ),
+      ),
+    );
   } on FirebaseAuthException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(e.message ?? "Login Failed"),
+        content:
+            Text(e.message ?? "Login Failed"),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
       ),
     );
   }
-                  },
+},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),
                     shape: RoundedRectangleBorder(
