@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'change_password_screen.dart';
 import '../orders/orders_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 import '../auth/login_screen.dart';
@@ -138,9 +138,14 @@ Future<void> pickProfileImage() async {
     );
   }
 }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+ @override
+Widget build(BuildContext context) {
+  final isEmailUser = user?.providerData.any(
+        (provider) => provider.providerId == "password",
+      ) ??
+      false;
+
+  return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
      appBar: AppBar(
@@ -378,19 +383,20 @@ _buildTile(
 },
 ),
 
-_buildTile(
-  icon: Icons.lock_outline,
-  title: "Change Password",
+if (isEmailUser)
+  _buildTile(
+    icon: Icons.lock_outline,
+    title: "Change Password",
   onTap: () {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text(
-        "Coming Soon",
-      ),
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) =>
+          const ChangePasswordScreen(),
     ),
   );
 },
-),
+  ),
 
 _buildTile(
   icon: Icons.support_agent,
