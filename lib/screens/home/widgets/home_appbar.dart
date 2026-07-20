@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import '../../../core/tab_controller.dart';
 import '../../auth/login_screen.dart';
 import '../../cart/cart_screen.dart';
 import '../../notification/notification_screen.dart';
@@ -16,14 +16,19 @@ class HomeAppBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 24,
-            backgroundColor: Color(0xffF0E5E1),
-            child: Icon(
-              Icons.person,
-              color: Color(0xff7F4F4F),
-            ),
-          ),
+         GestureDetector(
+  onTap: () {
+    selectedTab.value = 4;
+  },
+  child: const CircleAvatar(
+    radius: 24,
+    backgroundColor: Color(0xffF0E5E1),
+    child: Icon(
+      Icons.person,
+      color: Color(0xff7F4F4F),
+    ),
+  ),
+),
 
           const SizedBox(width: 12),
 
@@ -32,7 +37,7 @@ class HomeAppBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Welcome Back",
+                  "Welcome Back to",
                   style: GoogleFonts.manrope(
                     color: Colors.grey.shade600,
                     fontSize: 12,

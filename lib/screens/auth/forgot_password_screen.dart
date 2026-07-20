@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../utils/app_notifier.dart';
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -23,61 +23,68 @@ class _ForgotPasswordScreenState
     super.dispose();
   }
 
-  Future<void> resetPassword() async {
+ Future<void> resetPassword() async {
+  if (emailController.text.trim().isEmpty) {
+    AppNotifier.error(
+      context,
+      "Please enter your email address.",
+    );
+    return;
+  }
 
-    if (emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter your email"),
-        ),
-      );
-      return;
+  try {
+    setState(() {
+      loading = true;
+    });
+
+    await FirebaseAuth.instance.sendPasswordResetEmail(
+      email: emailController.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    AppNotifier.success(
+      context,
+      "Password reset email sent.",
+    );
+
+    Navigator.pop(context);
+  } on FirebaseAuthException catch (e) {
+    String message;
+
+    switch (e.code) {
+      case "invalid-email":
+        message = "Please enter a valid email address.";
+        break;
+
+      case "user-not-found":
+        message = "No account found with this email.";
+        break;
+
+      case "network-request-failed":
+        message = "No internet connection.";
+        break;
+
+      case "too-many-requests":
+        message = "Too many requests. Please try again later.";
+        break;
+
+      default:
+        message = "Failed to send reset email.";
     }
 
-    try {
-
+    AppNotifier.error(
+      context,
+      message,
+    );
+  } finally {
+    if (mounted) {
       setState(() {
-        loading = true;
+        loading = false;
       });
-
-      await FirebaseAuth.instance
-          .sendPasswordResetEmail(
-        email: emailController.text.trim(),
-      );
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text(
-            "Password reset email sent.",
-          ),
-        ),
-      );
-
-      Navigator.pop(context);
-
-    } on FirebaseAuthException catch (e) {
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.message ?? "Something went wrong",
-          ),
-        ),
-      );
-
-    } finally {
-
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
-
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

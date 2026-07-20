@@ -7,6 +7,7 @@ import '../../services/order_service.dart';
 import '../../models/checkout_item.dart';
 import '../../models/product_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/app_notifier.dart';
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -583,34 +584,63 @@ const SizedBox(height: 15),
                         ? null
                         : () async {
 
-                            if (addressController.text
-                                .trim()
-                                .isEmpty) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Please enter your shipping address",
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
+                           final address = addressController.text.trim();
 
-                            if (phoneController.text
-                                .trim()
-                                .isEmpty) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Please enter your phone number",
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
+if (address.length < 50) {
+  AppNotifier.error(
+    context,
+    "Please enter a complete delivery address (minimum 50 characters).",
+  );
+  return;
+}
 
+                          final phone = phoneController.text.trim();
+
+if (!RegExp(r'^03\d{9}$').hasMatch(phone)) {
+  AppNotifier.error(
+    context,
+    "Enter a valid phone number (03XXXXXXXXX).",
+  );
+  return;
+}
+final confirm = await showDialog<bool>(
+  context: context,
+  builder: (context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text("Confirm Order"),
+      content: const Text(
+        "Are you sure you want to place this order?",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+          child: const Text("Cancel"),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xff7F4F4F),
+          ),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+          child: const Text(
+            "Place Order",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  },
+);
+
+if (confirm != true) {
+  return;
+}
                             setState(() {
                               placingOrder = true;
                             });

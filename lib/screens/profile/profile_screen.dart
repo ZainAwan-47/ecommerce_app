@@ -306,28 +306,22 @@ TextField(
   child: ElevatedButton.icon(
   onPressed: () async {
   final newName = nameController.text.trim();
+
 final phone = phoneController.text.trim();
+final address = addressController.text.trim();
 
 if (!RegExp(r'^03\d{9}$').hasMatch(phone)) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text(
-        "Phone number must be 11 digits (03XXXXXXXXX)",
-      ),
-      backgroundColor: Colors.red,
-    ),
+  AppNotifier.error(
+    context,
+    "Enter a valid phone number (03XXXXXXXXX).",
   );
   return;
 }
 
-if (addressController.text.trim().isEmpty) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text(
-        "Please enter your address.",
-      ),
-      backgroundColor: Colors.red,
-    ),
+if (address.isNotEmpty && address.length < 50) {
+  AppNotifier.error(
+    context,
+    "Please enter a complete address (minimum 50 characters).",
   );
   return;
 }
