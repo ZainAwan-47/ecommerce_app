@@ -60,9 +60,6 @@ class ProductCard extends StatelessWidget {
                       List<ProductModel> products =
                           List.from(snapshot.data!);
                       products.shuffle();
-                      if (products.length > 5) {
-  products = products.sublist(0, 5);
-}
                       if (selectedCategory.value !=
                           null) {
                         products = products.where(
@@ -109,7 +106,40 @@ class ProductCard extends StatelessWidget {
                           );
                           break;
                       }
-
+  if (products.length > 5) {
+  products = products.sublist(0, 5);
+}
+if (products.isEmpty) {
+  return SizedBox(
+    height: 340,
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 70,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "No products found",
+            style: GoogleFonts.dmSerifDisplay(
+              fontSize: 26,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Try changing your filters.",
+            style: GoogleFonts.manrope(
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
                       return ListView.builder(
                         scrollDirection:
                             Axis.horizontal,

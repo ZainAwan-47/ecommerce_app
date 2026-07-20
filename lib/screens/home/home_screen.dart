@@ -7,6 +7,7 @@ import 'widgets/offer_banner.dart';
 import 'widgets/product_card.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/you_may_like_section.dart';
+import '../../core/filter_controller.dart';
 import '../../../core/tab_controller.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -52,17 +53,34 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Best Sellers",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+           ValueListenableBuilder<String?>(
+  valueListenable: selectedCategory,
+  builder: (context, category, _) {
+    return ValueListenableBuilder<double>(
+      valueListenable: maxPrice,
+      builder: (context, price, _) {
+        String title = "Best Sellers";
 
+        if (category != null) {
+          title = "$category Products";
+        } else if (price < 9999) {
+          title = "Products Under Rs ${price.toInt()}";
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      },
+    );
+  },
+),
               const SizedBox(height: 12),
 
               ProductCard(),
