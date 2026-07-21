@@ -159,7 +159,7 @@ Widget build(BuildContext context) {
     color: Colors.black,
   ),
   onPressed: () {
-    Navigator.pop(context);
+    selectedTab.value = 0;
   },
 ),
   title: Text(
