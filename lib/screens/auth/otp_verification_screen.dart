@@ -29,16 +29,19 @@ class _OtpVerificationScreenState
       TextEditingController();
 
   bool isLoading = false;
-
+bool sendingOtp = true;
   int seconds = 60;
 
   Timer? timer;
 
-  @override
-  void initState() {
-    super.initState();
-    startTimer();
-  }
+ @override
+void initState() {
+  super.initState();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    sendOtp();
+  });
+}
 
   void startTimer() {
     seconds = 60;
@@ -65,6 +68,36 @@ class _OtpVerificationScreenState
     otpController.dispose();
     super.dispose();
   }
+  Future<void> sendOtp() async {
+  setState(() {
+    sendingOtp = true;
+  });
+
+  final success = await OtpService.createAndSendOtp(
+    userName: widget.name,
+    email: widget.email,
+  );
+
+  if (!mounted) return;
+
+  if (success) {
+    AppNotifier.success(
+      context,
+      "OTP sent successfully.",
+    );
+
+    startTimer();
+  } else {
+    AppNotifier.error(
+      context,
+      "Failed to send OTP.",
+    );
+  }
+
+  setState(() {
+    sendingOtp = false;
+  });
+}
     Future<void> verifyOtp() async {
     setState(() {
       isLoading = true;
@@ -132,18 +165,19 @@ class _OtpVerificationScreenState
 
     if (!mounted) return;
 
-   if (success) {
+  if (success) {
   startTimer();
 
   AppNotifier.success(
     context,
     "OTP sent successfully.",
   );
+} else {
+  AppNotifier.error(
+    context,
+    "Failed to send OTP.",
+  );
 }
-AppNotifier.error(
-  context,
-  "Failed to send OTP.",
-);
   }
     @override
   Widget build(BuildContext context) {
@@ -163,8 +197,24 @@ AppNotifier.error(
         ),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+   body: SafeArea(
+  child: SingleChildScrollView(
+    keyboardDismissBehavior:
+        ScrollViewKeyboardDismissBehavior.onDrag,
+    padding: EdgeInsets.fromLTRB(
+      24,
+      24,
+      24,
+      MediaQuery.of(context).viewInsets.bottom + 24,
+    ),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight:
+            MediaQuery.of(context).size.height -
+            kToolbarHeight -
+            MediaQuery.of(context).padding.top,
+      ),
+      child: IntrinsicHeight(
         child: Column(
           children: [
 
@@ -203,6 +253,11 @@ AppNotifier.error(
               controller: otpController,
               keyboardType: TextInputType.number,
               maxLength: 6,
+              onChanged: (value) {
+  if (value.length == 6) {
+    FocusScope.of(context).unfocus();
+  }
+},
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 28,
@@ -227,8 +282,10 @@ AppNotifier.error(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed:
-                    isLoading ? null : verifyOtp,
+              onPressed:
+    isLoading || sendingOtp
+        ? null
+        : verifyOtp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       const Color(0xff7F4F4F),
@@ -237,7 +294,7 @@ AppNotifier.error(
                         BorderRadius.circular(15),
                   ),
                 ),
-                child: isLoading
+             child: (isLoading || sendingOtp)
                     ? const CircularProgressIndicator(
                         color: Colors.white,
                       )
@@ -262,9 +319,12 @@ AppNotifier.error(
                     : "Resend in ${seconds}s",
               ),
             ),
-          ],
+                  ],
         ),
       ),
+    ),
+  ),
+),
     );
   }
 }

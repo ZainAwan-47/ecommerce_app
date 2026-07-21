@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 bool isGoogleLoading = false;
-
+bool isLoginLoading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,15 +134,22 @@ bool isGoogleLoading = false;
                   child: const Text("Forgot Password?"),
                 ),
               ),
-
               const SizedBox(height: 20),
 
               // Sign In Button
               SizedBox(
                 height: 55,
                 child: ElevatedButton(
-           onPressed: () async {
-  try {
+
+        onPressed: isLoginLoading
+    ? null
+    : () async {
+
+        setState(() {
+          isLoginLoading = true;
+        });
+
+        try {
     final credential =
         await _auth.signInWithEmailAndPassword(
       email: emailController.text.trim(),
@@ -167,37 +174,27 @@ bool isGoogleLoading = false;
 
     final email =
         userData["email"] ?? user.email!;
-
-    final sent =
-        await OtpService.createAndSendOtp(
-      userName: name,
+AppNotifier.success(
+  context,
+  "Sending OTP to mail...",
+);
+   if (!mounted) return;
+if (mounted) {
+  setState(() {
+    isLoginLoading = false;
+  });
+}
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => OtpVerificationScreen(
+      uid: user.uid,
+      name: name,
       email: email,
-    );
+    ),
+  ),
+);
 
-    if (!mounted) return;
-
-    if (!sent) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Failed to send OTP.",
-          ),
-        ),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            OtpVerificationScreen(
-          uid: user.uid,
-          name: name,
-          email: email,
-        ),
-      ),
-    );
   }on FirebaseAuthException catch (e) {
   String message;
 
@@ -237,12 +234,21 @@ bool isGoogleLoading = false;
     default:
       message = "Login failed. Please try again.";
   }
-
+if (mounted) {
+  setState(() {
+    isLoginLoading = false;
+  });
+}
   AppNotifier.error(
     context,
     message,
   );
 } catch (e) {
+  if (mounted) {
+  setState(() {
+    isLoginLoading = false;
+  });
+}
   AppNotifier.error(
     context,
     "Something went wrong.",
@@ -255,13 +261,22 @@ bool isGoogleLoading = false;
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: const Text(
-                    "Sign In",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
+                child: isLoginLoading
+    ? const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          color: Colors.white,
+        ),
+      )
+    : const Text(
+        "Sign In",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+        ),
+      ),
                 ),
               ),
 
