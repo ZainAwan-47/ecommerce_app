@@ -673,19 +673,22 @@ return ValueListenableBuilder<String>(
                     const SizedBox(
                         height: 18),
 
-                    Expanded(
-                      child: isGrid
-                          ? GridView.builder(
-                                                      itemCount: products.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            childAspectRatio: .88,
-                          ),
-                          itemBuilder:
-                              (context, index) {
+                Expanded(
+  child: AnimatedCrossFade(
+    duration: const Duration(milliseconds: 280),
+    crossFadeState: isGrid
+        ? CrossFadeState.showFirst
+        : CrossFadeState.showSecond,
+    firstChild: GridView.builder(
+      itemCount: products.length,
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: .88,
+      ),
+      itemBuilder: (context, index) {
                             final data = products[index]
                                     .data()
                                 as Map<String, dynamic>;
@@ -838,12 +841,10 @@ return ValueListenableBuilder<String>(
                               ),
                             );
                           },
-                        )
-                        : ListView.builder(
-                          itemCount:
-                              products.length,
-                          itemBuilder:
-                              (context, index) {
+                        ),
+                       secondChild: ListView.builder(
+      itemCount: products.length,
+      itemBuilder: (context, index) {
                             final data = products[index]
                                     .data()
                                 as Map<String, dynamic>;
@@ -932,6 +933,7 @@ return ValueListenableBuilder<String>(
                             );
                           },
                         ),
+  ),
                     ),
                   ],
                 ),
