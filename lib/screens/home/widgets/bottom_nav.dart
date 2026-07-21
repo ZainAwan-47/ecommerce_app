@@ -33,7 +33,6 @@ class BottomNav extends StatelessWidget {
         elevation: 0,
         selectedIndex: currentIndex,
         onDestinationSelected: (index) {
-          previousTab = currentIndex;
           onTap(index);
         },
         destinations: const [

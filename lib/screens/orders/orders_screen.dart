@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/tab_controller.dart';
 import '../auth/login_screen.dart';
 import 'order_details_screen.dart';
-import '../main/main_screen.dart';
-import '../product/products_screen.dart';
+import '../../core/page_controller_holder.dart';
+import '../../core/page_controller_holder.dart';
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
@@ -28,7 +28,7 @@ if (user == null) {
     color: Colors.black,
   ),
  onPressed: () {
-  selectedTab.value = previousTab;
+ goBackTab();
 },
 ),
 
@@ -116,7 +116,7 @@ title: Text(
     color: Colors.black,
   ),
   onPressed: () {
-    selectedTab.value = previousTab;
+   goBackTab();
   },
 ),
 
@@ -195,14 +195,7 @@ title: Text(
                     height: 50,
                     child: ElevatedButton(
          onPressed: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const MainScreen(
-        initialIndex: 1,
-      ),
-    ),
-  );
+  goToTab(1);
 },
                       style:
                           ElevatedButton.styleFrom(

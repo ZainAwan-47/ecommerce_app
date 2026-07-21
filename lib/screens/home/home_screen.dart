@@ -5,10 +5,12 @@ import 'widgets/category_card.dart';
 import 'widgets/home_appbar.dart';
 import 'widgets/offer_banner.dart';
 import 'widgets/product_card.dart';
+import '../../core/page_controller_holder.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/you_may_like_section.dart';
 import '../../core/filter_controller.dart';
 import '../../../core/tab_controller.dart';
+import '../../core/page_controller_holder.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -107,7 +109,13 @@ const SizedBox(height: 20),
 Center(
   child: ElevatedButton(
  onPressed: () {
-  selectedTab.value = 1;
+ goToTab(1);
+
+  appPageController.animateToPage(
+    1,
+    duration: const Duration(milliseconds: 320),
+    curve: Curves.easeOutCubic,
+  );
 },
     style: ElevatedButton.styleFrom(
       minimumSize: const Size(160, 48),

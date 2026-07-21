@@ -4,7 +4,7 @@ import '../../core/tab_controller.dart';
 import '../../models/product_model.dart';
 import 'product_details_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../core/page_controller_holder.dart';
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
 
@@ -158,7 +158,7 @@ class _ProductsScreenState
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     } else {
-      selectedTab.value = 0;
+     goToTab(0);
     }
   },
 ),

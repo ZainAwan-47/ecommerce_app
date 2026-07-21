@@ -7,7 +7,7 @@ import '../wishlist/wishlist_screen.dart';
 import '../auth/login_screen.dart';
 import '../main/main_screen.dart';
 import '../home/widgets/bottom_nav.dart';
-
+import '../../core/page_controller_holder.dart';
 import '../../core/tab_controller.dart';
 import '../../utils/app_notifier.dart';
 
@@ -159,7 +159,7 @@ Widget build(BuildContext context) {
     color: Colors.black,
   ),
   onPressed: () {
-    selectedTab.value = 0;
+   goToTab(0);
   },
 ),
   title: Text(
@@ -353,12 +353,11 @@ if (address.isNotEmpty && address.length < 50) {
 ),
 
 const SizedBox(height: 25),
-  _buildTile(
+ _buildTile(
   icon: Icons.shopping_bag_outlined,
   title: "My Orders",
   onTap: () {
-    previousTab = 4; // Profile tab
-    selectedTab.value = 3;
+    goToTab(3);
   },
 ),
 
@@ -366,8 +365,7 @@ _buildTile(
   icon: Icons.favorite_outline,
   title: "Wishlist",
   onTap: () {
-    previousTab = 4; // Profile tab
-    selectedTab.value = 2;
+    goToTab(2);
   },
 ),
 

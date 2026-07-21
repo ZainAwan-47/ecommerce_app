@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/tab_controller.dart';
+import '../../core/page_controller_holder.dart';
 
 import '../home/home_screen.dart';
 import '../product/products_screen.dart';
@@ -22,34 +23,44 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final pages = [
+    const HomeScreen(),
+    const ProductsScreen(),
+    WishlistScreen(),
+    const OrdersScreen(),
+    const ProfileScreen(),
+  ];
+
   @override
   void initState() {
     super.initState();
-    selectedTab.value = widget.initialIndex;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      selectedTab.value = widget.initialIndex;
+      appPageController.jumpToPage(widget.initialIndex);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      const HomeScreen(),        // 0
-      const ProductsScreen(),    // 1
-      WishlistScreen(),          // 2
-      const OrdersScreen(),      // 3
-      const ProfileScreen(),     // 4
-    ];
-
     return ValueListenableBuilder<int>(
       valueListenable: selectedTab,
-      builder: (context, index, child) {
+      builder: (context, index, _) {
         return Scaffold(
-          body: IndexedStack(
-            index: index,
+          body: PageView(
+            controller: appPageController,
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (value) {
+              selectedTab.value = value;
+            },
             children: pages,
           ),
           bottomNavigationBar: BottomNav(
             currentIndex: index,
             onTap: (value) {
-              selectedTab.value = value;
+              if (value != selectedTab.value) {
+                goToTab(value);
+              }
             },
           ),
         );

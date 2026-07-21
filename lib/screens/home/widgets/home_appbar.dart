@@ -6,7 +6,7 @@ import '../../../core/tab_controller.dart';
 import '../../auth/login_screen.dart';
 import '../../cart/cart_screen.dart';
 import '../../notification/notification_screen.dart';
-
+import '../../../core/page_controller_holder.dart';
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
 
@@ -18,7 +18,7 @@ class HomeAppBar extends StatelessWidget {
         children: [
          GestureDetector(
   onTap: () {
-    selectedTab.value = 4;
+  goToTab(4);
   },
   child: const CircleAvatar(
     radius: 24,

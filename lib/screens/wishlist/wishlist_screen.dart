@@ -5,6 +5,7 @@ import '../../utils/app_notifier.dart';
 import '../../models/product_model.dart';
 import '../../services/cart_service.dart';
 import '../../services/wishlist_service.dart';
+import '../../core/page_controller_holder.dart';
 import '../../core/tab_controller.dart';
 class WishlistScreen extends StatelessWidget {
   WishlistScreen({super.key});
@@ -29,7 +30,7 @@ leading: IconButton(
     color: Colors.black,
   ),
   onPressed: () {
-    selectedTab.value = previousTab;
+   goBackTab();
   },
 ),
         title: Text(
