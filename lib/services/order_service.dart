@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/product_model.dart';
+import 'payment_service.dart';
+import 'receipt_service.dart';
 
 class OrderService {
   final FirebaseFirestore _firestore =
@@ -10,102 +13,95 @@ class OrderService {
   final FirebaseAuth _auth =
       FirebaseAuth.instance;
 
-  /// CART ORDER
-  Future<void> placeOrder({
-    required String address,
-    required String phone,
-  }) async {
+  /// GENERATE UNIQUE ORDER ID
+  String generateOrderId() {
+    return _firestore
+        .collection("orders")
+        .doc()
+        .id;
+  }
+
+  /// CLEAR USER CART AFTER SUCCESSFUL PAYMENT
+  Future<void> clearCart() async {
     final user = _auth.currentUser;
 
     if (user == null) return;
 
     final cartSnapshot = await _firestore
-        .collection('users')
+        .collection("users")
         .doc(user.uid)
-        .collection('cart')
+        .collection("cart")
         .get();
 
-    if (cartSnapshot.docs.isEmpty) {
-      return;
-    }
-
-    double total = 0;
-
-    List<Map<String, dynamic>> products = [];
-
-    for (var cartItem in cartSnapshot.docs) {
-      final data = cartItem.data();
-
-      final price =
-          (data['price'] as num).toDouble();
-
-      final quantity =
-          (data['quantity'] as num).toInt();
-
-      total += price * quantity;
-
-      products.add({
-        'productId': cartItem.id,
-        'name': data['name'],
-        'image': data['image'],
-        'price': price,
-        'quantity': quantity,
-      });
-    }
-
-    await _firestore.collection('orders').add({
-      'userId': user.uid,
-      'address': address,
-      'phone': phone,
-      'paymentMethod': 'Cash on Delivery',
-      'status': 'Pending',
-      'total': total,
-      'products': products,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    for (var cartItem in cartSnapshot.docs) {
-      await cartItem.reference.delete();
+    for (final item in cartSnapshot.docs) {
+      await item.reference.delete();
     }
   }
 
-  /// BUY NOW ORDER
-  Future<void> placeBuyNowOrder({
-    required ProductModel product,
+  /// PLACE MANUAL PAYMENT ORDER
+  Future<void> placeManualPaymentOrder({
+    required String userName,
+    required String email,
+
     required String address,
     required String phone,
+
+    required List<Map<String, dynamic>> products,
+
+    required double subtotal,
+    required double delivery,
+    required double total,
+
+    required String paymentMethod,
+
+    required File receipt,
   }) async {
     final user = _auth.currentUser;
 
-    if (user == null) return;
+    if (user == null) {
+      throw Exception("User not logged in.");
+    }
 
-    await _firestore.collection('orders').add({
-      'userId': user.uid,
-      'address': address,
-      'phone': phone,
-      'paymentMethod': 'Cash on Delivery',
-      'status': 'Pending',
-      'total': product.price,
-      'products': [
-        {
-          'productId': product.id,
-          'name': product.name,
-          'image': product.image,
-          'price': product.price,
-          'quantity': 1,
-        }
-      ],
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    final orderId = generateOrderId();
+
+    final receiptUrl =
+        await ReceiptService.instance.uploadReceipt(
+      receipt: receipt,
+      orderId: orderId,
+    );
+
+    await PaymentService.instance.submitPayment(
+      orderId: orderId,
+      userName: userName,
+      email: email,
+      phone: phone,
+      address: address,
+      products: products,
+      subtotal: subtotal,
+      delivery: delivery,
+      total: total,
+      paymentMethod: paymentMethod,
+      receiptUrl: receiptUrl,
+    );
+
+    await clearCart();
   }
-  /// GET USER ORDERS (Newest First)
-Stream<QuerySnapshot> getOrders() {
-  final user = _auth.currentUser;
 
-  return _firestore
-      .collection('orders')
-      .where('userId', isEqualTo: user!.uid)
-      .orderBy('createdAt', descending: true)
-      .snapshots();
-}
+  /// USER ORDERS
+  Stream<QuerySnapshot<Map<String, dynamic>>> getOrders() {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      return const Stream.empty();
+    }
+
+    return _firestore
+        .collection("orders")
+        .where("userId", isEqualTo: user.uid)
+        .orderBy(
+          "createdAt",
+          descending: true,
+        )
+        .snapshots();
+  }
 }

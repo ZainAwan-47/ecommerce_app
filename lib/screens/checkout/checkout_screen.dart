@@ -8,6 +8,7 @@ import '../../models/checkout_item.dart';
 import '../../models/product_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../utils/app_notifier.dart';
+import '../payment/payment_screen.dart';
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -262,145 +263,6 @@ final data = doc.data() as Map<String, dynamic>;
                 ),
 
                 const SizedBox(height: 35),
-                                Text(
-                  "Payment Method",
-                  style: GoogleFonts.dmSerifDisplay(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xff7F4F4F),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-
-                      const CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Color(0xffF5EAEA),
-                        child: Icon(
-                          Icons.local_shipping_outlined,
-                          color: Color(0xff7F4F4F),
-                        ),
-                      ),
-
-                      const SizedBox(width: 16),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-
-                            Text(
-                              "Cash on Delivery",
-  style: GoogleFonts.manrope(                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Pay when your order arrives.",
-  style: GoogleFonts.manrope(                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 28,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-
-                      const CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Color(0xffF5F5F5),
-                        child: Icon(
-                          Icons.credit_card,
-                          color: Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(width: 16),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-
-                            Text(
-                              "Stripe",
-  style: GoogleFonts.manrope(                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Coming Soon",
-  style: GoogleFonts.manrope(                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          "Soon",
-  style: GoogleFonts.manrope(                            color: Colors.orange.shade800,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 35),
 
                 Text(
                   "Order Summary",
@@ -574,6 +436,75 @@ const SizedBox(height: 15),
                     ],
                   ),
                 ),
+  const SizedBox(height: 35),
+ Text(
+  "Next Step",
+  style: GoogleFonts.dmSerifDisplay(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  ),
+),
+
+const SizedBox(height: 18),
+
+Container(
+  padding: const EdgeInsets.all(18),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(20),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(.05),
+        blurRadius: 15,
+        offset: const Offset(0, 8),
+      ),
+    ],
+    border: Border.all(
+      color: const Color(0xff7F4F4F).withOpacity(.15),
+    ),
+  ),
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const CircleAvatar(
+        radius: 22,
+        backgroundColor: Color(0xffF5EAEA),
+        child: Icon(
+          Icons.arrow_forward_rounded,
+          color: Color(0xff7F4F4F),
+        ),
+      ),
+
+      const SizedBox(width: 16),
+
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Continue to Payment",
+              style: GoogleFonts.manrope(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              "Continue to the payment page to complete your payment.",
+              style: GoogleFonts.manrope(
+                color: Colors.grey.shade700,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
 
                 const SizedBox(height: 35),
                                 SizedBox(
@@ -646,114 +577,25 @@ if (confirm != true) {
                             });
 
                             try {
+setState(() {
+  placingOrder = false;
+});
 
-                        if (BuyNowService().item != null) {
-  final item = BuyNowService().item!;
-
-  await _orderService.placeBuyNowOrder(
-    product: ProductModel(
-      id: item.productId,
-      name: item.name,
-      image: item.image,
-      price: item.price,
-      oldPrice: item.price,
-      rating: 0,
-      category: "",
-      description: "",
-      featured: false,
-      discount: 0,
-      inStock: true,
-    ),
-    address: addressController.text.trim(),
-    phone: phoneController.text.trim(),
-  );
-
-  BuyNowService().clear();
-} else {
-  await _orderService.placeOrder(
-    address: addressController.text.trim(),
-    phone: phoneController.text.trim(),
-  );
-}
-                              if (!mounted) return;
-
-                              setState(() {
-                                placingOrder = false;
-                              });
-showDialog(
-  context: context,
-  barrierDismissible: false,
-  builder: (_) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-
-            const CircleAvatar(
-              radius: 35,
-              backgroundColor: Colors.green,
-              child: Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 40,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              "Order Placed!",
-              style: GoogleFonts.dmSerifDisplay(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            Text(
-              "Thank you for shopping with us.\nYour order has been placed successfully.",
-              textAlign: TextAlign.center,
-  style: GoogleFonts.manrope(                color: Colors.grey,
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-
-                  Navigator.pop(context);
-
-                  addressController.clear();
-                  phoneController.clear();
-
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff7F4F4F),
-                ),
-                child: const Text(
-                  "Continue Shopping",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  },
+ await Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => PaymentScreen(
+  address: addressController.text.trim(),
+  phone: phoneController.text.trim(),
+  items: checkoutItems,
+  subtotal: subtotal,
+  delivery: delivery,
+  total: total,
+),
+  ),
 );
+
+return;
 
                             } catch (e) {
 

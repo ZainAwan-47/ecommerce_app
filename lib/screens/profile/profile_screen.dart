@@ -153,21 +153,15 @@ Widget build(BuildContext context) {
   elevation: 0,
   centerTitle: true,
 
-  leading: IconButton(
-    icon: const Icon(
-      Icons.arrow_back_ios_new,
-      color: Colors.black,
-    ),
-    onPressed: () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-         builder: (_) => const MainScreen(),
-        ),
-      );
-    },
+ leading: IconButton(
+  icon: const Icon(
+    Icons.arrow_back_ios_new,
+    color: Colors.black,
   ),
-
+  onPressed: () {
+    Navigator.pop(context);
+  },
+),
   title: Text(
     "My Profile",
     style: GoogleFonts.dmSerifDisplay(
@@ -359,22 +353,22 @@ if (address.isNotEmpty && address.length < 50) {
 ),
 
 const SizedBox(height: 25),
-            _buildTile(
+  _buildTile(
   icon: Icons.shopping_bag_outlined,
   title: "My Orders",
- onTap: () {
-  previousTab = 3;
-  selectedTab.value = 2;
-},
+  onTap: () {
+    previousTab = 4; // Profile tab
+    selectedTab.value = 3;
+  },
 ),
 
 _buildTile(
   icon: Icons.favorite_outline,
   title: "Wishlist",
   onTap: () {
-  previousTab = 3;
-  selectedTab.value = 1;
-},
+    previousTab = 4; // Profile tab
+    selectedTab.value = 2;
+  },
 ),
 
 if (isEmailUser)
