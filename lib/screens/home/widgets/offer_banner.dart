@@ -19,7 +19,7 @@ class OfferBanner extends StatelessWidget {
        if (snapshot.connectionState ==
     ConnectionState.waiting) {
   return const SizedBox(
-    height: 185,
+    height: 187,
     child: Center(
       child: CircularProgressIndicator(),
     ),

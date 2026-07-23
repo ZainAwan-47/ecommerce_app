@@ -83,7 +83,7 @@ void initState() {
 
         title: Text(
           "Checkout",
-          style: GoogleFonts.dmSerifDisplay(
+          style: GoogleFonts.manrope(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -130,7 +130,7 @@ if (snapshot.hasData &&
 
                   Text(
                     "Your Cart is Empty",
-                    style: GoogleFonts.dmSerifDisplay(
+                    style: GoogleFonts.manrope(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
@@ -173,17 +173,18 @@ final data = doc.data() as Map<String, dynamic>;
 
           final total = subtotal + delivery;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(22),
-
-            child: Column(
+       return SafeArea(
+  top: false,
+  child: SingleChildScrollView(
+    padding: const EdgeInsets.all(22),
+    child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
 
               children: [
                                 Text(
                   "Shipping Address",
-                  style: GoogleFonts.dmSerifDisplay(
+                  style: GoogleFonts.manrope(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -225,7 +226,7 @@ final data = doc.data() as Map<String, dynamic>;
 
                 Text(
                   "Phone Number",
-                  style: GoogleFonts.dmSerifDisplay(
+                  style: GoogleFonts.manrope(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -266,7 +267,7 @@ final data = doc.data() as Map<String, dynamic>;
 
                 Text(
                   "Order Summary",
-                  style: GoogleFonts.dmSerifDisplay(
+                  style: GoogleFonts.manrope(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -297,7 +298,7 @@ Align(
   alignment: Alignment.centerLeft,
   child: Text(
     "Items",
-    style: GoogleFonts.dmSerifDisplay(
+    style: GoogleFonts.manrope(
       fontSize: 22,
       fontWeight: FontWeight.bold,
     ),
@@ -425,7 +426,7 @@ const SizedBox(height: 15),
 
                           Text(
                             "Rs ${total.toStringAsFixed(0)}",
-                            style: GoogleFonts.dmSerifDisplay(
+                            style: GoogleFonts.manrope(
                               fontSize: 24,
                               color: const Color(0xff7F4F4F),
                               fontWeight: FontWeight.bold,
@@ -439,7 +440,7 @@ const SizedBox(height: 15),
   const SizedBox(height: 35),
  Text(
   "Next Step",
-  style: GoogleFonts.dmSerifDisplay(
+  style: GoogleFonts.manrope(
     fontSize: 24,
     fontWeight: FontWeight.bold,
   ),
@@ -665,9 +666,12 @@ Text(
     fontSize: 12,
   ),
 ),
-const SizedBox(height: 20),
+SizedBox(
+  height: MediaQuery.of(context).viewPadding.bottom + 15,
+),
                             ],
                           ),
+  ),
                         );
                       },
                     ),

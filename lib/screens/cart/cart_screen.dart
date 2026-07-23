@@ -277,25 +277,52 @@ onTap: () async {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text("Remove Item"),
-        content: const Text(
-          "Are you sure you want to remove this item from your cart?",
+  title: Text(
+    "Remove Item",
+    style: GoogleFonts.manrope(
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+    ),
+  ),
+  content: Text(
+    "Are you sure you want to remove this item from your cart?",
+    style: GoogleFonts.manrope(
+      fontSize: 15,
+    ),
+  ),
+  actions: [
+    TextButton(
+      onPressed: () {
+        Navigator.pop(context, false);
+      },
+      child: Text(
+        "Cancel",
+        style: GoogleFonts.manrope(
+          color: Colors.grey.shade700,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-            child: const Text("Delete"),
-          ),
-        ],
-      );
+      ),
+    ),
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFB76E79),
+        foregroundColor: Colors.white,
+      ),
+      onPressed: () {
+        Navigator.pop(context, true);
+      },
+      child: Text(
+        "Delete",
+        style: GoogleFonts.manrope(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    ),
+  ],
+);
     },
   );
 
@@ -323,8 +350,15 @@ onTap: () async {
                   },
                 ),
               ),
-                            Container(
-            margin: EdgeInsets.all(width * 0.04),
+                           SafeArea(
+  top: false,
+  child: Container(
+    margin: EdgeInsets.fromLTRB(
+      width * 0.04,
+      width * 0.04,
+      width * 0.04,
+      width * 0.04,
+    ),
             padding: EdgeInsets.all(width * 0.04),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -447,8 +481,9 @@ onTap: () async {
                     ),
                   ],
                 ),
-              ),
-            ],
+                          ),
+            ),
+        ],
           );
         },
       ),

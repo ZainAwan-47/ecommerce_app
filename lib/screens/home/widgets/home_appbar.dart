@@ -48,7 +48,7 @@ class HomeAppBar extends StatelessWidget {
 
                 Text(
                   "Tehreem Store",
-                  style: GoogleFonts.dmSerifDisplay(
+                  style: GoogleFonts.manrope(
                     fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xff3A2B2B),
@@ -70,29 +70,56 @@ class HomeAppBar extends StatelessWidget {
                     showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                        title: const Text("Sign In Required"),
-                        content: const Text(
-                          "Please sign in to access your cart.",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancel"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const LoginScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text("Sign In"),
-                          ),
-                        ],
-                      ),
+  title: Text(
+    "Sign In Required",
+    style: GoogleFonts.manrope(
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+    ),
+  ),
+  content: Text(
+    "Please sign in to access your cart.",
+    style: GoogleFonts.manrope(
+      fontSize: 15,
+    ),
+  ),
+  actions: [
+    TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: Text(
+        "Cancel",
+        style: GoogleFonts.manrope(
+          color: Colors.grey.shade700,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    ),
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFB76E79),
+        foregroundColor: Colors.white,
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const LoginScreen(),
+          ),
+        );
+      },
+      child: Text(
+        "Sign In",
+        style: GoogleFonts.manrope(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    ),
+  ],
+)
                     );
                   },
                   child: Container(

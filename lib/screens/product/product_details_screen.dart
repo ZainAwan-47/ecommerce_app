@@ -38,8 +38,10 @@ final width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
-      body: CustomScrollView(
-        slivers: [
+    body: SafeArea(
+  top: false,
+  child: CustomScrollView(
+    slivers: [
 
           SliverAppBar(
         expandedHeight: width * 0.75,
@@ -571,6 +573,7 @@ onPressed: () {
           ),
         ],
       ),
+    ),
     );
   }
 }

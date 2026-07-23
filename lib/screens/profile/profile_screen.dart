@@ -242,9 +242,15 @@ Widget build(BuildContext context) {
    fontSize: width * 0.06,
     fontWeight: FontWeight.bold,
   ),
-  decoration: const InputDecoration(
-    border: InputBorder.none,
+ decoration: InputDecoration(
+  border: InputBorder.none,
+  hintText: "Your Name",
+  hintStyle: GoogleFonts.manrope(
+    color: Colors.grey,
+    fontSize: width * 0.05,
+    fontWeight: FontWeight.w500,
   ),
+),
 ),
 
             const SizedBox(height: 4),
@@ -265,6 +271,9 @@ TextField(
   decoration: InputDecoration(
     labelText: "Phone Number",
     hintText: "03XXXXXXXXX",
+    hintStyle: GoogleFonts.manrope(
+    color: Colors.grey,
+  ),
     prefixIcon: const Icon(Icons.phone_outlined),
     filled: true,
     fillColor: Colors.white,
@@ -280,19 +289,19 @@ TextField(
   controller: addressController,
    minLines: 2,
   maxLines: 3,
-  decoration: InputDecoration(
-    labelText: "Delivery Address",
-    hintText: "House, Street, Area, City",
-    prefixIcon: const Padding(
-      padding: EdgeInsets.only(bottom: 55),
-      child: Icon(Icons.location_on_outlined),
-    ),
-    filled: true,
-    fillColor: Colors.white,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
+ decoration: InputDecoration(
+  hintText: "Delivery Address\nHouse, Street, Area, City",
+  hintStyle: GoogleFonts.manrope(
+    color: Colors.grey,
   ),
+  prefixIcon: const Icon(Icons.location_on_outlined),
+  alignLabelWithHint: true,
+  filled: true,
+  fillColor: Colors.white,
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+  ),
+),
 ),
             const SizedBox(height: 18),
             SizedBox(
@@ -313,7 +322,9 @@ TextField(
 final phone = phoneController.text.trim();
 final address = addressController.text.trim();
 
-if (!RegExp(r'^03\d{9}$').hasMatch(phone)) {
+
+if (phone.isNotEmpty &&
+    !RegExp(r'^03\d{9}$').hasMatch(phone)) {
   AppNotifier.error(
     context,
     "Enter a valid phone number (03XXXXXXXXX).",
