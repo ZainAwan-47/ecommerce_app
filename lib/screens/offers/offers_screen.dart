@@ -19,9 +19,9 @@ class OffersScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           "Today's Offers",
-          style: GoogleFonts.dmSerifDisplay(
+          style: GoogleFonts.manrope(
             color: Colors.black,
-            fontSize: 30,
+            fontSize: 28,
           ),
         ),
       ),
@@ -63,16 +63,16 @@ class OffersScreen extends StatelessWidget {
 
           return GridView.builder(
             padding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 12,
+              horizontal: 12,
+              vertical: 10,
             ),
             itemCount: docs.length,
             gridDelegate:
                 const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: .68,
+              crossAxisSpacing: 7,
+              mainAxisSpacing: 7,
+              childAspectRatio: .86,
             ),
             itemBuilder: (context, index) {
               final product =

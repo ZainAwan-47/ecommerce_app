@@ -16,7 +16,7 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 340,
+      height: 305,
       child: StreamBuilder<List<ProductModel>>(
         stream: FirestoreService().getProducts(),
         builder: (context, snapshot) {
@@ -164,16 +164,16 @@ if (products.isEmpty) {
     );
   },
   child: Container(
-    width: 220,
-    margin: const EdgeInsets.only(right: 18),
+  width: MediaQuery.of(context).size.width * 0.52,
+    margin: const EdgeInsets.only(right: 14),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(.08),
           blurRadius: 18,
-          offset: const Offset(0, 8),
+          offset: const Offset(0, 5),
         ),
       ],
     ),
@@ -233,21 +233,21 @@ if (products.isEmpty) {
                 overflow:
                     TextOverflow.ellipsis,
                 style:
-                    GoogleFonts.dmSerifDisplay(
+                    GoogleFonts.manrope(
                   fontWeight:
                       FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 15,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
 
               Row(
                 children: [
                   const Icon(
                     Icons.star,
                     color: Colors.amber,
-                    size: 18,
+                    size: 15,
                   ),
 
                   const SizedBox(width: 4),
@@ -262,7 +262,7 @@ if (products.isEmpty) {
                 ],
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
               Row(
                 mainAxisAlignment:
@@ -277,7 +277,7 @@ if (products.isEmpty) {
                           0xff7F4F4F),
                       fontWeight:
                           FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 16,
                     ),
                   ),
 
@@ -316,7 +316,7 @@ if (products.isEmpty) {
                         Icons
                             .shopping_cart_outlined,
                         color: Colors.white,
-                        size: 20,
+                        size: 18,
                       ),
                     ),
                   ),

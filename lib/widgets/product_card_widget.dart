@@ -32,22 +32,19 @@ class ProductCardWidget extends StatelessWidget {
           ),
         );
       },
-
-      child: Container(
-        width: 220,
-        margin:
-            const EdgeInsets.only(right: 18),
-
-        decoration: BoxDecoration(
+    child: Container(
+  width: MediaQuery.sizeOf(context).width * 0.43,
+  margin: const EdgeInsets.only(right: 10),
+  decoration: BoxDecoration(
           color: Colors.white,
           borderRadius:
-              BorderRadius.circular(24),
+              BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
               color:
                   Colors.black.withOpacity(.08),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              blurRadius: 6,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -67,7 +64,7 @@ class ProductCardWidget extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
-                          vertical: 6,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.red,
@@ -79,12 +76,14 @@ class ProductCardWidget extends StatelessWidget {
                           style: GoogleFonts.manrope(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 9,
+                            fontSize: 11,
                           ),
                         ),
                       ),
                     ),
-                  ClipRRect(
+                Padding(
+  padding: const EdgeInsets.only(top: 8),
+  child: ClipRRect(
                     borderRadius:
                         const BorderRadius.vertical(
                       top: Radius.circular(24),
@@ -111,8 +110,7 @@ class ProductCardWidget extends StatelessWidget {
                           (_, __, ___) {
                         return const Center(
                           child: Icon(
-                            Icons
-                                .image_not_supported_outlined,
+                            Icons.image_not_supported_outlined,
                             size: 70,
                             color: Colors.grey,
                           ),
@@ -120,9 +118,10 @@ class ProductCardWidget extends StatelessWidget {
                       },
                     ),
                   ),
+                ),
                   Positioned(
-                    top: 10,
-                    right: 10,
+                    top: 8,
+                    right: 8,
                     child: StreamBuilder<bool>(
                       stream: wishlistService
                           .isWishlisted(product.id),
@@ -131,7 +130,7 @@ class ProductCardWidget extends StatelessWidget {
                             snapshot.data ?? false;
 
                         return CircleAvatar(
-                          radius: 18,
+                          radius: 16,
                           backgroundColor: Colors.white,
                           child: IconButton(
                             padding: EdgeInsets.zero,
@@ -210,7 +209,7 @@ class ProductCardWidget extends StatelessWidget {
               ),
             ),
             Padding(
-  padding: const EdgeInsets.all(15),
+padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -219,13 +218,13 @@ class ProductCardWidget extends StatelessWidget {
         product.name,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.dmSerifDisplay(
+        style: GoogleFonts.manrope(
           fontWeight: FontWeight.bold,
-          fontSize: 18,
+          fontSize: 13,
         ),
       ),
 
-      const SizedBox(height: 8),
+      const SizedBox(height: 4),
 
       Row(
         children: [
@@ -284,7 +283,7 @@ class ProductCardWidget extends StatelessWidget {
               icon: const Icon(
                 Icons.shopping_cart_outlined,
                 color: Colors.white,
-                size: 20,
+                size: 14,
               ),
 
               onPressed: product.inStock
@@ -321,6 +320,7 @@ class ProductCardWidget extends StatelessWidget {
     ],
   ),
 ),
+        
           ],
         ),
       ),

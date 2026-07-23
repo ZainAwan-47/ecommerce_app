@@ -139,6 +139,8 @@ class _ProductsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+final width = size.width;
     return Scaffold(
       backgroundColor:
           const Color(0xffFFF9F7),
@@ -224,18 +226,17 @@ return ValueListenableBuilder<String>(
     }
 
               return Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(
-                  12,
-                  8,
-                  12,
-                  12,
-                ),
+              padding: EdgeInsets.fromLTRB(
+  width * 0.03,
+  8,
+  width * 0.03,
+  12,
+),
                 child: Column(
                   children: [
                                         /// SEARCH BAR
                     Container(
-                      height: 52,
+                 height: width * 0.11,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius:
@@ -272,14 +273,14 @@ return ValueListenableBuilder<String>(
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 13),
 
                     /// GRID/LIST + FILTER
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            height: 48,
+                      height: width * 0.11,
                             decoration:
                                 BoxDecoration(
                               color:
@@ -647,8 +648,8 @@ return ValueListenableBuilder<String>(
                             );
                           },
                           child: Container(
-                            height: 48,
-                            width: 48,
+                         height: width * 0.11,
+width: width * 0.11,
                             decoration:
                                 BoxDecoration(
                               color:
@@ -684,9 +685,9 @@ return ValueListenableBuilder<String>(
       gridDelegate:
           const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: .88,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+        childAspectRatio: .82,
       ),
       itemBuilder: (context, index) {
                             final data = products[index]
@@ -725,7 +726,7 @@ return ValueListenableBuilder<String>(
                                           .black
                                           .withOpacity(
                                               .05),
-                                      blurRadius: 10,
+                                      blurRadius: 5,
                                     ),
                                   ],
                                 ),
@@ -735,11 +736,11 @@ return ValueListenableBuilder<String>(
                                           .start,
    children: [
   SizedBox(
-    height: 140,
+ height: width * 0.31,
     child: Stack(
       children: [
       Padding(
-  padding: const EdgeInsets.only(top: 12),
+  padding: const EdgeInsets.only(top: 8),
   child: Center(
     child: ClipRRect(
             borderRadius: const BorderRadius.vertical(
@@ -760,19 +761,19 @@ return ValueListenableBuilder<String>(
             left: 8,
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
+                horizontal: 8,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
                 color: Colors.redAccent,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 "${product.discount}% OFF",
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                  fontSize: 10,
                 ),
               ),
             ),
@@ -783,20 +784,20 @@ return ValueListenableBuilder<String>(
 
   Expanded(
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(8, 3, 8, 8),
+      padding: const EdgeInsets.fromLTRB(8, 11, 8, 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 38,
+            height: 45,
             child: Text(
               product.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
               ),
             ),
           ),
@@ -809,7 +810,7 @@ return ValueListenableBuilder<String>(
                 style: GoogleFonts.manrope(
                   color: const Color(0xff7F4F4F),
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 15,
                 ),
               ),
 
@@ -818,13 +819,13 @@ return ValueListenableBuilder<String>(
                   const Icon(
                     Icons.star_rounded,
                     color: Colors.amber,
-                    size: 16,
+                    size: 15,
                   ),
-                  const SizedBox(width: 3),
+                  const SizedBox(width: 2),
                   Text(
                     product.rating.toStringAsFixed(1),
                     style: GoogleFonts.manrope(
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -893,8 +894,8 @@ return ValueListenableBuilder<String>(
                                                 10),
                                     child: Image.network(
                                       product.image,
-                                      width: 65,
-                                      height: 65,
+                                  width: width * 0.16,
+height: width * 0.16,
                                       fit: BoxFit.contain,
                                     ),
                                   ),

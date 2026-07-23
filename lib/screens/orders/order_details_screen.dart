@@ -12,7 +12,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+final width = MediaQuery.sizeOf(context).width;
     final List products =
         order['products'];
 
@@ -26,7 +26,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
         title: Text(
           "Order Details",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.manrope(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -35,7 +35,7 @@ class OrderDetailsScreen extends StatelessWidget {
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
+     padding: EdgeInsets.all(width * 0.03),
 
         child: Column(
           crossAxisAlignment:
@@ -44,13 +44,13 @@ class OrderDetailsScreen extends StatelessWidget {
           children: [
                         Text(
               "Products",
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 24,
+              style: GoogleFonts.manrope(
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 6),
 
             ListView.builder(
               shrinkWrap: true,
@@ -65,11 +65,11 @@ class OrderDetailsScreen extends StatelessWidget {
 
                 return Card(
                   margin:
-                      const EdgeInsets.only(bottom: 16),
+                      const EdgeInsets.only(bottom: 10),
 
                   shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.circular(18),
+                        BorderRadius.circular(16),
                   ),
 
                   child: ListTile(
@@ -79,30 +79,34 @@ class OrderDetailsScreen extends StatelessWidget {
                           BorderRadius.circular(10),
                       child: Image.network(
                         product['image'],
-                        width: 60,
-                        height: 60,
+                    width: width * 0.12,
+height: width * 0.12,
                         fit: BoxFit.cover,
                       ),
                     ),
 
                     title: Text(
-                      product['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+  product['name'],
+  style: GoogleFonts.manrope(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+  ),
+),
 
-                    subtitle: Text(
-                      "Qty : ${product['quantity']}",
-                    ),
+                  subtitle: Text(
+  "Qty : ${product['quantity']}",
+  style: GoogleFonts.manrope(
+    fontSize: 13,
+  ),
+),
 
                     trailing: Text(
                       "Rs ${product['price']}",
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.manrope(
                         color:
                             const Color(0xff7F4F4F),
-                        fontWeight:
-                            FontWeight.bold,
+                      fontSize: 15,
+fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -110,28 +114,31 @@ class OrderDetailsScreen extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 8),
                         Text(
               "Delivery Information",
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.manrope(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+padding: EdgeInsets.symmetric(
+  horizontal: width * 0.04,
+  vertical: width * 0.03,
+),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(.05),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -153,13 +160,13 @@ class OrderDetailsScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           order['address'],
-                          style: GoogleFonts.poppins(),
+                          style: GoogleFonts.manrope(),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 6),
 
                   Row(
                     children: [
@@ -173,12 +180,12 @@ class OrderDetailsScreen extends StatelessWidget {
 
                       Text(
                         order['phone'],
-                        style: GoogleFonts.poppins(),
+                        style: GoogleFonts.manrope(),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 8),
 
                   Row(
                     children: [
@@ -192,12 +199,12 @@ class OrderDetailsScreen extends StatelessWidget {
 
                       Text(
                         order['paymentMethod'],
-                        style: GoogleFonts.poppins(),
+                        style: GoogleFonts.manrope(),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 8),
 
                   Row(
                     children: [
@@ -211,7 +218,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
                       Text(
                         order['status'],
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.manrope(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
                         ),
@@ -219,7 +226,7 @@ class OrderDetailsScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const Divider(height: 35),
+                  const Divider(height: 18),
 
                   Row(
                     mainAxisAlignment:
@@ -228,16 +235,16 @@ class OrderDetailsScreen extends StatelessWidget {
 
                       Text(
                         "Grand Total",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 24,
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
 
                       Text(
                         "Rs ${(order['total'] as num).toStringAsFixed(0)}",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 24,
+                        style: GoogleFonts.manrope(
+                          fontSize: 20,
                           color: const Color(0xff7F4F4F),
                           fontWeight: FontWeight.bold,
                         ),
@@ -248,7 +255,7 @@ class OrderDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 8),
           ],
         ),
       ),

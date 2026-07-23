@@ -19,7 +19,7 @@ class OfferBanner extends StatelessWidget {
        if (snapshot.connectionState ==
     ConnectionState.waiting) {
   return const SizedBox(
-    height: 220,
+    height: 185,
     child: Center(
       child: CircularProgressIndicator(),
     ),
@@ -50,7 +50,7 @@ if (snapshot.hasError) {
             horizontal: 16,
           ),
         child:Container(
-              height: 220,
+              height: 190,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius:
@@ -194,14 +194,15 @@ if (snapshot.hasError) {
                       ),
                     ),
                                         /// Main Content
+                                        const SizedBox(height: 16),
                     Positioned.fill(
                       child: Padding(
                         padding:
                             const EdgeInsets.fromLTRB(
-                          20,
+                          18,
                           50,
-                          20,
-                          16,
+                          18,
+                          14,
                         ),
                         child: Row(
                           children: [
@@ -229,7 +230,7 @@ if (snapshot.hasError) {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 4),
 
                                   Row(
                                     crossAxisAlignment:
@@ -242,10 +243,10 @@ if (snapshot.hasError) {
                                             : "$maxDiscount%",
                                         style:
                                             GoogleFonts
-                                                .playfairDisplay(
+                                                .manrope(
                                           color:
                                               Colors.white,
-                                          fontSize: 44,
+                                          fontSize: 35,
                                           height: .9,
                                           fontWeight:
                                               FontWeight.bold,
@@ -264,7 +265,7 @@ if (snapshot.hasError) {
                                             style:
                                                 GoogleFonts.manrope(
                                               color: Colors.white,
-                                              fontSize: 16,
+                                              fontSize: 13,
                                               fontWeight:
                                                   FontWeight.w800,
                                               letterSpacing: 1,
@@ -274,10 +275,10 @@ if (snapshot.hasError) {
                                     ],
                                   ),
 
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 3),
 
                                   SizedBox(
-                                    width: 190,
+                                    width: 240,
                                     child: Text(
                                       maxDiscount == 0
                                           ? "Explore our newest premium beauty collection."
@@ -286,18 +287,18 @@ if (snapshot.hasError) {
                                           GoogleFonts.manrope(
                                         color: Colors.white
                                             .withOpacity(.92),
-                                        fontSize: 13,
-                                        height: 1.45,
+                                        fontSize: 12,
+                                        height: 1.25,
                                         fontWeight:
                                             FontWeight.w500,
                                       ),
                                     ),
                                   ),
 
-                                  const Spacer(),
+const SizedBox(height: 4),
                                if (maxDiscount > 0)
   SizedBox(
-    height: 42,
+    height: 34,
     child: ElevatedButton(
       onPressed: () {
         Navigator.push(
@@ -312,7 +313,7 @@ if (snapshot.hasError) {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xff6E4747),
         padding: const EdgeInsets.symmetric(
-          horizontal: 22,
+          horizontal: 18,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
@@ -320,18 +321,18 @@ if (snapshot.hasError) {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children:[
           Text(
             "Claim Offer",
             style: GoogleFonts.manrope(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(width: 6),
           const Icon(
             Icons.arrow_forward_rounded,
-            size: 18,
+            size: 16,
           ),
         ],
       ),
@@ -341,7 +342,7 @@ if (snapshot.hasError) {
                               ),
                             ),
 
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 4),
 
                             /// Right Decoration
                             Expanded(
@@ -351,8 +352,8 @@ if (snapshot.hasError) {
                                 children: [
 
                                   Container(
-                                    width: 130,
-                                    height: 130,
+                                    width: 110,
+                                    height: 110,
                                     decoration:
                                         BoxDecoration(
                                       shape:
@@ -363,8 +364,8 @@ if (snapshot.hasError) {
                                   ),
 
                                   Container(
-                                    width: 95,
-                                    height: 95,
+                                    width: 80,
+                                    height: 80,
                                     decoration:
                                         BoxDecoration(
                                       shape:
@@ -379,7 +380,7 @@ if (snapshot.hasError) {
 
                                   Icon(
                                     Icons.spa_rounded,
-                                    size: 82,
+                                    size: 68,
                                     color: Colors.white
                                         .withOpacity(.18),
                                   ),
@@ -391,7 +392,7 @@ if (snapshot.hasError) {
                                       Icons.auto_awesome,
                                       color: Colors.white
                                           .withOpacity(.45),
-                                      size: 18,
+                                      size: 16,
                                     ),
                                   ),
 

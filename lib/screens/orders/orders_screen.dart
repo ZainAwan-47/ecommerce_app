@@ -13,7 +13,7 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-   
+   final width = MediaQuery.sizeOf(context).width;
 if (user == null) {
   return Scaffold(
     backgroundColor: const Color(0xffFFF9F7),
@@ -34,7 +34,7 @@ if (user == null) {
 
 title: Text(
   "My Orders",
-  style: GoogleFonts.dmSerifDisplay(
+  style: GoogleFonts.manrope(
     fontSize: 30,
     fontWeight: FontWeight.bold,
   ),
@@ -58,7 +58,7 @@ title: Text(
 
             Text(
               "Login Required",
-              style: GoogleFonts.dmSerifDisplay(
+              style: GoogleFonts.manrope(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
@@ -122,7 +122,7 @@ title: Text(
 
         title: Text(
           "My Orders",
- style: GoogleFonts.dmSerifDisplay(            fontSize: 30,
+ style: GoogleFonts.manrope(            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -174,7 +174,7 @@ title: Text(
 
                   Text(
                     "No Orders Yet",
- style: GoogleFonts.dmSerifDisplay(                      fontSize: 28,
+ style: GoogleFonts.manrope(                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -296,16 +296,17 @@ title: Text(
               children: [
 
                 const CircleAvatar(
-                  radius: 25,
+                  radius: 21,
                   backgroundColor:
                       Color(0xffF5EAEA),
                   child: Icon(
                     Icons.shopping_bag_outlined,
+                    size: 22,
                     color: Color(0xff7F4F4F),
                   ),
                 ),
 
-                const SizedBox(width: 15),
+              SizedBox(width: width * 0.03),
 
                 Expanded(
                   child: Column(
@@ -316,8 +317,8 @@ title: Text(
 
                     Text(
   "Order #${order.id.substring(0, 6).toUpperCase()}",
-  style: GoogleFonts.dmSerifDisplay(
-    fontSize: 20,
+  style: GoogleFonts.manrope(
+    fontSize: 18,
     fontWeight: FontWeight.bold,
   ),
 ),
@@ -330,7 +331,7 @@ title: Text(
                             : "${date.day}-${date.month}-${date.year} • ${date.hour}:${date.minute.toString().padLeft(2, '0')}",
   style: GoogleFonts.manrope(   
                            color: Colors.grey,
-                          fontSize: 13,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -340,8 +341,8 @@ title: Text(
                 Container(
                   padding:
                       const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                    horizontal: 10,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
                     color:
@@ -360,7 +361,7 @@ title: Text(
               ],
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
             Row(
   children: [
 
@@ -374,16 +375,16 @@ title: Text(
             "$itemCount Item${itemCount > 1 ? "s" : ""}",
   style: GoogleFonts.manrope(   
                color: Colors.grey,
-              fontSize: 14,
+              fontSize: 12,
             ),
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(height: 3),
 
           Text(
             "Rs ${(order['total'] as num).toStringAsFixed(0)}",
  style: GoogleFonts.dmSerifDisplay(      
-          fontSize: 24,
+          fontSize: 20,
               fontWeight: FontWeight.bold,
               color: const Color(0xff7F4F4F),
             ),
@@ -394,11 +395,11 @@ title: Text(
   ],
 ),
 
-const SizedBox(height: 20),
+const SizedBox(height: 10),
 
 SizedBox(
   width: double.infinity,
-  height: 48,
+  height: 40,
   child: OutlinedButton.icon(
     onPressed: () {
       Navigator.push(
@@ -417,12 +418,13 @@ SizedBox(
       ),
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(14),
       ),
     ),
 
     icon: const Icon(
       Icons.visibility_outlined,
+      size:18,
       color: Color(0xff7F4F4F),
     ),
 

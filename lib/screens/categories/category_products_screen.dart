@@ -15,6 +15,7 @@ class CategoryProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
@@ -27,8 +28,8 @@ class CategoryProductsScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           category,
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 28,
+          style: GoogleFonts.manrope(
+        fontSize:28,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -56,7 +57,7 @@ class CategoryProductsScreen extends StatelessWidget {
             return Center(
               child: Text(
                 "No products found",
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.manrope(
                   fontSize: 16,
                 ),
               ),
@@ -66,14 +67,14 @@ class CategoryProductsScreen extends StatelessWidget {
           final products = snapshot.data!;
 
           return GridView.builder(
-            padding: const EdgeInsets.all(18),
+           padding: EdgeInsets.all(width * 0.03),
             itemCount: products.length,
             gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
+                SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: .74,
+           crossAxisSpacing: width * 0.015,
+mainAxisSpacing: width * 0.015,
+              childAspectRatio: .87,
             ),
             itemBuilder: (context, index) {
               final product = products[index];
@@ -95,12 +96,12 @@ class CategoryProductsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
-                        BorderRadius.circular(20),
+                        BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(.06),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+                        blurRadius: 5,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -110,7 +111,7 @@ class CategoryProductsScreen extends StatelessWidget {
 
                       /// IMAGE + BADGE
                       SizedBox(
-                        height: 135,
+                    height: width * 0.31,
                         child: Stack(
                           children: [
 
@@ -119,7 +120,7 @@ class CategoryProductsScreen extends StatelessWidget {
                                 tag: product.id,
                                 child: Image.network(
                                   product.image,
-                                  height: 95,
+                             height: width * 0.25,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -127,13 +128,13 @@ class CategoryProductsScreen extends StatelessWidget {
 
                             if (product.discount > 0)
                               Positioned(
-                                top: 10,
-                                left: 10,
+                                top: 8,
+                                left: 8,
                                 child: Container(
                                   padding:
                                       const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
+                                    horizontal: 8,
+                                    vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.redAccent,
@@ -144,7 +145,7 @@ class CategoryProductsScreen extends StatelessWidget {
                                     "${product.discount}% OFF",
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 11,
+                                      fontSize: 9,
                                       fontWeight:
                                           FontWeight.bold,
                                     ),
@@ -159,9 +160,9 @@ class CategoryProductsScreen extends StatelessWidget {
                         child: Padding(
                           padding:
                               const EdgeInsets.fromLTRB(
-                            10,
-                            0,
-                            10,
+                            8,
+                            8,
+                            9,
                             10,
                           ),
                           child: Column(
@@ -173,15 +174,15 @@ class CategoryProductsScreen extends StatelessWidget {
                             children: [
 
                               SizedBox(
-                                height: 46,
+                                height: 37,
                                 child: Text(
                                   product.name,
                                   maxLines: 2,
                                   overflow:
                                       TextOverflow.ellipsis,
                                   style: GoogleFonts
-                                      .playfairDisplay(
-                                    fontSize: 17,
+                                      .manrope(
+                                    fontSize: 15,
                                     fontWeight:
                                         FontWeight.bold,
                                   ),
@@ -202,7 +203,7 @@ class CategoryProductsScreen extends StatelessWidget {
                                           const Color(0xff7F4F4F),
                                       fontWeight:
                                           FontWeight.bold,
-                                      fontSize: 18,
+                                      fontSize: 16,
                                     ),
                                   ),
 
@@ -211,15 +212,15 @@ class CategoryProductsScreen extends StatelessWidget {
                                       const Icon(
                                         Icons.star_rounded,
                                         color: Colors.amber,
-                                        size: 16,
+                                        size: 14,
                                       ),
-                                      const SizedBox(width: 3),
+                                      const SizedBox(width: 2),
                                       Text(
                                         product.rating
                                             .toStringAsFixed(1),
                                         style:
                                             GoogleFonts.manrope(
-                                          fontSize: 14,
+                                          fontSize: 13,
                                           fontWeight:
                                               FontWeight.w600,
                                         ),

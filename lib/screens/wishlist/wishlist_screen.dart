@@ -17,6 +17,7 @@ class WishlistScreen extends StatelessWidget {
       CartService();  
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
 
@@ -35,7 +36,7 @@ leading: IconButton(
 ),
         title: Text(
           "My Wishlist",
- style: GoogleFonts.dmSerifDisplay(            fontSize: 30,
+ style: GoogleFonts.manrope(            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -106,7 +107,7 @@ leading: IconButton(
               snapshot.data!.docs;
 
           return ListView.builder(
-            padding: const EdgeInsets.all(18),
+padding: EdgeInsets.all(width * 0.028),
             itemCount: wishlist.length,
 
             itemBuilder: (context, index) {
@@ -115,17 +116,16 @@ leading: IconButton(
 
 
               return Container(
-  margin: const EdgeInsets.only(bottom: 18),
-  padding: const EdgeInsets.all(18),
-
+ margin: EdgeInsets.only(bottom: width * 0.025),
+ padding: EdgeInsets.all(width * 0.04),
   decoration: BoxDecoration(
     color: Colors.white,
-    borderRadius: BorderRadius.circular(22),
+    borderRadius: BorderRadius.circular(18),
     boxShadow: [
       BoxShadow(
         color: Colors.black.withOpacity(.05),
-        blurRadius: 15,
-        offset: const Offset(0, 8),
+        blurRadius: 8,
+        offset: const Offset(0, 4),
       ),
     ],
   ),
@@ -137,16 +137,16 @@ leading: IconButton(
         borderRadius: BorderRadius.circular(18),
         child: Image.network(
           item['image'],
-          width: 90,
-          height: 90,
+       width: width * 0.17,
+height: width * 0.17,
           fit: BoxFit.cover,
 
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
 
-            return const SizedBox(
-              width: 90,
-              height: 90,
+            return SizedBox(
+          width: width * 0.17,
+  height: width * 0.17,
               child: Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
@@ -157,8 +157,8 @@ leading: IconButton(
 
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              width: 90,
-              height: 90,
+  width: width * 0.17,
+  height: width * 0.17,
               color: const Color(0xffF6F1EE),
               child: const Icon(
                 Icons.image_not_supported_outlined,
@@ -169,7 +169,7 @@ leading: IconButton(
         ),
       ),
 
-      const SizedBox(width: 18),
+    SizedBox(width: width * 0.03),
 
       Expanded(
         child: Column(
@@ -181,7 +181,7 @@ leading: IconButton(
               item['name'],
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
- style: GoogleFonts.dmSerifDisplay(                fontSize: 20,
+ style: GoogleFonts.manrope(                fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -192,13 +192,10 @@ leading: IconButton(
               "Rs ${item['price']}",
   style: GoogleFonts.manrope(                color: const Color(0xff7F4F4F),
                 fontWeight: FontWeight.w600,
-                fontSize: 17,
+                fontSize: 14,
               ),
             ),
-
-            const SizedBox(height: 10),
-
-           const SizedBox(height: 10),
+           const SizedBox(height: 4),
 
 Row(
   children: [
@@ -216,11 +213,11 @@ Row(
 ),
   ],
 ),
-const SizedBox(height: 14),
+const SizedBox(height: 7),
 
 SizedBox(
   width: double.infinity,
-  height: 42,
+ height: width * 0.085,
   child: ElevatedButton.icon(
    onPressed: () async {
 
@@ -281,13 +278,13 @@ await wishlistService.removeFromWishlist(
     icon: const Icon(
       Icons.shopping_cart_outlined,
       color: Colors.white,
-      size: 18,
+      size: 14,
     ),
 
     label: Text(
       "Add to Cart",
   style: GoogleFonts.manrope(        color: Colors.white,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w400,
       ),
     ),
   ),
@@ -314,10 +311,10 @@ await wishlistService.removeFromWishlist(
   );
 },
 
-        icon: const Icon(
+        icon: Icon(
           Icons.favorite,
           color: Colors.red,
-          size: 30,
+       size: width * 0.07,
         ),
       ),
     ],

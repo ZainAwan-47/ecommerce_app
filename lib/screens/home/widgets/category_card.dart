@@ -34,7 +34,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 118,
+      height: 100,
       child: StreamBuilder<List<CategoryModel>>(
         stream: _categoryService.getCategories(),
         builder: (context, snapshot) {
@@ -48,7 +48,7 @@ class CategoryCard extends StatelessWidget {
 
           return ListView.builder(
             padding:
-                const EdgeInsets.symmetric(horizontal: 22),
+                const EdgeInsets.symmetric(horizontal: 18),
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
             itemBuilder: (context, index) {
@@ -67,15 +67,15 @@ final selected = false;
   );
 },
                 child: Container(
-                  width: 105,
+                  width: 90,
                   margin:
-                      const EdgeInsets.only(right: 16),
+                      const EdgeInsets.only(right: 13),
                   decoration: BoxDecoration(
                     color: selected
                         ? const Color(0xff7F4F4F)
                         : Colors.white,
                     borderRadius:
-                        BorderRadius.circular(24),
+                        BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black
@@ -90,7 +90,7 @@ final selected = false;
                         MainAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 25,
+                        radius: 21,
                         backgroundColor: selected
                             ? Colors.white24
                             : const Color(
@@ -98,7 +98,7 @@ final selected = false;
                               ),
                         child: Icon(
                           _getIcon(category.name),
-                          size: 26,
+                          size: 21,
                           color: selected
                               ? Colors.white
                               : const Color(
@@ -107,13 +107,13 @@ final selected = false;
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
                       Text(
                         category.name,
                         textAlign: TextAlign.center,
                         maxLines: 2,
-  style: GoogleFonts.manrope(                          fontSize: 13,
+  style: GoogleFonts.manrope(                          fontSize: 12,
                           fontWeight:
                               FontWeight.w600,
                           color: selected

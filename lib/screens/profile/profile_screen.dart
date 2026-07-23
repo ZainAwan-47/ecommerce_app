@@ -140,6 +140,7 @@ Future<void> pickProfileImage() async {
 }
  @override
 Widget build(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
   final isEmailUser = user?.providerData.any(
         (provider) => provider.providerId == "password",
       ) ??
@@ -164,8 +165,8 @@ Widget build(BuildContext context) {
 ),
   title: Text(
     "My Profile",
-    style: GoogleFonts.dmSerifDisplay(
-      fontSize: 30,
+    style: GoogleFonts.manrope(
+    fontSize: width * 0.075,
       fontWeight: FontWeight.bold,
       color: Colors.black,
     ),
@@ -173,19 +174,19 @@ Widget build(BuildContext context) {
 ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+    padding: EdgeInsets.all(width * 0.05),
 
         child: Column(
           children: [
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 8),
 
            GestureDetector(
   onTap: pickProfileImage,
   child: Stack(
     children: [
       CircleAvatar(
-        radius: 55,
+    radius: width * 0.10,
         backgroundColor: const Color(0xff7F4F4F),
       backgroundImage: profileImage != null
     ? FileImage(profileImage!)
@@ -232,13 +233,13 @@ Widget build(BuildContext context) {
   ),
 ),
 
-            const SizedBox(height: 22),
+            const SizedBox(height: 12),
 
            TextField(
   controller: nameController,
   textAlign: TextAlign.center,
-  style: GoogleFonts.dmSerifDisplay(
-    fontSize: 28,
+  style: GoogleFonts.manrope(
+   fontSize: width * 0.06,
     fontWeight: FontWeight.bold,
   ),
   decoration: const InputDecoration(
@@ -246,17 +247,17 @@ Widget build(BuildContext context) {
   ),
 ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
 
             Text(
               user?.email ??
                   "No Email",
               style: GoogleFonts.manrope(
                 color: Colors.grey,
-                fontSize: 16,
+            fontSize: width * 0.038,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 16),
 
 TextField(
   controller: phoneController,
@@ -268,17 +269,17 @@ TextField(
     filled: true,
     fillColor: Colors.white,
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
+    borderRadius: BorderRadius.circular(width * 0.035),
     ),
   ),
 ),
 
-const SizedBox(height: 20),
+const SizedBox(height: 12),
 
 TextField(
   controller: addressController,
-   minLines: 3,
-  maxLines: 5,
+   minLines: 2,
+  maxLines: 3,
   decoration: InputDecoration(
     labelText: "Delivery Address",
     hintText: "House, Street, Area, City",
@@ -293,11 +294,19 @@ TextField(
     ),
   ),
 ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 18),
             SizedBox(
   width: double.infinity,
-  height: 50,
+ height: 42,
   child: ElevatedButton.icon(
+    style: ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xFFB76E79), // Rose Gold
+  foregroundColor: Colors.white,
+  elevation: 0,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(18),
+  ),
+),
   onPressed: () async {
   final newName = nameController.text.trim();
 
@@ -352,8 +361,9 @@ if (address.isNotEmpty && address.length < 50) {
   ),
 ),
 
-const SizedBox(height: 25),
+const SizedBox(height: 14),
  _buildTile(
+   context: context,
   icon: Icons.shopping_bag_outlined,
   title: "My Orders",
   onTap: () {
@@ -362,6 +372,7 @@ const SizedBox(height: 25),
 ),
 
 _buildTile(
+   context: context,
   icon: Icons.favorite_outline,
   title: "Wishlist",
   onTap: () {
@@ -371,6 +382,7 @@ _buildTile(
 
 if (isEmailUser)
   _buildTile(
+     context: context,
     icon: Icons.lock_outline,
     title: "Change Password",
   onTap: () {
@@ -385,6 +397,7 @@ if (isEmailUser)
   ),
 
 _buildTile(
+   context: context,
   icon: Icons.support_agent,
   title: "Contact Us",
  onTap: () {
@@ -402,6 +415,7 @@ _buildTile(
 ),
 
 _buildTile(
+   context: context,
   icon: Icons.info_outline,
   title: "About App",
  onTap: () {
@@ -415,17 +429,19 @@ _buildTile(
 },
 ),
 
-const SizedBox(height: 25),
+const SizedBox(height: 14),
 SizedBox(
   width: double.infinity,
-  height: 55,
+height: 44,
   child: ElevatedButton.icon(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.red,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
-    ),
+   style: ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xFFD9534F), // Soft Red
+  foregroundColor: Colors.white,
+  elevation: 0,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(18),
+  ),
+),
     onPressed: () async {
   final shouldLogout = await showDialog<bool>(
     context: context,
@@ -467,7 +483,7 @@ SizedBox(
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff7F4F4F),
+              backgroundColor: const Color(0xFFB76E79),
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -503,13 +519,13 @@ SizedBox(
       style: GoogleFonts.manrope(
         color: Colors.white,
         fontWeight: FontWeight.w600,
-        fontSize: 16,
+      fontSize: width * 0.04,
       ),
     ),
   ),
 ),
 
-const SizedBox(height: 20),
+const SizedBox(height: 10),
 
 Text(
   "Version 1.0.0",
@@ -522,18 +538,19 @@ Text(
       ),
     );
   }
-  Widget _buildTile({
+ Widget _buildTile({
+  required BuildContext context,
   required IconData icon,
   required String title,
   required VoidCallback onTap,
 }) {
+  final width = MediaQuery.sizeOf(context).width;
   return Container(
-    margin: const EdgeInsets.only(bottom: 14),
-
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      boxShadow: [
+ margin: const EdgeInsets.only(bottom: 16),
+ decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(width * 0.04),
+  boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(.05),
           blurRadius: 12,
@@ -543,25 +560,33 @@ Text(
     ),
 
     child: ListTile(
+      dense: true,
+minVerticalPadding: 2,
+visualDensity: const VisualDensity(
+  vertical: -4,
+),
       onTap: onTap,
-
-      leading: Icon(
-        icon,
-        color: const Color(0xff7F4F4F),
-      ),
+contentPadding: EdgeInsets.symmetric(
+  horizontal: width * 0.04,
+),
+    leading: Icon(
+  icon,
+  size: width * 0.06,
+  color: const Color(0xFFC98C8C),
+),
 
       title: Text(
         title,
         style: GoogleFonts.manrope(
           fontWeight: FontWeight.w600,
-          fontSize: 16,
+  fontSize: width * 0.04,
         ),
       ),
 
-      trailing: const Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 18,
-      ),
+    trailing: Icon(
+  Icons.arrow_forward_ios_rounded,
+  size: width * 0.045,
+),
     ),
   );
 }
