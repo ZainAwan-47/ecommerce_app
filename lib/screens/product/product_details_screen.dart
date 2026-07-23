@@ -32,7 +32,7 @@ final CartService _cartService = CartService();
 final WishlistService _wishlistService = WishlistService();
   @override
   Widget build(BuildContext context) {
-
+final width = MediaQuery.sizeOf(context).width;
     final product = widget.product;
 
     return Scaffold(
@@ -42,7 +42,7 @@ final WishlistService _wishlistService = WishlistService();
         slivers: [
 
           SliverAppBar(
-            expandedHeight: 420,
+        expandedHeight: width * 0.75,
             pinned: true,
             elevation: 0,
             backgroundColor: Colors.white,
@@ -190,12 +190,12 @@ https://shopbytehreem.com
                     child: Hero(
                       tag: product.id,
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 70,
-                          left: 30,
-                          right: 30,
-                          bottom: 45,
-                        ),
+                      padding: EdgeInsets.only(
+  top: width * 0.12,
+  left: width * 0.08,
+  right: width * 0.08,
+  bottom: width * 0.03,
+),
                         child: Image.network(
                           product.image,
                           fit: BoxFit.contain,
@@ -228,9 +228,9 @@ https://shopbytehreem.com
 
           if (product.discount > 0)
   Positioned(
-    top: 110,
-    left: 20,
-    right: 20,
+ top: width * 0.24,
+left: width * 0.04,
+right: width * 0.04,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -280,7 +280,7 @@ https://shopbytehreem.com
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(22),
+         padding: EdgeInsets.all(width * 0.045),
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -289,20 +289,20 @@ https://shopbytehreem.com
                   Text(
                     "Shop by Tehreem",
   style: GoogleFonts.manrope(                      color: Colors.grey,
-                      fontSize: 15,
+                      fontSize: 10,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+           SizedBox(height: width * 0.012),
 
                   Text(
                     product.name,
- style: GoogleFonts.dmSerifDisplay(                      fontSize: 30,
+ style: GoogleFonts.manrope(                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 18),
+                SizedBox(height: width * 0.03),
 
                   Row(
                     children: [
@@ -344,17 +344,16 @@ https://shopbytehreem.com
                     ],
                   ),
 
-                  const SizedBox(height: 24),
-
+                SizedBox(height: width * 0.04),
                   Row(
                     children: [
 
                     Text(
   "Rs ${product.price.toStringAsFixed(0)}",
-  style: GoogleFonts.dmSerifDisplay(
+  style: GoogleFonts.manrope(
     color: const Color(0xff7F4F4F),
     fontWeight: FontWeight.bold,
-    fontSize: 34,
+    fontSize: 28,
   ),
 ),
 
@@ -371,28 +370,28 @@ https://shopbytehreem.com
                     ],
                   ),
 
-                  const SizedBox(height: 30),
+                 SizedBox(height: width * 0.045),
                                     Container(
-                    padding: const EdgeInsets.all(20),
+padding: EdgeInsets.all(width * 0.04),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
+             borderRadius: BorderRadius.circular(width * 0.05),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Description",
- style: GoogleFonts.dmSerifDisplay(                            fontSize: 24,
+ style: GoogleFonts.manrope(                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                      SizedBox(height: width * 0.02),
 
                         Text(
                           product.description,
-  style: GoogleFonts.manrope(                            fontSize: 15,
+  style: GoogleFonts.manrope(                            fontSize: 14,
                             height: 1.7,
                             color: Colors.black87,
                           ),
@@ -401,11 +400,11 @@ https://shopbytehreem.com
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+               SizedBox(height: width * 0.045),
 
                  Text(
   "Quantity",
- style: GoogleFonts.dmSerifDisplay(    fontSize: 24,
+ style: GoogleFonts.manrope(    fontSize: 20,
     fontWeight: FontWeight.bold,
   ),
 ),
@@ -428,7 +427,7 @@ Row(
 
     Text(
       quantity.toString(),
-  style: GoogleFonts.manrope(        fontSize: 20,
+  style: GoogleFonts.manrope(       fontSize: 14,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -448,7 +447,7 @@ const SizedBox(height: 30),
 
 SizedBox(
   width: double.infinity,
-  height: 58,
+  height: width * 0.13,
   child: ElevatedButton(
     onPressed: () async {
       final added = await _cartService.addToCart(
@@ -500,19 +499,19 @@ SizedBox(
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color(0xff7F4F4F),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+     borderRadius: BorderRadius.circular(width * 0.04),
       ),
     ),
     child: Text(
       "Add to Cart",
-  style: GoogleFonts.manrope(        fontSize: 18,
+  style: GoogleFonts.manrope(        fontSize: 14,
         color: Colors.white,
         fontWeight: FontWeight.w600,
       ),
     ),
   ),
 ),
-                  const SizedBox(height: 16),
+                SizedBox(height: width * 0.025),
 
                   SizedBox(
                     width: double.infinity,
@@ -557,7 +556,7 @@ onPressed: () {
                       ),
                       child: Text(
                         "Buy Now",
-  style: GoogleFonts.manrope(                          fontSize: 18,
+  style: GoogleFonts.manrope(                       fontSize: 14,
                           color: const Color(0xff7F4F4F),
                           fontWeight: FontWeight.w600,
                         ),
@@ -565,7 +564,7 @@ onPressed: () {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                 SizedBox(height: width * 0.06),
                 ],
               ),
             ),
