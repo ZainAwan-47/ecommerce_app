@@ -10,6 +10,7 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
     final CartService cartService = CartService();
 
     return Scaffold(
@@ -22,8 +23,8 @@ class CartScreen extends StatelessWidget {
 
         title: Text(
           "My Cart",
-          style: GoogleFonts.dmSerifDisplay(
-            fontSize: 30,
+          style: GoogleFonts.manrope(
+            fontSize: 26,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -56,7 +57,7 @@ class CartScreen extends StatelessWidget {
 
                   Icon(
                     Icons.shopping_cart_outlined,
-                    size: 90,
+                  size: width * 0.18,
                     color: Colors.grey.shade400,
                   ),
 
@@ -64,8 +65,8 @@ class CartScreen extends StatelessWidget {
 
                   Text(
                     "Your Cart is Empty",
-                    style: GoogleFonts.dmSerifDisplay(
-                      fontSize: 28,
+                    style: GoogleFonts.manrope(
+                   fontSize: width * 0.065,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -77,7 +78,7 @@ class CartScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       color: Colors.grey,
-                      fontSize: 15,
+                   fontSize: width * 0.037,
                     ),
                   ),
                 ],
@@ -95,7 +96,7 @@ class CartScreen extends StatelessWidget {
 
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(width * 0.04),
                   itemCount: cartItems.length,
 
                   itemBuilder: (context, index) {
@@ -103,18 +104,18 @@ class CartScreen extends StatelessWidget {
                     final item = cartItems[index];
 
                     return Container(
-                      margin: const EdgeInsets.only(
-                        bottom: 18,
-                      ),
+                    margin: EdgeInsets.only(bottom: width * 0.03),
 
-                      padding:
-                          const EdgeInsets.all(15),
+                  padding: EdgeInsets.symmetric(
+  horizontal: width * 0.03,
+  vertical: width * 0.018,
+),
 
                       decoration: BoxDecoration(
                         color: Colors.white,
 
                         borderRadius:
-                            BorderRadius.circular(22),
+                         BorderRadius.circular(width * 0.04),
 
                         boxShadow: [
                           BoxShadow(
@@ -134,8 +135,8 @@ class CartScreen extends StatelessWidget {
                                 BorderRadius.circular(18),
                             child: Image.network(
   item['image'],
-  width: 90,
-  height: 90,
+width: width * 0.16,
+height: width * 0.16,
   fit: BoxFit.cover,
 
   loadingBuilder: (context, child, loadingProgress) {
@@ -169,12 +170,12 @@ class CartScreen extends StatelessWidget {
 ),
                           ),
 
-                          const SizedBox(width: 18),
+                        SizedBox(width: width * 0.035),
 
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                        child: Column(
+  mainAxisSize: MainAxisSize.min,
+  crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
 
                                 Text(
@@ -182,14 +183,14 @@ class CartScreen extends StatelessWidget {
                                   maxLines: 2,
                                   overflow:
                                       TextOverflow.ellipsis,
-                                  style: GoogleFonts.dmSerifDisplay(
-                                    fontSize: 21,
+                                  style: GoogleFonts.manrope(
+                              fontSize: width * 0.05,
                                     fontWeight:
                                         FontWeight.bold,
                                   ),
                                 ),
 
-                                const SizedBox(height: 8),
+                          SizedBox(height: width * 0.008),
 
                                 Text(
                                   "Rs ${item['price']}",
@@ -197,11 +198,11 @@ class CartScreen extends StatelessWidget {
                                         const Color(0xff7F4F4F),
                                     fontWeight:
                                         FontWeight.w600,
-                                    fontSize: 17,
+                                fontSize: width * 0.042,
                                   ),
                                 ),
 
-                                const SizedBox(height: 14),
+                       SizedBox(height: width * 0.012),
 
                                 Row(
                                   children: [
@@ -219,29 +220,28 @@ onTap: () async {
     );
   }
 },
-                                      child: const CircleAvatar(
-                                        radius: 15,
+                                      child: CircleAvatar(
+                                      radius: width * 0.032,
                                         backgroundColor:
                                             Color(0xffF3ECE9),
                                         child: Icon(
                                           Icons.remove,
-                                          size: 18,
+                                        size: width * 0.04,
                                           color:
                                               Color(0xff7F4F4F),
                                         ),
                                       ),
                                     ),
 
-                                    const SizedBox(width: 14),
+                                 SizedBox(width: width * 0.025),
 
                                     Text(
                                       item['quantity']
                                           .toString(),
-  style: GoogleFonts.manrope(                  
-                          fontWeight:
-                                            FontWeight.bold,
-                                        fontSize: 17,
-                                      ),
+ style: GoogleFonts.manrope(
+  fontSize: width * 0.042,
+  fontWeight: FontWeight.bold,
+),
                                     ),
 
                                     const SizedBox(width: 14),
@@ -254,13 +254,13 @@ onTap: () async {
                                         );
                                       },
 
-                                      child: const CircleAvatar(
-                                        radius: 15,
+                                    child: CircleAvatar(
+  radius: width * 0.032,
                                         backgroundColor:
                                             Color(0xff7F4F4F),
                                         child: Icon(
                                           Icons.add,
-                                          size: 18,
+                                     size: width * 0.04,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -311,10 +311,10 @@ onTap: () async {
   }
 },
 
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.delete_outline,
                               color: Colors.red,
-                              size: 28,
+                          size: width * 0.06,
                             ),
                           ),
                         ],
@@ -324,11 +324,11 @@ onTap: () async {
                 ),
               ),
                             Container(
-                margin: const EdgeInsets.all(18),
-                padding: const EdgeInsets.all(20),
+            margin: EdgeInsets.all(width * 0.04),
+            padding: EdgeInsets.all(width * 0.04),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+             borderRadius: BorderRadius.circular(width * 0.05),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(.05),
@@ -347,14 +347,14 @@ onTap: () async {
 
                         Text(
                           "Subtotal",
-  style: GoogleFonts.manrope(                            fontSize: 16,
+  style: GoogleFonts.manrope(                            fontSize: 14,
                           ),
                         ),
 
                         Text(
                           "Rs ${subtotal.toStringAsFixed(0)}",
   style: GoogleFonts.manrope(                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -369,7 +369,7 @@ onTap: () async {
 
                         Text(
                           "Delivery",
-  style: GoogleFonts.manrope(                            fontSize: 16,
+  style: GoogleFonts.manrope(                            fontSize: 14,
                           ),
                         ),
 
@@ -377,7 +377,7 @@ onTap: () async {
                           "Free",
   style: GoogleFonts.manrope(                            color: Colors.green,
                             fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -397,17 +397,17 @@ onTap: () async {
 
                         Text(
                           "Total",
-                          style: GoogleFonts.dmSerifDisplay(
-                            fontSize: 24,
+                          style: GoogleFonts.manrope(
+                        fontSize: width * 0.055,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
 
                         Text(
                           "Rs ${subtotal.toStringAsFixed(0)}",
-                          style: GoogleFonts.dmSerifDisplay(
+                          style: GoogleFonts.manrope(
                             color: const Color(0xff7F4F4F),
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -417,7 +417,7 @@ onTap: () async {
                     const SizedBox(height: 25),
                                         SizedBox(
                       width: double.infinity,
-                      height: 58,
+                  height: width * 0.12,
                       child: ElevatedButton(
                         onPressed: cartItems.isEmpty? null
                        : () {
@@ -439,7 +439,7 @@ onTap: () async {
                         child: Text(
                           "Proceed to Checkout",
   style: GoogleFonts.manrope(                            color: Colors.white,
-                            fontSize: 18,
+                          fontSize: width * 0.043,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

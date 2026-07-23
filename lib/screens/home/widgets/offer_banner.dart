@@ -50,7 +50,7 @@ if (snapshot.hasError) {
             horizontal: 16,
           ),
         child:Container(
-              height: 190,
+              height: 193,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius:
