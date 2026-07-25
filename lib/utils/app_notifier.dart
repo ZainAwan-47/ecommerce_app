@@ -40,6 +40,16 @@ static void error(BuildContext context, String message) {
     const Color(0xffD32F2F), // Material Red 700
   );
 }
+static void info(
+  BuildContext context,
+  String message,
+) {
+  _show(
+    context,
+    message,
+    Colors.grey.shade700,
+  );
+}
   static void _show(
     BuildContext context,
     String message,

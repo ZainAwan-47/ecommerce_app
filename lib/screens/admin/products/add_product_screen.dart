@@ -11,7 +11,7 @@ import '../../../widgets/admin/admin_text_field.dart';
 import '../../../widgets/admin/image_picker_box.dart';
 import '../../../widgets/admin/responsive.dart';
 import '../../../widgets/admin/image_source_bottom_sheet.dart';
-
+import '../../../utils/app_notifier.dart';
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
   @override
@@ -21,6 +21,8 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState
     extends State<AddProductScreen> {
+        bool showGalleryPicker = true;
+bool showUrlField = true;
         Future<void> openImageSourceSheet() async {
   final source =
       await showModalBottomSheet<ImageSourceType>(
@@ -28,7 +30,6 @@ class _AddProductScreenState
     builder: (_) =>
         const ImageSourceBottomSheet(),
   );
-
   if (source == null) return;
 
   switch (source) {
@@ -64,6 +65,9 @@ class _AddProductScreenState
   final TextEditingController ratingController =
       TextEditingController();
 
+         final TextEditingController imageUrlController =
+    TextEditingController();
+
   final ImagePicker picker = ImagePicker();
 
   final ProductService _productService =
@@ -73,7 +77,7 @@ final StorageService _storageService =
     StorageService.instance;
 
   List<File> images = [];
-
+  List<String> imageUrls = [];
   bool featured = false;
   bool inStock = true;
 
@@ -88,6 +92,7 @@ final StorageService _storageService =
     oldPriceController.dispose();
     discountController.dispose();
     ratingController.dispose();
+    imageUrlController.dispose();
     super.dispose();
   }
 
@@ -129,35 +134,284 @@ final StorageService _storageService =
               ),
 
               const SizedBox(height: 14),
+LayoutBuilder(
+  builder: (context, constraints) {
+    final isMobile = constraints.maxWidth < 700;
 
-              SizedBox(
-                height: 120,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: images.length + 1,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    if (index == images.length) {
-                      return ImagePickerBox(
-                        image: null,
-                      onTap: openImageSourceSheet,
-                      );
-                    }
+    return isMobile
+        ? Column(
+            children: [
+              // Gallery
+            if (showGalleryPicker)
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
 
-                    return ImagePickerBox(
-                      image: images[index],
-                      onTap: () {},
-                      onRemove: () {
-                        setState(() {
-                          images.removeAt(index);
-                        });
-                      },
-                    );
-                  },
+      SizedBox(
+        height: 120,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: images.length + 1,
+          separatorBuilder: (_, __) =>
+              const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+
+            if (index == images.length) {
+              return ImagePickerBox(
+                image: null,
+                onTap: pickImages,
+              );
+            }
+
+            return ImagePickerBox(
+              image: images[index],
+              onTap: () {},
+              onRemove: () {
+                setState(() {
+                  images.removeAt(index);
+
+                  if (images.isEmpty && imageUrls.isEmpty) {
+                    showUrlField = true;
+                  }
+                });
+              },
+            );
+          },
+        ),
+      ),
+
+      if (!showUrlField)
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                showGalleryPicker = false;
+                showUrlField = true;
+              });
+            },
+            child: const Text("Switch to URL"),
+          ),
+        ),
+    ],
+  ),
+              if (showGalleryPicker && showUrlField)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text("OR"),
                 ),
-              ),
 
+              // URL
+             if (showUrlField)
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
+     AdminTextField(
+  controller: imageUrlController,
+  hintText: imageUrls.isEmpty
+      ? "Paste Image URL"
+      : "Add More URL",
+  prefixIcon: Icons.link,
+),
+
+      const SizedBox(height: 12),
+
+      SizedBox(
+        width: double.infinity,
+        child: AdminButton(
+          text: "Add URL",
+         onPressed: () {
+  final url = imageUrlController.text.trim();
+
+  // Empty
+  if (url.isEmpty) {
+    AppNotifier.info(
+      context,
+      "Please enter an image URL.",
+    );
+    return;
+  }
+
+  // Valid URL
+  final uri = Uri.tryParse(url);
+
+  if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+    AppNotifier.info(
+      context,
+      "Please enter a valid URL.",
+    );
+    return;
+  }
+
+  // Duplicate
+  if (imageUrls.contains(url)) {
+    AppNotifier.info(
+      context,
+      "This image has already been added.",
+    );
+    return;
+  }
+
+  setState(() {
+    imageUrls.add(url);
+print(imageUrls);
+    showGalleryPicker = false;
+
+    imageUrlController.clear();
+  });
+
+  AppNotifier.success(
+    context,
+    "URL added successfully.",
+  );
+},
+        ),
+      ),
+
+      if (!showGalleryPicker)
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                showGalleryPicker = true;
+                showUrlField = false;
+              });
+            },
+            child: const Text("Switch to Gallery"),
+          ),
+        ),
+        buildUrlPreviewList(),
+    ],
+  ),
+            ],
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showGalleryPicker)
+                Expanded(
+                  child: Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+
+    SizedBox(
+      height: 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length + 1,
+        separatorBuilder: (_, __) =>
+            const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+
+          if (index == images.length) {
+            return ImagePickerBox(
+              image: null,
+              onTap: pickImages,
+            );
+          }
+
+          return ImagePickerBox(
+            image: images[index],
+            onTap: () {},
+            onRemove: () {
+              setState(() {
+                images.removeAt(index);
+
+                if (images.isEmpty) {
+                  showUrlField = true;
+                }
+              });
+            },
+          );
+        },
+      ),
+    ),
+
+    if (!showUrlField)
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              showGalleryPicker = false;
+              showUrlField = true;
+            });
+          },
+          child: const Text("Switch to URL"),
+        ),
+      ),
+  ],
+),
+                ),
+
+              if (showGalleryPicker && showUrlField)
+                const Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 18),
+                  child: Text("OR"),
+                ),
+
+              if (showUrlField)
+                Expanded(
+                  child: Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+
+    AdminTextField(
+      controller: imageUrlController,
+      hintText: "Paste Image URL",
+      prefixIcon: Icons.link,
+    ),
+
+    const SizedBox(height: 12),
+
+    SizedBox(
+      width: double.infinity,
+      child: AdminButton(
+        text: "Add URL",
+        onPressed: () {
+          final url = imageUrlController.text.trim();
+
+          if (url.isEmpty) return;
+
+          setState(() {
+            imageUrls.add(url);
+
+            showGalleryPicker = false;
+
+            imageUrlController.clear();
+          });
+        },
+      ),
+    ),
+
+    const SizedBox(height: 16),
+
+   buildUrlPreviewList(),
+
+    if (!showGalleryPicker)
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              showGalleryPicker = true;
+              showUrlField = false;
+            });
+          },
+          child: const Text("Switch to Gallery"),
+        ),
+      ),
+  ],
+),
+                ),
+            ],
+          );
+  },
+),
+             
               const SizedBox(height: 24),
 
               AdminTextField(
@@ -288,39 +542,132 @@ final StorageService _storageService =
           (image) => File(image.path),
         ),
       );
+       showUrlField = false;
     });
   }
+  Widget buildUrlPreviewList() {
+  if (imageUrls.isEmpty) return const SizedBox();
+
+  return Column(
+    children: [
+      const SizedBox(height: 16),
+
+      SizedBox(
+        height: 120,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: imageUrls.length,
+          separatorBuilder: (_, __) =>
+              const SizedBox(width: 12),
+
+          itemBuilder: (context, index) {
+            return Stack(
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrls[index],
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+
+                    errorBuilder:
+                        (_, __, ___) => Container(
+                      width: 120,
+                      height: 120,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius:
+                            BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.broken_image_outlined,
+                        size: 40,
+                      ),
+                    ),
+
+                    loadingBuilder:
+                        (context, child, progress) {
+                      if (progress == null) return child;
+
+                      return Container(
+                        width: 120,
+                        height: 120,
+                        alignment: Alignment.center,
+                        child:
+                            const CircularProgressIndicator(),
+                      );
+                    },
+                  ),
+                ),
+
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        imageUrls.removeAt(index);
+
+                        if (imageUrls.isEmpty) {
+                          showGalleryPicker = true;
+                        }
+                      });
+                    },
+                    child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: Colors.red,
+                      child: Icon(
+                        Icons.close,
+                        size: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ],
+  );
+}
   Future<void> saveProduct() async {
   if (!_formKey.currentState!.validate()) return;
 
-  if (images.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Please select at least one image.",
-        ),
-      ),
-    );
-    return;
-  }
+ if (images.isEmpty && imageUrls.isEmpty) {
+  AppNotifier.info(
+    context,
+    "Please add at least one product image.",
+  );
+  return;
+}
 
   setState(() {
     isLoading = true;
   });
 
   try {
-    final imageUrls =
-        await _storageService.uploadProductImages(
-      images: images,
-    );
+   List<String> finalImageUrls = [];
 
+if (images.isNotEmpty) {
+  finalImageUrls =
+      await _storageService.uploadProductImages(
+    images: images,
+  );
+} else {
+  finalImageUrls = imageUrls;
+}
     final productId =
         await _productService.generateProductId();
 
     final product = ProductModel(
       id: productId,
       name: nameController.text.trim(),
-      images: imageUrls,
+      images: finalImageUrls,
       price:
           double.tryParse(priceController.text) ??
               0,
@@ -345,20 +692,17 @@ final StorageService _storageService =
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content:
-            Text("Product added successfully."),
-      ),
-    );
+   AppNotifier.success(
+  context,
+  "Product added successfully.",
+);
 
     Navigator.pop(context);
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-      ),
-    );
+   AppNotifier.error(
+  context,
+  e.toString(),
+);
   } finally {
     if (mounted) {
       setState(() {

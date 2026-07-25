@@ -154,6 +154,7 @@ class _ProductsScreenState
                   }
 
                   return ListView.separated(
+                      padding: const EdgeInsets.only(bottom: 100),
                     itemCount:
                         products.length,
                     separatorBuilder:
@@ -248,31 +249,111 @@ class _ProductsScreenState
                                               .w600,
                                     ),
                                   ),
+                                  const SizedBox(height: 8),
+
+Wrap(
+  spacing: 8,
+  runSpacing: 8,
+  children: [
+    if (product.featured)
+      Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 4,
+        ),
+       decoration: BoxDecoration(
+  color: Colors.grey[60],
+  borderRadius: BorderRadius.circular(20),
+  border: Border.all(
+    color:Colors.amber.withOpacity(0.50),
+    width: 1.2,
+  ),
+),
+        child: const Text(
+          "Featured",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+    Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 4,
+      ),
+     decoration: BoxDecoration(
+  color: Colors.grey[60],
+  borderRadius: BorderRadius.circular(20),
+  border: Border.all(
+    color: const Color(0xff7F4F4F).withOpacity(0.25),
+    width: 1.2,
+  ),
+),
+      child: Text(
+        product.inStock
+            ? " In Stock"
+            : " Out of Stock",
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: product.inStock
+              ? Colors.green.shade800
+              : Colors.red.shade800,
+        ),
+      ),
+    ),
+  ],
+),
                                 ],
                               ),
                             ),
 
-                            Column(
-                              children: [
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(
-                                    Icons.edit,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    _showDeleteDialog(
-                                        product);
-                                  },
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color:
-                                        Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
+                        Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        // TODO: Edit Product
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xff7F4F4F).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.edit_outlined,
+          color: Color(0xff7F4F4F),
+          size: 20,
+        ),
+      ),
+    ),
+
+    const SizedBox(height: 10),
+
+    InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        _showDeleteDialog(product);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.delete_outline,
+          color: Colors.red,
+          size: 20,
+        ),
+      ),
+    ),
+  ],
+),
                           ],
                         ),
                       );

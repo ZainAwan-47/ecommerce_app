@@ -25,28 +25,31 @@ class AdminNavigationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(18),
+       padding: const EdgeInsets.symmetric(
+  horizontal: 12,
+  vertical: 10,
+),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: 28,
+                radius: 20,
                 backgroundColor: color.withOpacity(.12),
                 child: Icon(
                   icon,
                   color: color,
-                  size: 28,
+                  size: 22,
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
 
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 13,
                 ),
               ),
             ],

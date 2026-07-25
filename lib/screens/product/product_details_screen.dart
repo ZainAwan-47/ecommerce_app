@@ -11,6 +11,9 @@ import '../../models/checkout_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/login_screen.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/login_screen.dart';
+
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
 
@@ -331,17 +334,19 @@ right: width * 0.04,
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade100,
+                       color: product.inStock
+    ? Colors.green.shade100
+    : Colors.red.shade100,
                           borderRadius:
                               BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          "In Stock",
-  style: GoogleFonts.manrope(                            color: Colors.green,
-                            fontWeight:
-                                FontWeight.w600,
-                          ),
-                        ),
+                       child: Text(
+  product.inStock ? "In Stock" : "Out of Stock",
+  style: GoogleFonts.manrope(
+    color: product.inStock ? Colors.green : Colors.red,
+    fontWeight: FontWeight.w600,
+  ),
+),
                       ),
                     ],
                   ),

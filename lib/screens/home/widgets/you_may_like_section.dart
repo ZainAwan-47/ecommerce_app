@@ -51,23 +51,10 @@ class YouMayLikeSection extends StatelessWidget {
 
               return GestureDetector(
            onTap: () {
-  final product = ProductModel(
-    id: products[index].id,
-    name: data["name"] ?? "",
-     images: [
-    data["image"] ?? "",
-  ],
-    price: (data["price"] as num?)?.toDouble() ?? 0,
-    oldPrice: (data["oldPrice"] as num?)?.toDouble() ??
-        (data["price"] as num?)?.toDouble() ??
-        0,
-    rating: (data["rating"] as num?)?.toDouble() ?? 0,
-    category: data["category"] ?? "",
-    description: data["description"] ?? "",
-    featured: data["featured"] ?? false,
-    discount: data["discount"] ?? 0,
-    inStock: data["inStock"] ?? true,
-  );
+  final product = ProductModel.fromFirestore(
+  products[index].id,
+  data,
+);
 
   Navigator.push(
     context,
@@ -101,11 +88,14 @@ class YouMayLikeSection extends StatelessWidget {
                               const BorderRadius.vertical(
                             top: Radius.circular(16),
                           ),
-                          child: Image.network(
-                            data["image"],
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                          ),
+                          child:Image.network(
+  data["images"] != null &&
+          (data["images"] as List).isNotEmpty
+      ? data["images"][0]
+      : (data["image"] ?? ""),
+  width: double.infinity,
+  fit: BoxFit.contain,
+),
                         ),
                       ),
 
@@ -117,8 +107,8 @@ class YouMayLikeSection extends StatelessWidget {
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              data["name"],
+                         Text(
+  data["name"] ?? "",
                               maxLines: 1,
                               overflow:
                                   TextOverflow.ellipsis,

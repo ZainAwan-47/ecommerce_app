@@ -88,7 +88,6 @@ class ProductCardWidget extends StatelessWidget {
                         const BorderRadius.vertical(
                       top: Radius.circular(24),
                     ),
-
                     child: Image.network(
                       product.image,
                       width: double.infinity,

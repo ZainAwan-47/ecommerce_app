@@ -9,6 +9,10 @@ import '../../../widgets/admin/responsive.dart';
 import '../products/products_screen.dart';
 import '../orders/orders_screen.dart';
 import '../../../widgets/admin/image_source_bottom_sheet.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../auth/login_screen.dart';
+import '../../../utils/app_notifier.dart';
+
 class AdminDashboardScreen extends StatelessWidget {
   AdminDashboardScreen({super.key});
 
@@ -33,16 +37,43 @@ class AdminDashboardScreen extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
+      actions: [
+  IconButton(
+    onPressed: () {},
+    icon: const Icon(
+      Icons.notifications_outlined,
+      color: Colors.black87,
+    ),
+  ),
+
+  IconButton(
+    icon: const Icon(
+      Icons.logout,
+      color: Colors.black87,
+    ),
+    tooltip: "Logout",
+    onPressed: () async {
+      await FirebaseAuth.instance.signOut();
+
+      if (!context.mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        ),
+        (route) => false,
+      );
+
+      AppNotifier.success(
+        context,
+        "Logged out successfully.",
+      );
+    },
+  ),
+
+  const SizedBox(width: 4),
+],
       ),
       body: StreamBuilder<DashboardStats>(
         stream: _dashboardService.dashboardStream(),
@@ -140,17 +171,52 @@ class AdminDashboardScreen extends StatelessWidget {
                   itemBuilder: (context, index) => statCards[index],
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 11),
 
-               Text(
-  "Management",
-  style: GoogleFonts.manrope(
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
+           Align(
+  alignment: Alignment.centerLeft,
+  child: Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 18,
+      vertical: 10,
+    ),
+ decoration: BoxDecoration(
+  color: const Color(0xffFCF8F6),
+  borderRadius: BorderRadius.circular(18),
+  border: Border.all(
+    color: const Color(0xffE7D9D4),
+  ),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.brown.withOpacity(0.08),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
+    ),
+  ],
+),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.dashboard_customize_outlined,
+          color: Color(0xff7F4F4F),
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          "Management",
+          style: GoogleFonts.manrope(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xff7F4F4F),
+          ),
+        ),
+      ],
+    ),
   ),
 ),
 
-const SizedBox(height: 16),
+const SizedBox(height: 27),
 
 GridView.count(
   shrinkWrap: true,
@@ -158,7 +224,7 @@ GridView.count(
   crossAxisCount: columns,
   crossAxisSpacing: 16,
   mainAxisSpacing: 16,
-  childAspectRatio: 1.15,
+  childAspectRatio: 1.55,
   children: [
 
     AdminNavigationCard(
