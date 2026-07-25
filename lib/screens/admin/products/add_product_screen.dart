@@ -10,10 +10,10 @@ import '../../../widgets/admin/admin_button.dart';
 import '../../../widgets/admin/admin_text_field.dart';
 import '../../../widgets/admin/image_picker_box.dart';
 import '../../../widgets/admin/responsive.dart';
+import '../../../widgets/admin/image_source_bottom_sheet.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
-
   @override
   State<AddProductScreen> createState() =>
       _AddProductScreenState();
@@ -21,6 +21,26 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState
     extends State<AddProductScreen> {
+        Future<void> openImageSourceSheet() async {
+  final source =
+      await showModalBottomSheet<ImageSourceType>(
+    context: context,
+    builder: (_) =>
+        const ImageSourceBottomSheet(),
+  );
+
+  if (source == null) return;
+
+  switch (source) {
+    case ImageSourceType.gallery:
+      pickImages();
+      break;
+
+    case ImageSourceType.url:
+      // We'll implement next
+      break;
+  }
+}
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController =
@@ -121,7 +141,7 @@ final StorageService _storageService =
                     if (index == images.length) {
                       return ImagePickerBox(
                         image: null,
-                        onTap: pickImages,
+                      onTap: openImageSourceSheet,
                       );
                     }
 

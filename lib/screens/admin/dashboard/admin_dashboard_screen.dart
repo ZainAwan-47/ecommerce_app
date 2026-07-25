@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../../widgets/admin/admin_navigation_card.dart';
 import '../../../models/dashboard_stats.dart';
 import '../../../services/dashboard_service.dart';
 import '../../../widgets/admin/admin_card.dart';
 import '../../../widgets/admin/admin_stat_card.dart';
 import '../../../widgets/admin/responsive.dart';
-
+import '../products/products_screen.dart';
+import '../orders/orders_screen.dart';
+import '../../../widgets/admin/image_source_bottom_sheet.dart';
 class AdminDashboardScreen extends StatelessWidget {
   AdminDashboardScreen({super.key});
 
@@ -140,21 +142,82 @@ class AdminDashboardScreen extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
-                Text(
-                  "Recent Orders",
-                  style: GoogleFonts.manrope(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+               Text(
+  "Management",
+  style: GoogleFonts.manrope(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+  ),
+),
 
-                const SizedBox(height: 12),
+const SizedBox(height: 16),
 
-                const AdminCard(
-                  child: Text(
-                    "Recent orders will appear here.",
-                  ),
-                ),
+GridView.count(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  crossAxisCount: columns,
+  crossAxisSpacing: 16,
+  mainAxisSpacing: 16,
+  childAspectRatio: 1.15,
+  children: [
+
+    AdminNavigationCard(
+      title: "Products",
+      icon: Icons.inventory_2_outlined,
+      color: Colors.orange,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProductsScreen(),
+          ),
+        );
+      },
+    ),
+
+    AdminNavigationCard(
+      title: "Orders",
+      icon: Icons.shopping_bag_outlined,
+      color: Colors.blue,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const OrdersScreen(),
+          ),
+        );
+      },
+    ),
+
+    AdminNavigationCard(
+      title: "Customers",
+      icon: Icons.people_outline,
+      color: Colors.purple,
+      onTap: () {},
+    ),
+
+    AdminNavigationCard(
+      title: "Categories",
+      icon: Icons.category_outlined,
+      color: Colors.green,
+      onTap: () {},
+    ),
+
+    AdminNavigationCard(
+      title: "Coupons",
+      icon: Icons.discount_outlined,
+      color: Colors.red,
+      onTap: () {},
+    ),
+
+    AdminNavigationCard(
+      title: "Settings",
+      icon: Icons.settings_outlined,
+      color: Colors.grey,
+      onTap: () {},
+    ),
+  ],
+),
               ],
             ),
           );

@@ -14,20 +14,21 @@ class AdminTextField extends StatelessWidget {
   final bool enabled;
 final TextInputAction? textInputAction;
 final ValueChanged<String>? onFieldSubmitted;
-  const AdminTextField({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    this.prefixIcon,
-    this.obscureText = false,
-    this.keyboardType = TextInputType.text,
-    this.maxLines = 1,
-    this.suffixIcon,
-    this.onChanged,
-    this.validator,
-    this.enabled = true,
-  });
-
+ const AdminTextField({
+  super.key,
+  required this.controller,
+  required this.hintText,
+  this.prefixIcon,
+  this.obscureText = false,
+  this.keyboardType = TextInputType.text,
+  this.maxLines = 1,
+  this.suffixIcon,
+  this.onChanged,
+  this.validator,
+  this.enabled = true,
+  this.textInputAction,
+  this.onFieldSubmitted,
+});
   @override
   Widget build(BuildContext context) {
     return TextFormField(

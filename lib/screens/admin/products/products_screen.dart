@@ -6,7 +6,6 @@ import '../../../services/product_service.dart';
 import '../../../widgets/admin/admin_card.dart';
 import '../../../widgets/admin/responsive.dart';
 import 'add_product_screen.dart';
-import 'edit_product_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -51,6 +50,7 @@ class _ProductsScreenState
 
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xff7F4F4F),
+         foregroundColor: Colors.white,
         onPressed: () {
           Navigator.push(
             context,
@@ -61,7 +61,13 @@ class _ProductsScreenState
           );
         },
         icon: const Icon(Icons.add),
-        label: const Text("Add Product"),
+     label: const Text(
+  "Add Product",
+  style: TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+  ),
+),
       ),
 
       body: Padding(
@@ -249,18 +255,7 @@ class _ProductsScreenState
                             Column(
                               children: [
                                 IconButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            EditProductScreen(
-                                          product:
-                                              product,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                  onPressed: () {},
                                   icon: const Icon(
                                     Icons.edit,
                                   ),

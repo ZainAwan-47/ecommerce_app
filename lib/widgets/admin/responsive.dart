@@ -40,4 +40,25 @@ class Responsive {
     if (w >= 1000) return 26;
     return 22;
   }
+  // Border Radius
+static double get radius => 16;
+
+// Standard button height
+static double buttonHeight(BuildContext context) {
+  if (isDesktop(context)) return 56;
+  if (isTablet(context)) return 52;
+  return 48;
+}
+
+// Card padding
+static double cardPadding(BuildContext context) {
+  if (isDesktop(context)) return 24;
+  if (isTablet(context)) return 20;
+  return 16;
+}
+
+// Grid spacing
+static double gridSpacing(BuildContext context) {
+  return 16;
+}
 }
