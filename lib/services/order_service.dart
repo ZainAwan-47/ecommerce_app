@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import '../models/order_model.dart';
 import 'payment_service.dart';
 import 'receipt_service.dart';
 
@@ -104,4 +104,71 @@ class OrderService {
         )
         .snapshots();
   }
+  /// ===============================
+/// ADMIN - GET ALL ORDERS
+/// ===============================
+Stream<List<OrderModel>> getAllOrders() {
+  return _firestore
+      .collection("orders")
+      .orderBy("createdAt", descending: true)
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs
+            .map(
+              (doc) => OrderModel.fromMap(doc.data()),
+            )
+            .toList(),
+      );
+}
+
+/// ===============================
+/// ADMIN - FILTER ORDERS
+/// ===============================
+Stream<List<OrderModel>> getOrdersByStatus(
+  String status,
+) {
+  return _firestore
+      .collection("orders")
+      .where("status", isEqualTo: status)
+      .orderBy("createdAt", descending: true)
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs
+            .map(
+              (doc) => OrderModel.fromMap(doc.data()),
+            )
+            .toList(),
+      );
+}
+
+/// ===============================
+/// ADMIN - GET SINGLE ORDER
+/// ===============================
+Future<OrderModel?> getOrderById(
+  String orderId,
+) async {
+  final doc = await _firestore
+      .collection("orders")
+      .doc(orderId)
+      .get();
+
+  if (!doc.exists) return null;
+
+  return OrderModel.fromMap(doc.data()!);
+}
+
+/// ===============================
+/// ADMIN - UPDATE STATUS
+/// ===============================
+Future<void> updateOrderStatus({
+  required String orderId,
+  required String status,
+}) async {
+  await _firestore
+      .collection("orders")
+      .doc(orderId)
+      .update({
+    "status": status,
+  });
+}
 }
