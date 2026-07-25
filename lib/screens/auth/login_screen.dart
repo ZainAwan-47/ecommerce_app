@@ -8,8 +8,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/app_notifier.dart';
 import '../../services/otp_service.dart';
-
+import '../../services/admin_service.dart';
 import 'otp_verification_screen.dart';
+import '../../services/admin_service.dart';
+import '../admin/dashboard/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -156,43 +158,100 @@ bool isLoginLoading = false;
       password: passwordController.text.trim(),
     );
 
-    final user = credential.user;
+   final user = credential.user;
 
-    if (user == null) {
-      throw Exception("Login failed.");
-    }
+if (user == null) {
+  throw Exception("Login failed.");
+}
 
-    final userDoc = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(user.uid)
-        .get();
+// ---------- Check Admin ----------
+final adminDoc = await FirebaseFirestore.instance
+    .collection("admins")
+    .doc(user.uid)
+    .get();
 
-    final userData = userDoc.data() ?? {};
+if (adminDoc.exists) {
+  final adminData = adminDoc.data()!;
 
-    final name =
-        userData["name"] ?? "Customer";
+  final name = adminData["name"] ?? "Admin";
+  final email = adminData["email"] ?? user.email!;
 
-    final email =
-        userData["email"] ?? user.email!;
-AppNotifier.success(
-  context,
-  "Sending OTP to mail...",
-);
-   if (!mounted) return;
-if (mounted) {
+  AppNotifier.success(
+    context,
+    "Sending OTP to mail...",
+  );
+
+  if (!mounted) return;
+
   setState(() {
     isLoginLoading = false;
   });
-}
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => OtpVerificationScreen(
-      uid: user.uid,
-      name: name,
-      email: email,
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => OtpVerificationScreen(
+        uid: user.uid,
+        name: name,
+        email: email,
+        isAdmin: true,
+      ),
     ),
-  ),
+  );
+
+  return;
+}
+
+// ---------- Check Customer ----------
+final userDoc = await FirebaseFirestore.instance
+    .collection("users")
+    .doc(user.uid)
+    .get();
+
+if (userDoc.exists) {
+  final userData = userDoc.data()!;
+
+  final name = userData["name"] ?? "Customer";
+  final email = userData["email"] ?? user.email!;
+
+  AppNotifier.success(
+    context,
+    "Sending OTP to mail...",
+  );
+
+  if (!mounted) return;
+
+  setState(() {
+    isLoginLoading = false;
+  });
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => OtpVerificationScreen(
+        uid: user.uid,
+        name: name,
+        email: email,
+        isAdmin: false,
+      ),
+    ),
+  );
+
+  return;
+}
+
+// ---------- Account Not Registered ----------
+await FirebaseAuth.instance.signOut();
+
+if (!mounted) return;
+
+setState(() {
+  isLoginLoading = false;
+});
+
+AppNotifier.error(
+  context,
+  "Account not found.",
 );
 
   }on FirebaseAuthException catch (e) {

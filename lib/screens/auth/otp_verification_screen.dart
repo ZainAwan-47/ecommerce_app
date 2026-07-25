@@ -2,7 +2,7 @@ import 'dart:async';
 import '../../utils/app_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+import '../admin/dashboard/admin_dashboard_screen.dart';
 import '../main/main_screen.dart';
 import '../../services/otp_service.dart';
 
@@ -10,14 +10,15 @@ class OtpVerificationScreen extends StatefulWidget {
   final String uid;
   final String name;
   final String email;
+  final bool isAdmin;
 
   const OtpVerificationScreen({
     super.key,
     required this.uid,
     required this.name,
     required this.email,
+    required this.isAdmin,
   });
-
   @override
   State<OtpVerificationScreen> createState() =>
       _OtpVerificationScreenState();
@@ -134,13 +135,23 @@ void initState() {
 
       if (!mounted) return;
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MainScreen(),
-        ),
-        (route) => false,
-      );
+    if (widget.isAdmin) {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => AdminDashboardScreen(),
+    ),
+    (route) => false,
+  );
+} else {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => MainScreen(),
+    ),
+    (route) => false,
+  );
+}
     } catch (e) {
       if (!mounted) return;
 
