@@ -1,44 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/dashboard_stats.dart';
+
 class DashboardService {
+  DashboardService._();
+
+  static final DashboardService instance = DashboardService._();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<int> getTotalProducts() async {
-    final snapshot = await _firestore.collection("products").get();
-    return snapshot.docs.length;
-  }
+  Stream<DashboardStats> dashboardStream() {
+    return _firestore.collection("orders").snapshots().asyncMap(
+      (orderSnapshot) async {
+        final productsFuture = _firestore.collection("products").get();
+        final usersFuture = _firestore.collection("users").get();
 
-  Future<int> getTotalUsers() async {
-    final snapshot = await _firestore.collection("users").get();
-    return snapshot.docs.length;
-  }
+        final productSnapshot = await productsFuture;
+        final userSnapshot = await usersFuture;
 
-  Future<int> getTotalOrders() async {
-    final snapshot = await _firestore.collection("orders").get();
-    return snapshot.docs.length;
-  }
+        double revenue = 0;
+        int pendingOrders = 0;
 
-  Future<int> getPendingOrders() async {
-    final snapshot = await _firestore
-        .collection("orders")
-        .where("status", isEqualTo: "Pending")
-        .get();
+        for (final doc in orderSnapshot.docs) {
+          final data = doc.data();
 
-    return snapshot.docs.length;
-  }
+          revenue +=
+              ((data["totalAmount"] ?? 0) as num).toDouble();
 
-  Future<double> getTotalRevenue() async {
-    final snapshot = await _firestore.collection("orders").get();
+          if ((data["status"] ?? "") == "Pending") {
+            pendingOrders++;
+          }
+        }
 
-    double revenue = 0;
-
-    for (final doc in snapshot.docs) {
-      final data = doc.data();
-
-      revenue +=
-          (data["totalAmount"] ?? 0).toDouble();
-    }
-
-    return revenue;
+        return DashboardStats(
+          revenue: revenue,
+          totalOrders: orderSnapshot.docs.length,
+          totalProducts: productSnapshot.docs.length,
+          totalUsers: userSnapshot.docs.length,
+          pendingOrders: pendingOrders,
+        );
+      },
+    );
   }
 }

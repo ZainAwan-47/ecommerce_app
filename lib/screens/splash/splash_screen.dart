@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../admin/dashboard/admin_dashboard_screen.dart';
+import '../../services/admin_service.dart';
 import '../auth/login_screen.dart';
 import '../main/main_screen.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -49,15 +50,20 @@ Future<void> _checkAppState() async {
     return;
   }
 
-  if (user != null) {
+ if (user != null) {
+  final isAdmin = await AdminService().isAdmin();
+
+  if (!mounted) return;
+
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-    builder: (_) => const MainScreen(),
+      builder: (_) => isAdmin
+          ?  AdminDashboardScreen()
+          : const MainScreen(),
     ),
   );
-}
-  else {
+} else {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

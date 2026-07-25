@@ -222,9 +222,11 @@ SizedBox(
    onPressed: () async {
 
   final product = ProductModel(
-    id: item.id,
-    name: item['name'],
-    image: item['image'],
+  id: item['id'],
+  name: item['name'],
+  images: [
+    item['image'] ?? "",
+  ],
     price: (item['price'] as num).toDouble(),
     oldPrice: (item['oldPrice'] as num).toDouble(),
     rating: (item['rating'] as num).toDouble(),

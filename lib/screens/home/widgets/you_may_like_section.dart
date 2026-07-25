@@ -54,7 +54,9 @@ class YouMayLikeSection extends StatelessWidget {
   final product = ProductModel(
     id: products[index].id,
     name: data["name"] ?? "",
-    image: data["image"] ?? "",
+     images: [
+    data["image"] ?? "",
+  ],
     price: (data["price"] as num?)?.toDouble() ?? 0,
     oldPrice: (data["oldPrice"] as num?)?.toDouble() ??
         (data["price"] as num?)?.toDouble() ??
