@@ -315,9 +315,16 @@ Wrap(
   children: [
     InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        // TODO: Edit Product
-      },
+    onTap: () async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => AddProductScreen(
+        product: product,
+      ),
+    ),
+  );
+},
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(

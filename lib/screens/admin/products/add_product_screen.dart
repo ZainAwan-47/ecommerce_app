@@ -12,8 +12,19 @@ import '../../../widgets/admin/image_picker_box.dart';
 import '../../../widgets/admin/responsive.dart';
 import '../../../widgets/admin/image_source_bottom_sheet.dart';
 import '../../../utils/app_notifier.dart';
+import '../../../models/category_model.dart';
+import '../../../services/category_service.dart';
+
 class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+  final ProductModel? product;
+
+  const AddProductScreen({
+    super.key,
+    this.product,
+  });
+
+  bool get isEditing => product != null;
+
   @override
   State<AddProductScreen> createState() =>
       _AddProductScreenState();
@@ -76,6 +87,11 @@ bool showUrlField = true;
 final StorageService _storageService =
     StorageService.instance;
 
+    final CategoryService _categoryService =
+    CategoryService();
+
+String? selectedCategory;
+
   List<File> images = [];
   List<String> imageUrls = [];
   bool featured = false;
@@ -95,7 +111,33 @@ final StorageService _storageService =
     imageUrlController.dispose();
     super.dispose();
   }
+@override
+void initState() {
+  super.initState();
 
+  if (widget.product == null) return;
+
+  final product = widget.product!;
+
+  nameController.text = product.name;
+  selectedCategory = product.category;
+  descriptionController.text = product.description;
+  categoryController.text = product.category;
+  priceController.text = product.price.toString();
+  oldPriceController.text = product.oldPrice.toString();
+  discountController.text = product.discount.toString();
+  ratingController.text = product.rating.toString();
+
+  featured = product.featured;
+  inStock = product.inStock;
+
+  imageUrls = List<String>.from(product.images);
+
+  if (imageUrls.isNotEmpty) {
+    showGalleryPicker = false;
+    showUrlField = true;
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,8 +147,10 @@ final StorageService _storageService =
         backgroundColor: const Color(0xffFFF9F7),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          "Add Product",
+       title: Text(
+  widget.isEditing
+      ? "Edit Product"
+      : "Add Product",
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w700,
             fontSize:
@@ -431,11 +475,45 @@ print(imageUrls);
 
               const SizedBox(height: 16),
 
-              AdminTextField(
-                controller: categoryController,
-                hintText: "Category",
-                prefixIcon: Icons.category_outlined,
-              ),
+             StreamBuilder<List<CategoryModel>>(
+  stream: _categoryService.getCategories(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    final categories = snapshot.data!;
+
+    return DropdownButtonFormField<String>(
+      value: selectedCategory,
+      decoration: const InputDecoration(
+        labelText: "Category",
+        border: OutlineInputBorder(),
+      ),
+      items: categories
+          .map(
+            (category) => DropdownMenuItem(
+              value: category.name,
+              child: Text(category.name),
+            ),
+          )
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          selectedCategory = value;
+        });
+      },
+      validator: (value) {
+        if (value == null) {
+          return "Please select a category";
+        }
+        return null;
+      },
+    );
+  },
+),
 
               const SizedBox(height: 16),
 
@@ -518,8 +596,10 @@ print(imageUrls);
 
               const SizedBox(height: 30),
 
-              AdminButton(
-                text: "Save Product",
+             AdminButton(
+  text: widget.isEditing
+      ? "Update Product"
+      : "Save Product",
                 isLoading: isLoading,
              onPressed: saveProduct,
               ),
@@ -661,11 +741,12 @@ if (images.isNotEmpty) {
 } else {
   finalImageUrls = imageUrls;
 }
-    final productId =
-        await _productService.generateProductId();
+   final productId = widget.isEditing
+    ? widget.product!.id
+    : await _productService.generateProductId();
 
-    final product = ProductModel(
-      id: productId,
+final product = ProductModel(
+  id: productId,
       name: nameController.text.trim(),
       images: finalImageUrls,
       price:
@@ -677,8 +758,7 @@ if (images.isNotEmpty) {
       rating: double.tryParse(
               ratingController.text) ??
           0,
-      category:
-          categoryController.text.trim(),
+     category: selectedCategory!,
       description:
           descriptionController.text.trim(),
       featured: featured,
@@ -688,8 +768,21 @@ if (images.isNotEmpty) {
       inStock: inStock,
     );
 
-    await _productService.addProduct(product);
+if (widget.isEditing) {
+  await _productService.updateProduct(product);
 
+  if (!mounted) return;
+
+  AppNotifier.success(
+    context,
+    "Product updated successfully.",
+  );
+} else {
+  await _productService.addProduct(product);
+
+  if (!mounted) return;
+
+}
     if (!mounted) return;
 
    AppNotifier.success(

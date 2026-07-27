@@ -29,6 +29,9 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState
     extends State<ProductDetailsScreen> {
+      int currentImage = 0;
+
+final PageController _pageController = PageController();
 
   int quantity = 1;
 final CartService _cartService = CartService();
@@ -187,49 +190,83 @@ https://shopbytehreem.com
 
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
-                children: [
+  children: [
 
-                  Container(color: Colors.white),
+    Container(color: Colors.white),
 
-                  Center(
-                    child: Hero(
-                      tag: product.id,
-                      child: Padding(
-                      padding: EdgeInsets.only(
-  top: width * 0.12,
-  left: width * 0.08,
-  right: width * 0.08,
-  bottom: width * 0.03,
-),
-                        child: Image.network(
-                          product.image,
-                          fit: BoxFit.contain,
+    Center(
+      child: Hero(
+        tag: product.id,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: width * 0.12,
+            left: width * 0.08,
+            right: width * 0.08,
+            bottom: width * 0.03,
+          ),
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: product.images.length,
+            onPageChanged: (index) {
+              setState(() {
+                currentImage = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              return Image.network(
+                product.images[index],
+                fit: BoxFit.contain,
+                loadingBuilder: (
+                  context,
+                  child,
+                  progress,
+                ) {
+                  if (progress == null) return child;
 
-                          loadingBuilder:
-                              (context, child, progress) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+                errorBuilder: (
+                  context,
+                  error,
+                  stackTrace,
+                ) {
+                  return const Icon(
+                    Icons.image_not_supported,
+                    size: 100,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ), // <-- Center ends here
 
-                            if (progress == null) {
-                              return child;
-                            }
-
-                            return const Center(
-                              child:
-                                  CircularProgressIndicator(),
-                            );
-                          },
-
-                          errorBuilder:
-                              (context, error, stackTrace) {
-
-                            return const Icon(
-                              Icons.image_not_supported,
-                              size: 100,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+    Positioned(
+      bottom: 12,
+      left: 0,
+      right: 0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          product.images.length,
+          (index) => AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: currentImage == index ? 22 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: currentImage == index
+                  ? const Color(0xff7F4F4F)
+                  : Colors.grey.shade400,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+      ),
+    ),
 
           if (product.discount > 0)
   Positioned(
