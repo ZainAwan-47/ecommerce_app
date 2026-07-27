@@ -6,6 +6,7 @@ import '../../../services/category_service.dart';
 import '../../../utils/app_notifier.dart';
 import '../../../widgets/admin/responsive.dart';
 import 'add_category_screen.dart';
+import '../../../utils/category_icons.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -147,26 +148,38 @@ class _CategoriesScreenState
                               BorderRadius.circular(14),
                         ),
                         child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(10),
-                            child: Image.network(
-                              category.image,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                              errorBuilder:
-                                  (_, __, ___) =>
-                                      Container(
-                                width: 60,
-                                height: 60,
-                                color: Colors.grey.shade200,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                ),
-                              ),
-                            ),
-                          ),
+                        leading: Container(
+  width: 60,
+  height: 60,
+  decoration: BoxDecoration(
+    color: Colors.grey.shade200,
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(10),
+    child: Builder(
+      builder: (_) {
+        if (category.imageType == "icon") {
+          return Icon(
+            CategoryIcons.getIcon(category.image),
+            size: 30,
+            color: const Color(0xff7F4F4F),
+          );
+        }
+
+        return Image.network(
+          category.image,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.category_outlined,
+            size: 30,
+            color: Color(0xff7F4F4F),
+          ),
+        );
+      },
+    ),
+  ),
+),
                           title: Text(
                             category.name,
                             style:

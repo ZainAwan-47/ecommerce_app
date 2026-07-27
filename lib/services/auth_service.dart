@@ -57,6 +57,7 @@ print("FCM TOKEN: $fcmToken");
           "photo": user.photoURL ?? "",
           "role": "customer",
           "fcmToken": fcmToken ?? "",
+          "isActive": true,
           "createdAt":
               FieldValue.serverTimestamp(),
         },

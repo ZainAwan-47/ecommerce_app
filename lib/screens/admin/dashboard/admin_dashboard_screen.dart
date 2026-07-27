@@ -12,7 +12,8 @@ import '../../../widgets/admin/image_source_bottom_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../auth/login_screen.dart';
 import '../../../utils/app_notifier.dart';
-
+import '../users/users_screen.dart';
+import '../categories/categories_screen.dart';
 class AdminDashboardScreen extends StatelessWidget {
   AdminDashboardScreen({super.key});
 
@@ -255,19 +256,33 @@ GridView.count(
       },
     ),
 
-    AdminNavigationCard(
-      title: "Customers",
-      icon: Icons.people_outline,
-      color: Colors.purple,
-      onTap: () {},
-    ),
+      AdminNavigationCard(
+  title: "Customers",
+  icon: Icons.people_outline,
+  color: Colors.purple,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const UsersScreen(),
+      ),
+    );
+  },
+),
 
-    AdminNavigationCard(
-      title: "Categories",
-      icon: Icons.category_outlined,
-      color: Colors.green,
-      onTap: () {},
-    ),
+     AdminNavigationCard(
+  title: "Categories",
+  icon: Icons.category_outlined,
+  color: Colors.green,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CategoriesScreen(),
+      ),
+    );
+  },
+),
 
     AdminNavigationCard(
       title: "Coupons",

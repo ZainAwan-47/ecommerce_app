@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../categories/category_products_screen.dart';
 import '../../../models/category_model.dart';
 import '../../../services/category_service.dart';
-
+import '../../../utils/category_icons.dart';
 class CategoryCard extends StatelessWidget {
   CategoryCard({super.key});
 
@@ -96,15 +96,35 @@ final selected = false;
                             : const Color(
                                 0xffF8EEEB,
                               ),
-                        child: Icon(
-                          _getIcon(category.name),
-                          size: 21,
-                          color: selected
-                              ? Colors.white
-                              : const Color(
-                                  0xff7F4F4F,
-                                ),
-                        ),
+                      child: Builder(
+  builder: (_) {
+    if (category.imageType == "icon") {
+      return Icon(
+        CategoryIcons.getIcon(category.image),
+        size: 21,
+        color: selected
+            ? Colors.white
+            : const Color(0xff7F4F4F),
+      );
+    }
+
+    return ClipOval(
+      child: Image.network(
+        category.image,
+        width: 42,
+        height: 42,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Icon(
+          Icons.category_outlined,
+          size: 21,
+          color: selected
+              ? Colors.white
+              : const Color(0xff7F4F4F),
+        ),
+      ),
+    );
+  },
+),
                       ),
 
                       const SizedBox(height: 8),
