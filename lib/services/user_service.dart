@@ -80,4 +80,9 @@ class UserService {
 
     return total;
   }
+  Future<void> updateUserRole(String uid, String newRole) async {
+  await _firestore.collection('users').doc(uid).update({
+    'role': newRole,
+  });
+}
 }
