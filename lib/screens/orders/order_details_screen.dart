@@ -84,6 +84,11 @@ class OrderDetailsScreen extends StatelessWidget {
           final String paymentStatus = data['paymentStatus'] ?? data['payment_status'] ?? 'Pending';
           final String? rejectionReason = data['rejectionReason'] ?? data['rejection_reason'];
 
+          // Dynamically override display status if payment proof was rejected
+          final String displayOrderStatus = (paymentStatus.toLowerCase() == 'rejected')
+              ? 'Rejected'
+              : orderStatus;
+
           final bool isPaymentRejected = paymentStatus.toLowerCase() == 'rejected';
           final bool isOrderCancelled = orderStatus.toLowerCase() == 'cancelled';
 
@@ -339,17 +344,17 @@ class OrderDetailsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          // Live Order Status Badge
+                          // Live Order Status Badge using dynamic displayOrderStatus
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(orderStatus).withOpacity(0.12),
+                              color: _getStatusColor(displayOrderStatus).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              orderStatus.toUpperCase(),
+                              displayOrderStatus.toUpperCase(),
                               style: GoogleFonts.manrope(
-                                color: _getStatusColor(orderStatus),
+                                color: _getStatusColor(displayOrderStatus),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
