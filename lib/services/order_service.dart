@@ -2,29 +2,28 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../constants/order_constants.dart';
 import '../models/order_model.dart';
 import 'payment_service.dart';
 import 'receipt_service.dart';
 
 class OrderService {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  late final CollectionReference<Map<String, dynamic>> _ordersRef =
+      _firestore.collection("orders");
 
-  /// GENERATE UNIQUE ORDER ID
+  // ==========================================
+  // USER METHODS
+  // ==========================================
+
   String generateOrderId() {
-    return _firestore
-        .collection("orders")
-        .doc()
-        .id;
+    return _ordersRef.doc().id;
   }
 
-  /// CLEAR USER CART AFTER SUCCESSFUL PAYMENT
   Future<void> clearCart() async {
     final user = _auth.currentUser;
-
     if (user == null) return;
 
     final cartSnapshot = await _firestore
@@ -33,27 +32,25 @@ class OrderService {
         .collection("cart")
         .get();
 
+    if (cartSnapshot.docs.isEmpty) return;
+
+    final batch = _firestore.batch();
     for (final item in cartSnapshot.docs) {
-      await item.reference.delete();
+      batch.delete(item.reference);
     }
+    await batch.commit();
   }
 
-  /// PLACE MANUAL PAYMENT ORDER
   Future<void> placeManualPaymentOrder({
     required String userName,
     required String email,
-
     required String address,
     required String phone,
-
     required List<Map<String, dynamic>> products,
-
     required double subtotal,
     required double delivery,
     required double total,
-
     required String paymentMethod,
-
     required File receipt,
   }) async {
     final user = _auth.currentUser;
@@ -62,113 +59,116 @@ class OrderService {
       throw Exception("User not logged in.");
     }
 
-    final orderId = generateOrderId();
+    try {
+      final orderId = generateOrderId();
 
-    final receiptUrl =
-        await ReceiptService.instance.uploadReceipt(
-      receipt: receipt,
-      orderId: orderId,
-    );
+      final receiptUrl = await ReceiptService.instance.uploadReceipt(
+        receipt: receipt,
+        orderId: orderId,
+      );
 
-    await PaymentService.instance.submitPayment(
-      orderId: orderId,
-      userName: userName,
-      email: email,
-      phone: phone,
-      address: address,
-      products: products,
-      subtotal: subtotal,
-      delivery: delivery,
-      total: total,
-      paymentMethod: paymentMethod,
-      receiptUrl: receiptUrl,
-    );
+      await PaymentService.instance.submitPayment(
+        orderId: orderId,
+        userName: userName,
+        email: email,
+        phone: phone,
+        address: address,
+        products: products,
+        subtotal: subtotal,
+        delivery: delivery,
+        total: total,
+        paymentMethod: paymentMethod,
+        receiptUrl: receiptUrl,
+      );
 
-    await clearCart();
+      await clearCart();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  /// USER ORDERS
-  Stream<QuerySnapshot<Map<String, dynamic>>> getOrders() {
+  Stream<List<OrderModel>> getUserOrders() {
     final user = _auth.currentUser;
 
     if (user == null) {
-      return const Stream.empty();
+      return Stream.value([]);
     }
 
-    return _firestore
-        .collection("orders")
+    return _ordersRef
         .where("userId", isEqualTo: user.uid)
-        .orderBy(
-          "createdAt",
-          descending: true,
-        )
-        .snapshots();
+        .orderBy("createdAt", descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map(OrderModel.fromDocument).toList(),
+        );
   }
-  /// ===============================
-/// ADMIN - GET ALL ORDERS
-/// ===============================
-Stream<List<OrderModel>> getAllOrders() {
-  return _firestore
-      .collection("orders")
-      .orderBy("createdAt", descending: true)
-      .snapshots()
-      .map(
-        (snapshot) => snapshot.docs
-            .map(
-              (doc) => OrderModel.fromMap(doc.data()),
-            )
-            .toList(),
-      );
-}
 
-/// ===============================
-/// ADMIN - FILTER ORDERS
-/// ===============================
-Stream<List<OrderModel>> getOrdersByStatus(
-  String status,
-) {
-  return _firestore
-      .collection("orders")
-      .where("status", isEqualTo: status)
-      .orderBy("createdAt", descending: true)
-      .snapshots()
-      .map(
-        (snapshot) => snapshot.docs
-            .map(
-              (doc) => OrderModel.fromMap(doc.data()),
-            )
-            .toList(),
-      );
-}
+  // ==========================================
+  // ADMIN METHODS
+  // ==========================================
 
-/// ===============================
-/// ADMIN - GET SINGLE ORDER
-/// ===============================
-Future<OrderModel?> getOrderById(
-  String orderId,
-) async {
-  final doc = await _firestore
-      .collection("orders")
-      .doc(orderId)
-      .get();
+  Stream<List<OrderModel>> getAllOrders() {
+    return _ordersRef
+        .orderBy("createdAt", descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map(OrderModel.fromDocument).toList(),
+        );
+  }
 
-  if (!doc.exists) return null;
+  Stream<List<OrderModel>> getOrdersByOrderStatus(String orderStatus) {
+    return _ordersRef
+        .where("orderStatus", isEqualTo: orderStatus)
+        .orderBy("createdAt", descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map(OrderModel.fromDocument).toList(),
+        );
+  }
 
-  return OrderModel.fromMap(doc.data()!);
-}
+  Future<OrderModel?> getOrderById(String orderId) async {
+    final doc = await _ordersRef.doc(orderId).get();
 
-/// ===============================
-/// ADMIN - UPDATE STATUS
-/// ===============================
-Future<void> updateOrderStatus({
-  required String orderId,
-  required String status,
-}) async {
-  await _firestore
-      .collection("orders")
-      .doc(orderId)
-      .update({
-    "status": status,
-  });
-}
+    if (!doc.exists) return null;
+
+    return OrderModel.fromDocument(doc);
+  }
+
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String orderStatus,
+  }) async {
+    await _ordersRef.doc(orderId).update({
+      "orderStatus": orderStatus,
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> updatePaymentStatus({
+    required String orderId,
+    required String paymentStatus,
+  }) async {
+    await _ordersRef.doc(orderId).update({
+      "paymentStatus": paymentStatus,
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> markAdminSeen(String orderId) async {
+    await _ordersRef.doc(orderId).update({
+      "adminSeen": true,
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> cancelOrder(String orderId) async {
+    await _ordersRef.doc(orderId).update({
+      "orderStatus": OrderStatus.cancelled,
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    await _ordersRef.doc(orderId).delete();
+  }
 }
