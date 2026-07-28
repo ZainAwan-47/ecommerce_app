@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../../../constants/order_constants.dart';
 import '../../../models/order_model.dart';
 import '../../../services/order_service.dart';
-// TODO: Adjust this import path to where your AppNotifier class is located
+import '../../../services/notification_service.dart';
 import '../../../utils/app_notifier.dart';
-
 import 'widgets/customer_info_card.dart';
 import 'widgets/order_summary_card.dart';
 import 'widgets/order_timeline_card.dart';
@@ -28,7 +26,6 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
-  
   final OrderService _orderService = OrderService();
   bool _isUpdating = false;
 
@@ -53,101 +50,141 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
- Future<bool> _confirmCancel() async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-          contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFEE2E2)),
+  Future<bool> _showConfirmationDialog({
+    required String title,
+    required String message,
+    required String confirmText,
+    required Color confirmColor,
+    required IconData icon,
+  }) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: confirmColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: confirmColor.withOpacity(0.2)),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: confirmColor,
+                    size: 20,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Color(0xFFDC2626),
-                  size: 20,
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
+              ],
+            ),
+            content: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                fontSize: 14,
+                height: 1.4,
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Cancel Order',
-                style: TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+            ),
+            actions: [
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF475569),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: confirmColor,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(confirmText),
               ),
             ],
           ),
-          content: const Text(
-            'Are you sure you want to cancel this order? This action cannot be undone.',
-            style: TextStyle(
-              color: Color(0xFF475569),
-              fontSize: 14,
-              height: 1.4,
-            ),
-          ),
-          actions: [
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF475569),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Keep Order'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626),
-                elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Cancel Order'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
+        ) ??
+        false;
+  }
 
-  Future<void> _updateOrderStatus(String orderId, String status) async {
+  Future<void> _updateOrderStatus(String orderId, String status, String userId) async {
     if (_isUpdating) return;
 
+    if (status == OrderStatus.confirmed) {
+      final confirmed = await _showConfirmationDialog(
+        title: 'Confirm Order',
+        message: 'Are you sure you want to approve and confirm this order?',
+        confirmText: 'Confirm Order',
+        confirmColor: const Color(0xFF2563EB),
+        icon: Icons.thumb_up_alt_outlined,
+      );
+      if (!confirmed) return;
+    }
+
     if (status == OrderStatus.cancelled) {
-      final confirmed = await _confirmCancel();
+      final confirmed = await _showConfirmationDialog(
+        title: 'Cancel Order',
+        message: 'Are you sure you want to cancel this order? This action cannot be undone.',
+        confirmText: 'Cancel Order',
+        confirmColor: const Color(0xFFDC2626),
+        icon: Icons.warning_amber_rounded,
+      );
       if (!confirmed) return;
     }
 
     setState(() => _isUpdating = true);
-
     try {
       await _orderService.updateOrderStatus(
         orderId: orderId,
         orderStatus: status,
       );
+
+      // If order is cancelled, automatically reject/cancel payment status too
+      if (status == OrderStatus.cancelled) {
+        await _orderService.updatePaymentStatus(
+          orderId: orderId,
+          paymentStatus: PaymentStatus.rejected,
+        );
+      }
+
+      if (userId.isNotEmpty) {
+        final shortId = orderId.length >= 6 ? orderId.substring(0, 6) : orderId;
+        await NotificationService.sendOrderNotification(
+          userId: userId,
+          orderId: orderId,
+          title: "Order Status Updated",
+          body: "Your order #$shortId status has been updated to ${status.toUpperCase()}.",
+          type: "status_update",
+        );
+      }
 
       if (!mounted) return;
       AppNotifier.success(context, 'Order status updated to $status');
@@ -159,16 +196,60 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
-  Future<void> _updatePaymentStatus(String orderId, String status) async {
+  Future<void> _updatePaymentStatus(String orderId, String status, String userId) async {
     if (_isUpdating) return;
 
-    setState(() => _isUpdating = true);
+    if (status == PaymentStatus.rejected) {
+      final confirmed = await _showConfirmationDialog(
+        title: 'Reject Payment',
+        message: 'Are you sure you want to reject this payment? This will also automatically cancel the order.',
+        confirmText: 'Reject & Cancel',
+        confirmColor: const Color(0xFFDC2626),
+        icon: Icons.warning_amber_rounded,
+      );
+      if (!confirmed) return;
+    }
 
+    if (status == PaymentStatus.verified) {
+      final confirmed = await _showConfirmationDialog(
+        title: 'Verify Payment',
+        message: 'Are you sure you want to verify and approve this payment receipt?',
+        confirmText: 'Verify Payment',
+        confirmColor: const Color(0xFF059669),
+        icon: Icons.check_circle_outline,
+      );
+      if (!confirmed) return;
+    }
+
+    setState(() => _isUpdating = true);
     try {
+      final bool isRejected = status == PaymentStatus.rejected;
+
       await _orderService.updatePaymentStatus(
         orderId: orderId,
         paymentStatus: status,
       );
+
+      if (isRejected) {
+        await _orderService.updateOrderStatus(
+          orderId: orderId,
+          orderStatus: OrderStatus.cancelled,
+        );
+      }
+
+      if (userId.isNotEmpty) {
+        final shortId = orderId.length >= 6 ? orderId.substring(0, 6) : orderId;
+        final isVerified = status == PaymentStatus.verified;
+        await NotificationService.sendOrderNotification(
+          userId: userId,
+          orderId: orderId,
+          title: isVerified ? "Payment Verified!" : "Payment Rejected & Order Cancelled",
+          body: isVerified
+              ? "Your payment for Order #$shortId has been approved."
+              : "Your payment for Order #$shortId was rejected, so the order has been cancelled.",
+          type: isVerified ? "payment_approved" : "payment_rejected",
+        );
+      }
 
       if (!mounted) return;
       AppNotifier.success(context, 'Payment status updated to $status');
@@ -189,18 +270,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         OrderModel order = widget.order;
-
-       if (snapshot.hasData &&
-    snapshot.data != null &&
-    snapshot.data!.exists &&
-    snapshot.data!.data() != null) {
-  final data = snapshot.data!.data()!;
-  
-  // Inject the document ID into the map so fromMap reads it safely
-  data['orderId'] = snapshot.data!.id; 
-
-  order = OrderModel.fromMap(data);
-}
+        if (snapshot.hasData &&
+            snapshot.data != null &&
+            snapshot.data!.exists &&
+            snapshot.data!.data() != null) {
+          final data = snapshot.data!.data()!;
+          data['orderId'] = snapshot.data!.id;
+          order = OrderModel.fromMap(data);
+        }
 
         final width = MediaQuery.of(context).size.width;
         final isDesktop = width >= 900;
@@ -344,14 +421,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  /// Clean, dual-column structured action bar
   Widget? _buildBottomActionDock(OrderModel order) {
-    final isTerminal = order.orderStatus == OrderStatus.delivered ||
-        order.orderStatus == OrderStatus.cancelled;
+    // If the order is cancelled, delivered, or payment is rejected, 
+    // hide the bottom action dock completely so no payment prompts appear.
+    final bool isTerminal = order.orderStatus == OrderStatus.delivered ||
+        order.orderStatus == OrderStatus.cancelled ||
+        order.paymentStatus == PaymentStatus.rejected;
 
-    if (isTerminal && order.paymentStatus != PaymentStatus.pending) {
+    if (isTerminal) {
       return null;
     }
+
+    final String userId = order.userId;
 
     return Container(
       padding: EdgeInsets.only(
@@ -381,8 +462,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 color: Color(0xFF2563EB),
               ),
             ),
-
-          /// Payment Verification Action Row
           if (order.paymentStatus == PaymentStatus.pending) ...[
             Row(
               children: [
@@ -401,6 +480,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         : () => _updatePaymentStatus(
                               order.orderId,
                               PaymentStatus.rejected,
+                              userId,
                             ),
                     icon: const Icon(Icons.close_rounded, size: 18),
                     label: const Text("Reject Payment"),
@@ -421,6 +501,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         : () => _updatePaymentStatus(
                               order.orderId,
                               PaymentStatus.verified,
+                              userId,
                             ),
                     icon: const Icon(Icons.check_circle_outline, size: 18),
                     label: const Text("Verify Payment"),
@@ -428,46 +509,44 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ),
               ],
             ),
-            if (!isTerminal) const SizedBox(height: 10),
           ],
-
-          /// Order Workflow Action Row
-          if (!isTerminal) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFDC2626),
-                      side: const BorderSide(color: Color(0xFFFCA5A5)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+          if (order.paymentStatus == PaymentStatus.pending)
+            const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFDC2626),
+                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed: _isUpdating
-                        ? null
-                        : () => _updateOrderStatus(
-                              order.orderId,
-                              OrderStatus.cancelled,
-                            ),
-                    icon: const Icon(Icons.cancel_outlined, size: 18),
-                    label: const Text("Cancel Order"),
                   ),
+                  onPressed: _isUpdating
+                      ? null
+                      : () => _updateOrderStatus(
+                            order.orderId,
+                            OrderStatus.cancelled,
+                            userId,
+                          ),
+                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                  label: const Text("Cancel Order"),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildNextWorkflowButton(order),
-                ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildNextWorkflowButton(order, userId),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNextWorkflowButton(OrderModel order) {
+  Widget _buildNextWorkflowButton(OrderModel order, String userId) {
     String label = "";
     IconData icon = Icons.arrow_forward;
     Color color = const Color(0xFF2563EB);
@@ -505,7 +584,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
       onPressed: _isUpdating
           ? null
-          : () => _updateOrderStatus(order.orderId, nextStatus),
+          : () => _updateOrderStatus(order.orderId, nextStatus, userId),
       icon: Icon(icon, size: 18),
       label: Text(label),
     );

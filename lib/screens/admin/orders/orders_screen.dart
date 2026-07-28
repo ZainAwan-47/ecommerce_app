@@ -1,13 +1,10 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../../../models/order_model.dart';
 import '../../../services/order_service.dart';
 import '../../../constants/order_constants.dart';
-// TODO: Adjust this import path to where your AppNotifier class is located
-import '../../../utils/app_notifier.dart'; 
-
+import '../../../utils/app_notifier.dart';
 import 'order_details_screen.dart';
 import 'widgets/order_card.dart';
 
@@ -28,13 +25,10 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   final OrderService _orderService = OrderService();
   final TextEditingController _searchController = TextEditingController();
-
   late final Stream<List<OrderModel>> _ordersStream;
-
-  String _searchQuery = "";
+  String _searchQuery = '';
   String _selectedStatus = "All";
   OrderSortOption _selectedSort = OrderSortOption.newest;
-
   int _currentPage = 1;
   final int _itemsPerPage = 15;
 
@@ -65,25 +59,30 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   List<OrderModel> _filterAndSortOrders(List<OrderModel> rawOrders) {
     var filtered = List<OrderModel>.from(rawOrders);
-
+    
     // 1. Status Filter
     if (_selectedStatus != "All") {
       filtered = filtered
           .where((order) => order.orderStatus == _selectedStatus)
           .toList();
     }
-
-    // 2. Search Query Filter
+    
+    // 2. Search Query Filter (Aligned with Firestore fields: orderId, name, email, phoneNumber)
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((order) {
-        return order.orderId.toLowerCase().contains(query) ||
-            order.userName.toLowerCase().contains(query) ||
-            order.email.toLowerCase().contains(query) ||
-            order.phone.toLowerCase().contains(query);
+        final orderId = (order.orderId ?? '').toLowerCase();
+        final userName = (order.userName ?? '').toLowerCase(); // Maps to 'name' in Firestore
+        final userEmail = (order.email ?? '').toLowerCase();
+        final phone = (order.phone ?? '').toLowerCase(); // Maps to 'phoneNumber' in Firestore
+
+        return orderId.contains(query) ||
+            userName.contains(query) ||
+            userEmail.contains(query) ||
+            phone.contains(query);
       }).toList();
     }
-
+    
     // 3. Sorting
     filtered.sort((a, b) {
       switch (_selectedSort) {
@@ -97,7 +96,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           return a.total.compareTo(b.total);
       }
     });
-
+    
     return filtered;
   }
 
@@ -109,7 +108,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   /// Delete Confirmation Dialog
   Future<void> _confirmAndDeleteOrder(String orderId) async {
-   final confirmed = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
@@ -120,7 +119,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
         titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         title: Row(
           children: [
             Container(
@@ -182,13 +181,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ],
       ),
-    ) ??
-    false;
+    ) ?? false;
+
     if (!confirmed || !mounted) return;
 
     try {
       await FirebaseFirestore.instance.collection('orders').doc(orderId).delete();
-
       if (!mounted) return;
       AppNotifier.success(context, "Order deleted successfully");
     } catch (_) {
@@ -200,13 +198,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final statusList = ["All", ...OrderStatus.values];
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0.5,
+        centerTitle: false,
         title: const Text(
           "Orders",
           style: TextStyle(
@@ -215,7 +213,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
             fontSize: 20,
           ),
         ),
-        centerTitle: false,
       ),
       body: SafeArea(
         child: StreamBuilder<List<OrderModel>>(
@@ -229,7 +226,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               );
             }
-
             if (!snapshot.hasData) {
               return const Center(
                 child: CircularProgressIndicator(
@@ -238,20 +234,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
               );
             }
-
             final allOrders = snapshot.data!;
             final statusCounts = _calculateStatusCounts(allOrders);
             final filteredOrders = _filterAndSortOrders(allOrders);
-
             final totalPages = max(
               1,
               (filteredOrders.length / _itemsPerPage).ceil(),
             );
-
             if (_currentPage > totalPages) {
               _currentPage = totalPages;
             }
-
             final start = (_currentPage - 1) * _itemsPerPage;
             final end = min(start + _itemsPerPage, filteredOrders.length);
             final pageItems = filteredOrders.isEmpty
@@ -264,7 +256,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-
                   /// Search Input & Sort Button Row
                   Row(
                     children: [
@@ -272,22 +263,32 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         child: TextField(
                           controller: _searchController,
                           style: const TextStyle(
-                              fontSize: 14, color: Color(0xFF0F172A)),
+                            fontSize: 14,
+                            color: Color(0xFF0F172A),
+                          ),
                           decoration: InputDecoration(
-                            hintText: "Search by Name, Order ID, Phone...",
+                            hintText: "Search Order ID or Phone Number",
                             hintStyle: const TextStyle(
-                                color: Color(0xFF94A3B8), fontSize: 13),
-                            prefixIcon: const Icon(Icons.search,
-                                color: Color(0xFF64748B), size: 20),
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xFF64748B),
+                              size: 20,
+                            ),
                             suffixIcon: _searchQuery.isEmpty
                                 ? null
                                 : IconButton(
-                                    icon: const Icon(Icons.clear,
-                                        size: 18, color: Color(0xFF64748B)),
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      size: 18,
+                                      color: Color(0xFF64748B),
+                                    ),
                                     onPressed: () {
                                       _searchController.clear();
                                       setState(() {
-                                        _searchQuery = "";
+                                        _searchQuery = '';
                                         _currentPage = 1;
                                       });
                                     },
@@ -296,16 +297,21 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             fillColor: Colors.white,
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide:
-                                  const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE2E8F0),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: const BorderSide(
-                                  color: Color(0xFF2563EB), width: 1.5),
+                                color: Color(0xFF2563EB),
+                                width: 1.5,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                           ),
                           onChanged: (value) {
                             setState(() {
@@ -316,7 +322,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-
                       /// Sort By Filter Popup Menu
                       PopupMenuButton<OrderSortOption>(
                         initialValue: _selectedSort,
@@ -377,7 +382,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(
+                              color: const Color(0xFFE2E8F0),
+                            ),
                           ),
                           child: const Icon(
                             Icons.swap_vert_rounded,
@@ -388,21 +395,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 12),
-
                   /// Status Filter Chips
                   SizedBox(
                     height: 36,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: statusList.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         final status = statusList[index];
                         final count = statusCounts[status] ?? 0;
                         final isSelected = _selectedStatus == status;
-
                         return ChoiceChip(
                           label: Text("$status ($count)"),
                           labelStyle: TextStyle(
@@ -436,9 +440,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   /// Header Counter & Active Sort Indicator
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -461,9 +463,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
                   /// Orders List View
                   Expanded(
                     child: filteredOrders.isEmpty
@@ -476,7 +476,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final order = pageItems[index];
-
                               return OrderCard(
                                 order: order,
                                 onView: () {
@@ -495,27 +494,33 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             },
                           ),
                   ),
-
                   /// Pagination Footer Dock
                   if (filteredOrders.isNotEmpty && totalPages > 1) ...[
                     Container(
                       margin: const EdgeInsets.only(bottom: 8, top: 4),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 2),
+                        horizontal: 12,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(
+                          color: const Color(0xFFE2E8F0),
+                        ),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             onPressed: _currentPage > 1
                                 ? () => setState(() => _currentPage--)
                                 : null,
-                            icon: const Icon(Icons.arrow_back_ios_new,
-                                size: 16),
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 16,
+                            ),
                             color: const Color(0xFF0F172A),
                           ),
                           Text(
@@ -530,8 +535,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             onPressed: _currentPage < totalPages
                                 ? () => setState(() => _currentPage++)
                                 : null,
-                            icon: const Icon(Icons.arrow_forward_ios,
-                                size: 16),
+                            icon: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            ),
                             color: const Color(0xFF0F172A),
                           ),
                         ],
@@ -554,9 +561,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
       case OrderSortOption.oldest:
         return "Sorted by: Oldest";
       case OrderSortOption.priceHighToLow:
-        return "Sorted by: Price ↓";
+        return "Sorted by: Price: High to Low";
       case OrderSortOption.priceLowToHigh:
-        return "Sorted by: Price ↑";
+        return "Sorted by: Price: Low to High";
     }
   }
 
