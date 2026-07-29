@@ -44,10 +44,8 @@ class UserActionButtons extends StatelessWidget {
                 letterSpacing: -0.3,
               ),
             ),
-            
             const SizedBox(height: 20),
-            
-            // PRIMARY ACTION: Change Role (High contrast)
+            // PRIMARY ACTION: Change Role
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -72,18 +70,13 @@ class UserActionButtons extends StatelessWidget {
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (_) => ChangeRoleDialog(
-                      user: user,
-                      userService: userService,
-                    ),
+                    builder: (_) => ChangeRoleDialog(user: user),
                   );
                 },
               ),
             ),
-            
             const SizedBox(height: 12),
-            
-            // SECONDARY ACTION: Activate / Deactivate (Clean outlined tonal)
+            // SECONDARY ACTION: Activate / Deactivate
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -97,15 +90,6 @@ class UserActionButtons extends StatelessWidget {
                     side: const BorderSide(color: Color(0xFFE5E7EB)),
                   ),
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => DeactivateUserDialog(
-                      user: user,
-                      userService: userService,
-                    ),
-                  );
-                },
                 icon: Icon(
                   user.isActive ? Icons.block_flipped : Icons.check_circle_outline,
                   size: 20,
@@ -119,12 +103,16 @@ class UserActionButtons extends StatelessWidget {
                     letterSpacing: 0.2,
                   ),
                 ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => DeactivateUserDialog(user: user),
+                  );
+                },
               ),
             ),
-            
             const SizedBox(height: 12),
-            
-            // DESTRUCTIVE ACTION: Delete User (Soft red)
+            // DESTRUCTIVE ACTION: Delete User
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -149,10 +137,7 @@ class UserActionButtons extends StatelessWidget {
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (_) => DeleteUserDialog(
-                      user: user,
-                      userService: userService,
-                    ),
+                    builder: (_) => DeleteUserDialog(user: user),
                   );
                 },
               ),

@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               final name = adminData["name"] ?? "Admin";
                               final email = adminData["email"] ?? user.email!;
                               
-                              AppNotifier.success(
+                              AppNotifier.alert(
                                 context,
                                 "Sending OTP to mail...",
                               );

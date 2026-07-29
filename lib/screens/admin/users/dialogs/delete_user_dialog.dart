@@ -1,104 +1,92 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../utils/app_notifier.dart';
 import '../../../../models/user_model.dart';
 import '../../../../services/user_service.dart';
 
 class DeleteUserDialog extends StatefulWidget {
   final UserModel user;
-  final UserService userService;
-
-  const DeleteUserDialog({
-    super.key,
-    required this.user,
-    required this.userService,
-  });
+  const DeleteUserDialog({super.key, required this.user});
 
   @override
   State<DeleteUserDialog> createState() => _DeleteUserDialogState();
 }
 
 class _DeleteUserDialogState extends State<DeleteUserDialog> {
-  bool _loading = false;
-
-  Future<void> _delete() async {
-    setState(() => _loading = true);
-    try {
-      await widget.userService.deleteUser(widget.user.uid);
-
-      if (!mounted) return;
-      Navigator.pop(context); // Close dialog on success
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("User deleted successfully"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      
-      // Reset loading state so the dialog remains interactive if an error occurs
-      setState(() => _loading = false);
-
-      // Extract precise error message based on exception type
-      String errorMessage = "Failed to delete user.";
-      if (e is FirebaseException) {
-        errorMessage = e.message ?? errorMessage;
-      } else {
-        errorMessage = e.toString().replaceAll("Exception: ", "");
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      icon: const Icon(
-        Icons.delete_forever_rounded,
-        color: Colors.red,
-        size: 45,
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-      title: const Text(
+      title: Text(
         "Delete User",
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        style: GoogleFonts.manrope(
+          fontWeight: FontWeight.w700,
+          fontSize: 18,
+          color: const Color(0xff2D2323),
+        ),
       ),
       content: Text(
-        "Delete ${widget.user.name}?\n\nThis action cannot be undone.",
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 15, color: Colors.black87),
+        "Are you sure you want to permanently delete ${widget.user.name}? This action cannot be undone.",
+        style: GoogleFonts.manrope(
+          fontSize: 14,
+          color: const Color(0xff5D4E4E),
+        ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       actions: [
         TextButton(
-          onPressed: _loading ? null : () => Navigator.pop(context),
-          child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: Colors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: Text(
+            "Cancel",
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w600,
+              color: const Color(0xff8D7B7B),
+            ),
           ),
-          onPressed: _loading ? null : _delete,
-          child: _loading
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.shade600,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          onPressed: _isLoading
+              ? null
+              : () async {
+                  setState(() => _isLoading = true);
+                  try {
+                    await UserService().deleteUser(widget.user.uid);
+                    if (!mounted) return;
+                    Navigator.pop(context);
+                    AppNotifier.success(context, "User deleted successfully.");
+                  } catch (e) {
+                    if (!mounted) return;
+                    setState(() => _isLoading = false);
+                    AppNotifier.error(context, "Failed to delete user: $e");
+                  }
+                },
+          child: _isLoading
               ? const SizedBox(
-                  width: 18,
-                  height: 18,
+                  width: 16,
+                  height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,
                   ),
                 )
-              : const Text(
+              : Text(
                   "Delete",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
         ),
       ],

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../services/app_notification_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../utils/app_notifier.dart';
+import 'login_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  bool _isLoading = false;
   
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -34,13 +36,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> registerUser() async {
     if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Passwords do not match"),
-        ),
-      );
+      AppNotifier.error(context, "Passwords do not match");
       return;
     }
+
+    setState(() => _isLoading = true);
 
     try {
       final emailTrimmed = emailController.text.trim().toLowerCase();
@@ -56,7 +56,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final bool isActive = userDoc.data()["isActive"] ?? true;
 
         if (!isActive) {
-          AppNotifier.error(
+          if (!mounted) return;
+          setState(() => _isLoading = false);
+          // Using the orange alert notification for deactivation
+          AppNotifier.alert(
             context,
             "This account was previously deactivated. Please contact support to reactivate your account.",
           );
@@ -88,10 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "createdAt": FieldValue.serverTimestamp(),
       });
 
-      await AppNotificationService().addWelcomeNotification(
-        userId: userCredential.user!.uid,
-      );
-
+      if (!mounted) return;
       AppNotifier.success(
         context,
         "Account created. Please sign in.",
@@ -119,15 +119,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         default:
           message = "Registration failed. Please try again.";
       }
-      AppNotifier.error(
-        context,
-        message,
-      );
+      if (!mounted) return;
+      AppNotifier.error(context, message);
     } catch (e) {
-      AppNotifier.error(
-        context,
-        "Something went wrong.",
-      );
+      if (!mounted) return;
+      AppNotifier.error(context, "Something went wrong.");
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -147,22 +147,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 20),
               Image.asset(
                 "assets/logo/applogo.png",
-                height: 220,
+                height: 200,
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Create Account",
-                style: TextStyle(
+                style: GoogleFonts.manrope(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
+                  color: const Color(0xff2D2323),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Join Shop by Tehreem today",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black54,
+                style: GoogleFonts.manrope(
+                  color: const Color(0xff8D7B7B),
                   fontSize: 15,
                 ),
               ),
@@ -234,7 +235,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     onPressed: () {
                       setState(() {
-                        obscureConfirmPassword = !obscureConfirmPassword;
+                        obscureConfirmPassword =
+                            !obscureConfirmPassword;
                       });
                     },
                   ),
@@ -250,56 +252,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: registerUser,
+                  onPressed: _isLoading ? null : registerUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: const Text(
-                    "Create Account",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          "Create Account",
+                          style: GoogleFonts.manrope(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 25),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Already have an account?",
-                    style: TextStyle(
-                      color: Colors.black54,
-                    ),
+                    style: GoogleFonts.manrope(color: Colors.black54),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text(
+                    child: Text(
                       "Sign In",
-                      style: TextStyle(
+                      style: GoogleFonts.manrope(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xff7F4F4F),
+                        color: const Color(0xff7F4F4F),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "By creating an account, you agree to\nTerms of Service & Privacy Policy",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 20),
             ],
           ),
         ),

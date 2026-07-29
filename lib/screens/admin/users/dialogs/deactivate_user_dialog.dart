@@ -1,110 +1,104 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../utils/app_notifier.dart';
 import '../../../../models/user_model.dart';
 import '../../../../services/user_service.dart';
 
 class DeactivateUserDialog extends StatefulWidget {
   final UserModel user;
-  final UserService userService;
-
-  const DeactivateUserDialog({
-    super.key,
-    required this.user,
-    required this.userService,
-  });
+  const DeactivateUserDialog({super.key, required this.user});
 
   @override
   State<DeactivateUserDialog> createState() => _DeactivateUserDialogState();
 }
 
 class _DeactivateUserDialogState extends State<DeactivateUserDialog> {
-  bool _loading = false;
-
-  Future<void> _toggleStatus() async {
-    setState(() => _loading = true);
-    try {
-      final bool willBeActive = !widget.user.isActive;
-      await widget.userService.toggleUserStatus(
-        uid: widget.user.uid,
-        isActive: willBeActive,
-      );
-
-      if (!mounted) return;
-      Navigator.pop(context); // Close dialog on success
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            willBeActive
-                ? "User activated successfully"
-                : "User deactivated successfully",
-          ),
-          backgroundColor: willBeActive ? Colors.green : Colors.orange,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      // Reset loading state safely if an exception occurs
-      setState(() => _loading = false);
-
-      // Extract precise error message
-      String errorMessage = "Failed to update user status.";
-      if (e is FirebaseException) {
-        errorMessage = e.message ?? errorMessage;
-      } else {
-        errorMessage = e.toString().replaceAll("Exception: ", "");
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    final bool deactivate = widget.user.isActive;
-
+    final bool willActivate = !widget.user.isActive;
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       title: Text(
-        deactivate ? "Deactivate User" : "Activate User",
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        willActivate ? "Activate User" : "Deactivate User",
+        style: GoogleFonts.manrope(
+          fontWeight: FontWeight.w700,
+          fontSize: 18,
+          color: const Color(0xff2D2323),
+        ),
       ),
       content: Text(
-        deactivate
-            ? "This user won't be able to sign in until activated again."
-            : "Allow this user to sign in again?",
-        style: const TextStyle(fontSize: 15, color: Colors.black87),
+        willActivate
+            ? "Are you sure you want to activate ${widget.user.name}?"
+            : "Are you sure you want to deactivate ${widget.user.name}? They will no longer be able to log in.",
+        style: GoogleFonts.manrope(
+          fontSize: 14,
+          color: const Color(0xff5D4E4E),
+        ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       actions: [
         TextButton(
-          onPressed: _loading ? null : () => Navigator.pop(context),
-          child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: deactivate ? Colors.orange : Colors.green,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: Text(
+            "Cancel",
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w600,
+              color: const Color(0xff8D7B7B),
+            ),
           ),
-          onPressed: _loading ? null : _toggleStatus,
-          child: _loading
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: willActivate ? Colors.green.shade600 : const Color(0xffED6C02), // Using our new orange alert color
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+onPressed: _isLoading
+              ? null
+              : () async {
+                  setState(() => _isLoading = true);
+                  try {
+                    await UserService().toggleUserStatus(
+                      uid: widget.user.uid,
+                      isActive: willActivate,
+                    );
+                    if (!mounted) return;
+                    Navigator.pop(context);
+                    
+                    // Separate notifications based on action
+                    if (willActivate) {
+                      AppNotifier.success(context, "User activated successfully.");
+                    } else {
+                      AppNotifier.alert(context, "User deactivated successfully.");
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    setState(() => _isLoading = false);
+                    AppNotifier.error(context, "Operation failed: $e");
+                  }
+                },
+          child: _isLoading
               ? const SizedBox(
-                  width: 18,
-                  height: 18,
+                  width: 16,
+                  height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,
                   ),
                 )
               : Text(
-                  deactivate ? "Deactivate" : "Activate",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  willActivate ? "Activate" : "Deactivate",
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
         ),
       ],
