@@ -10,7 +10,6 @@ import '../../utils/app_notifier.dart';
 import '../../services/otp_service.dart';
 import '../../services/admin_service.dart';
 import 'otp_verification_screen.dart';
-import '../../services/admin_service.dart';
 import '../admin/dashboard/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,12 +21,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-bool isGoogleLoading = false;
-bool isLoginLoading = false;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  bool isGoogleLoading = false;
+  bool isLoginLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +41,6 @@ bool isLoginLoading = false;
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-
               // Logo
               Center(
                 child: Image.asset(
@@ -50,9 +48,7 @@ bool isLoginLoading = false;
                   height: 220,
                 ),
               ),
-
               const SizedBox(height: 20),
-
               const Text(
                 "Welcome Back",
                 textAlign: TextAlign.center,
@@ -61,9 +57,7 @@ bool isLoginLoading = false;
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               const Text(
                 "Sign in to continue your beauty journey.",
                 textAlign: TextAlign.center,
@@ -72,9 +66,7 @@ bool isLoginLoading = false;
                   color: Colors.black54,
                 ),
               ),
-
               const SizedBox(height: 40),
-
               // Email
               TextField(
                 controller: emailController,
@@ -89,9 +81,7 @@ bool isLoginLoading = false;
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               // Password
               TextField(
                 controller: passwordController,
@@ -101,9 +91,7 @@ bool isLoginLoading = false;
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      obscurePassword ? Icons.visibility : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -118,229 +106,207 @@ bool isLoginLoading = false;
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                     Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) =>
-        const ForgotPasswordScreen(),
-  ),
-);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
+                    );
                   },
                   child: const Text("Forgot Password?"),
                 ),
               ),
               const SizedBox(height: 20),
-
               // Sign In Button
               SizedBox(
                 height: 55,
                 child: ElevatedButton(
+                  onPressed: isLoginLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isLoginLoading = true;
+                          });
+                          try {
+                            final credential = await auth.signInWithEmailAndPassword(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
+                            final user = credential.user;
+                            if (user == null) {
+                              throw Exception("Login failed.");
+                            }
 
-        onPressed: isLoginLoading
-    ? null
-    : () async {
+                            // 0. Check if user account is active
+                            final userDocCheck = await FirebaseFirestore.instance
+                                .collection("users")
+                                .doc(user.uid)
+                                .get();
 
-        setState(() {
-          isLoginLoading = true;
-        });
+                            if (userDocCheck.exists) {
+                              final userData = userDocCheck.data()!;
+                              final bool isActive = userData["isActive"] ?? true;
+                              if (!isActive) {
+                                await auth.signOut();
+                                if (!mounted) return;
+                                setState(() {
+                                  isLoginLoading = false;
+                                });
+                                AppNotifier.error(
+                                    context, "This account has been deactivated.");
+                                return;
+                              }
+                            }
 
-        try {
-    final credential =
-        await _auth.signInWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
+                            // 1. Check Admin
+                            final adminDoc = await FirebaseFirestore.instance
+                                .collection("admins")
+                                .doc(user.uid)
+                                .get();
 
-   final user = credential.user;
+                            if (adminDoc.exists) {
+                              final adminData = adminDoc.data()!;
+                              final name = adminData["name"] ?? "Admin";
+                              final email = adminData["email"] ?? user.email!;
+                              
+                              AppNotifier.success(
+                                context,
+                                "Sending OTP to mail...",
+                              );
+                              if (!mounted) return;
+                              setState(() {
+                                isLoginLoading = false;
+                              });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OtpVerificationScreen(
+                                    uid: user.uid,
+                                    name: name,
+                                    email: email,
+                                    isAdmin: true,
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
 
-if (user == null) {
-  throw Exception("Login failed.");
-}
+                            // 2. Check Customer
+                            if (userDocCheck.exists) {
+                              final userData = userDocCheck.data()!;
+                              final name = userData["name"] ?? "Customer";
+                              final email = userData["email"] ?? user.email!;
+                              
+                              AppNotifier.success(
+                                context,
+                                "Sending OTP to mail...",
+                              );
+                              if (!mounted) return;
+                              setState(() {
+                                isLoginLoading = false;
+                              });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OtpVerificationScreen(
+                                    uid: user.uid,
+                                    name: name,
+                                    email: email,
+                                    isAdmin: false,
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
 
-// ---------- Check Admin ----------
-final adminDoc = await FirebaseFirestore.instance
-    .collection("admins")
-    .doc(user.uid)
-    .get();
-
-if (adminDoc.exists) {
-  final adminData = adminDoc.data()!;
-
-  final name = adminData["name"] ?? "Admin";
-  final email = adminData["email"] ?? user.email!;
-
-  AppNotifier.success(
-    context,
-    "Sending OTP to mail...",
-  );
-
-  if (!mounted) return;
-
-  setState(() {
-    isLoginLoading = false;
-  });
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => OtpVerificationScreen(
-        uid: user.uid,
-        name: name,
-        email: email,
-        isAdmin: true,
-      ),
-    ),
-  );
-
-  return;
-}
-
-// ---------- Check Customer ----------
-final userDoc = await FirebaseFirestore.instance
-    .collection("users")
-    .doc(user.uid)
-    .get();
-
-if (userDoc.exists) {
-  final userData = userDoc.data()!;
-
-  final name = userData["name"] ?? "Customer";
-  final email = userData["email"] ?? user.email!;
-
-  AppNotifier.success(
-    context,
-    "Sending OTP to mail...",
-  );
-
-  if (!mounted) return;
-
-  setState(() {
-    isLoginLoading = false;
-  });
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => OtpVerificationScreen(
-        uid: user.uid,
-        name: name,
-        email: email,
-        isAdmin: false,
-      ),
-    ),
-  );
-
-  return;
-}
-
-// ---------- Account Not Registered ----------
-await FirebaseAuth.instance.signOut();
-
-if (!mounted) return;
-
-setState(() {
-  isLoginLoading = false;
-});
-
-AppNotifier.error(
-  context,
-  "Account not found.",
-);
-
-  }on FirebaseAuthException catch (e) {
-  String message;
-
-  switch (e.code) {
-    case "invalid-email":
-      message = "Please enter a valid email address.";
-      break;
-
-    case "invalid-credential":
-      message = "Incorrect email or password.";
-      break;
-
-    case "wrong-password":
-      message = "Incorrect password.";
-      break;
-
-    case "user-not-found":
-      message = "No account found with this email.";
-      break;
-
-    case "email-already-in-use":
-      message = "This email is already registered.";
-      break;
-
-    case "user-disabled":
-      message = "This account has been disabled.";
-      break;
-
-    case "too-many-requests":
-      message = "Too many login attempts. Please try again later.";
-      break;
-
-    case "network-request-failed":
-      message = "No internet connection.";
-      break;
-
-    default:
-      message = "Login failed. Please try again.";
-  }
-if (mounted) {
-  setState(() {
-    isLoginLoading = false;
-  });
-}
-  AppNotifier.error(
-    context,
-    message,
-  );
-} catch (e) {
-  if (mounted) {
-  setState(() {
-    isLoginLoading = false;
-  });
-}
-  AppNotifier.error(
-    context,
-    "Something went wrong.",
-  );
-}
-},
+                            // 3. Account Not Registered
+                            await auth.signOut();
+                            if (!mounted) return;
+                            setState(() {
+                              isLoginLoading = false;
+                            });
+                            AppNotifier.error(
+                              context,
+                              "Account not found.",
+                            );
+                          } on FirebaseAuthException catch (e) {
+                            String message;
+                            switch (e.code) {
+                              case "invalid-email":
+                                message = "Please enter a valid email address.";
+                                break;
+                              case "invalid-credential":
+                                message = "Incorrect email or password.";
+                                break;
+                              case "wrong-password":
+                                message = "Incorrect password.";
+                                break;
+                              case "user-not-found":
+                                message = "No account found with this email.";
+                                break;
+                              case "email-already-in-use":
+                                message = "This email is already registered.";
+                                break;
+                              case "user-disabled":
+                                message = "This account has been disabled.";
+                                break;
+                              case "too-many-requests":
+                                message = "Too many login attempts. Please try again later.";
+                                break;
+                              case "network-request-failed":
+                                message = "No internet connection.";
+                                break;
+                              default:
+                                message = "Login failed. Please try again.";
+                            }
+                            if (mounted) {
+                              setState(() {
+                                isLoginLoading = false;
+                              });
+                            }
+                            AppNotifier.error(context, message);
+                          } catch (e) {
+                            if (mounted) {
+                              setState(() {
+                                isLoginLoading = false;
+                              });
+                            }
+                            AppNotifier.error(
+                              context,
+                              e.toString().replaceAll("Exception: ", ""),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff7F4F4F),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                child: isLoginLoading
-    ? const SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          color: Colors.white,
-        ),
-      )
-    : const Text(
-        "Sign In",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
+                  child: isLoginLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Sign In",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                 ),
               ),
-
               const SizedBox(height: 35),
-
               // Divider
               Row(
                 children: const [
@@ -358,126 +324,162 @@ if (mounted) {
                   Expanded(child: Divider()),
                 ],
               ),
-
               const SizedBox(height: 25),
+              // Google Sign-In Button
+              SizedBox(
+                height: 55,
+                child: OutlinedButton.icon(
+                  onPressed: isGoogleLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isGoogleLoading = true;
+                          });
+                          try {
+                            final user = await AuthService.instance.signInWithGoogle();
+                            if (!mounted) return;
 
-        SizedBox(
-  height: 55,
-  child: OutlinedButton.icon(
-    onPressed: isGoogleLoading
-        ? null
-        : () async {
-            setState(() {
-              isGoogleLoading = true;
-            });
+                            if (user != null) {
+                              // 1. Check Admin collection
+                              final adminDoc = await FirebaseFirestore.instance
+                                  .collection("admins")
+                                  .doc(user.uid)
+                                  .get();
 
-            try {
-              final user =
-                  await AuthService.instance
-                      .signInWithGoogle();
+                              if (adminDoc.exists) {
+                                if (!mounted) return;
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AdminDashboardScreen(),
+                                  ),
+                                );
+                                return;
+                              }
 
-              if (!mounted) return;
+                              // 2. Check Users collection role
+                              final userDoc = await FirebaseFirestore.instance
+                                  .collection("users")
+                                  .doc(user.uid)
+                                  .get();
 
-              if (user != null) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const MainScreen(),
+                              if (userDoc.exists) {
+                                final userData = userDoc.data()!;
+                                final role = (userData["role"] ?? "customer")
+                                    .toString()
+                                    .toLowerCase();
+
+                                if (role == "admin") {
+                                  await FirebaseFirestore.instance
+                                      .collection("admins")
+                                      .doc(user.uid)
+                                      .set({
+                                    'name': userData['name'] ?? user.displayName ?? 'Admin',
+                                    'email': userData['email'] ?? user.email ?? '',
+                                    'role': 'admin',
+                                    'createdAt': userData['createdAt'] ??
+                                        FieldValue.serverTimestamp(),
+                                  });
+
+                                  if (!mounted) return;
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AdminDashboardScreen(),
+                                    ),
+                                  );
+                                  return;
+                                }
+                              }
+
+                              // 3. Default customer navigation
+                              if (!mounted) return;
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MainScreen(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString().replaceAll("Exception: ", "")),
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                isGoogleLoading = false;
+                              });
+                            }
+                          }
+                        },
+                  icon: isGoogleLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Image.asset(
+                          "assets/icons/google.png",
+                          height: 22,
+                        ),
+                  label: const Text(
+                    "Continue with Google",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                );
-              }
-            } catch (e) {
-              if (!mounted) return;
-
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(
-                SnackBar(
-                  content: Text(
-                    e.toString(),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: Color(0xffDDDDDD)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                 ),
-              );
-            }
-
-            if (mounted) {
-              setState(() {
-                isGoogleLoading = false;
-              });
-            }
-          },
-    icon: isGoogleLoading
-        ? const SizedBox(
-            width: 20,
-            height: 20,
-            child:
-                CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          )
-        : Image.asset(
-            "assets/icons/google.png",
-            height: 22,
-          ),
-    label: const Text(
-      "Continue with Google",
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    style: OutlinedButton.styleFrom(
-      backgroundColor: Colors.white,
-      side: const BorderSide(
-        color: Color(0xffDDDDDD),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(15),
-      ),
-    ),
-  ),
-),
-
-const SizedBox(height: 25),
-
-SizedBox(
-  height: 55,
-  child: OutlinedButton(
-    onPressed: () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              const MainScreen(),
-        ),
-      );
-    },
-    style: OutlinedButton.styleFrom(
-      side:
-          const BorderSide(color: Colors.grey),
-      shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(15),
-      ),
-    ),
-    child: const Text(
-      "Continue as Guest",
-      style: TextStyle(fontSize: 17),
-    ),
-  ),
-),
-const SizedBox(height: 25),
+              ),
+              const SizedBox(height: 25),
+              // Guest Button
+              SizedBox(
+                height: 55,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MainScreen(),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.grey),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: const Text(
+                    "Continue as Guest",
+                    style: TextStyle(fontSize: 17),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
               // Create Account Button
               SizedBox(
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: () { Navigator.push(
-                               context,
-                              MaterialPageRoute(
-                              builder: (_) => const RegisterScreen(),
-                               ),
-                             );},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const RegisterScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xffEEDFD8),
                     foregroundColor: Colors.black87,
@@ -494,15 +496,13 @@ const SizedBox(height: 25),
                   ),
                 ),
               ),
-
               const SizedBox(height: 35),
-
               const Text(
                 "By continuing, you agree to\nTerms of Service & Privacy Policy",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.grey,
                   fontSize: 12,
+                  color: Colors.grey,
                 ),
               ),
             ],

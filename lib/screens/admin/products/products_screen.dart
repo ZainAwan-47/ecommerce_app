@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../models/product_model.dart';
 import '../../../services/product_service.dart';
 import '../../../utils/app_notifier.dart';
@@ -21,7 +20,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   // Pagination State
   int _currentPage = 0;
-  static const int _itemsPerPage = 15;
+  static const int _itemsPerPage = 10;
 
   static const Color _primaryColor = Color(0xff7F4F4F);
   static const Color _backgroundColor = Color(0xffFFF9F7);
@@ -44,7 +43,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         elevation: 0,
         titleSpacing: Responsive.horizontalPadding(context),
         title: Text(
-          "Products",
+          "Products Catalog",
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w800,
             fontSize: Responsive.titleSize(context),
@@ -54,8 +53,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        elevation: 2,
-        highlightElevation: 4,
+        elevation: 4,
+        highlightElevation: 6,
         backgroundColor: _primaryColor,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
@@ -88,15 +87,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ),
           child: Column(
             children: [
-              // Search Field
+              // Elite Search Field
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Responsive.radius),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: _primaryColor.withOpacity(0.04),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: _primaryColor.withOpacity(0.06),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -127,7 +126,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             },
                           )
                         : null,
-                    hintText: "Search products...",
+                    hintText: "Search elite products...",
                     hintStyle: GoogleFonts.manrope(
                       color: _subtextColor,
                       fontSize: 14,
@@ -139,39 +138,35 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       vertical: 14,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(Responsive.radius),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: _primaryColor.withOpacity(0.12),
                         width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(Responsive.radius),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(
                         color: _primaryColor,
                         width: 1.5,
                       ),
                     ),
                   ),
-                  onChanged: (_) {
+                  onChanged: (value) {
                     setState(() {
                       _currentPage = 0;
                     });
                   },
                 ),
               ),
-
               const SizedBox(height: 18),
 
-              // Product List & Pagination
+              // Product Stream & Tile View
               Expanded(
                 child: StreamBuilder<List<ProductModel>>(
                   stream: _productService.getProducts(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: _primaryColor,
@@ -180,7 +175,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       );
                     }
 
-                    // 1. Error boundary handling
                     if (snapshot.hasError) {
                       return _buildErrorState(
                         message: "Failed to load products: ${snapshot.error}",
@@ -190,16 +184,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return _buildEmptyState(
                         title: "No products found",
-                        subtitle:
-                            "Tap the button below to add your first product.",
+                        subtitle: "Tap the button below to add your first product.",
                       );
                     }
 
                     List<ProductModel> products = snapshot.data!;
 
                     if (_searchController.text.isNotEmpty) {
-                      final query =
-                          _searchController.text.toLowerCase().trim();
+                      final query = _searchController.text.toLowerCase().trim();
                       products = products
                           .where((p) =>
                               p.name.toLowerCase().contains(query) ||
@@ -210,13 +202,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     if (products.isEmpty) {
                       return _buildEmptyState(
                         title: "No matching products",
-                        subtitle:
-                            'No results found for "${_searchController.text}".',
+                        subtitle: 'No results found for "${_searchController.text}".',
                       );
                     }
 
                     final totalPages = (products.length / _itemsPerPage).ceil();
-
                     if (_currentPage >= totalPages) {
                       _currentPage = (totalPages > 0) ? totalPages - 1 : 0;
                     }
@@ -225,24 +215,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     final endIndex = (startIndex + _itemsPerPage < products.length)
                         ? startIndex + _itemsPerPage
                         : products.length;
-
                     final currentPageProducts = products.sublist(startIndex, endIndex);
 
                     return Column(
                       children: [
                         Expanded(
                           child: ListView.separated(
+                            padding: const EdgeInsets.only(bottom: 90, top: 4),
+                            physics: const BouncingScrollPhysics(),
                             itemCount: currentPageProducts.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final product = currentPageProducts[index];
-                              return _buildProductItem(product);
+                              return _buildEliteTileItem(product);
                             },
                           ),
                         ),
-                        if (totalPages > 1)
+                        if (totalPages > 1) ...[
+                          const SizedBox(height: 8),
                           _buildPaginationControls(totalPages),
+                        ],
                       ],
                     );
                   },
@@ -255,91 +247,31 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildPaginationControls(int totalPages) {
-    return Container(
-      margin: const EdgeInsets.only(top: 14, bottom: 70),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _primaryColor.withOpacity(0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: _primaryColor.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            onPressed: _currentPage > 0
-                ? () => setState(() => _currentPage--)
-                : null,
-            icon: const Icon(Icons.chevron_left_rounded, size: 24),
-            color: _primaryColor,
-            disabledColor: Colors.grey.shade300,
-            tooltip: "Previous Page",
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              "Page ${_currentPage + 1} of $totalPages",
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: _textColor,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            onPressed: _currentPage < totalPages - 1
-                ? () => setState(() => _currentPage++)
-                : null,
-            icon: const Icon(Icons.chevron_right_rounded, size: 24),
-            color: _primaryColor,
-            disabledColor: Colors.grey.shade300,
-            tooltip: "Next Page",
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductItem(ProductModel product) {
+  Widget _buildEliteTileItem(ProductModel product) {
     return AdminCard(
       child: Padding(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.all(4.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Product Thumbnail
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
-                width: 74,
-                height: 74,
+                width: 78,
+                height: 78,
                 color: _primaryColor.withOpacity(0.05),
                 child: Image.network(
                   product.image,
-                  width: 74,
-                  height: 74,
+                  width: 78,
+                  height: 78,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Icon(
                         Icons.image_not_supported_outlined,
                         color: _primaryColor.withOpacity(0.35),
-                        size: 24,
+                        size: 26,
                       ),
                     );
                   },
@@ -347,6 +279,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
             const SizedBox(width: 14),
+
+            // Product Information
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,67 +318,66 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   const SizedBox(height: 6),
                   Wrap(
                     spacing: 8,
-                    runSpacing: 8,
+                    runSpacing: 4,
                     children: [
                       if (product.featured)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                            horizontal: 8,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: Colors.grey.shade100, // Light greyish background
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.amber.withOpacity(0.50),
+                              color: Colors.grey.shade300,
                               width: 1.2,
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Featured",
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: GoogleFonts.manrope(
+                              fontSize: 10,
                               fontWeight: FontWeight.w600,
+                              color: _textColor,
                             ),
                           ),
                         ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
+                          horizontal: 8,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: Colors.grey.shade100, // Light greyish background instead of green/red
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xff7F4F4F).withOpacity(0.25),
+                            color: Colors.grey.shade300,
                             width: 1.2,
                           ),
                         ),
                         child: Text(
-                          product.inStock ? " In Stock" : " Out of Stock",
-                          style: TextStyle(
-                            fontSize: 12,
+                          product.inStock ? "In Stock" : "Out of Stock",
+                          style: GoogleFonts.manrope(
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: product.inStock
-                                ? Colors.green.shade800
-                                : Colors.red.shade800,
+                            color: _textColor,
                           ),
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
+
+            // Action Buttons Column
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  tooltip: "Edit",
-                  onPressed: () async {
+                InkWell(
+                  onTap: () async {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -452,35 +385,35 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       ),
                     );
                   },
-                  style: IconButton.styleFrom(
-                    backgroundColor: _primaryColor.withOpacity(0.08),
-                    shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.all(8),
-                  ),
-                  icon: const Icon(
-                    Icons.edit_outlined,
-                    color: _primaryColor,
-                    size: 18,
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: _primaryColor,
+                      size: 18,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  tooltip: "Delete",
-                  onPressed: () => _showDeleteDialog(product),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.08),
-                    shape: RoundedRectangleBorder(
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => _showDeleteDialog(product),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.all(8),
-                  ),
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: Colors.redAccent,
-                    size: 18,
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.redAccent,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -491,10 +424,66 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildEmptyState({
-    required String title,
-    required String subtitle,
-  }) {
+  Widget _buildPaginationControls(int totalPages) {
+    return Align(
+      alignment: Alignment.centerLeft, // Moved to total left
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _primaryColor.withOpacity(0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: _primaryColor.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _currentPage > 0 ? () => setState(() => _currentPage--) : null,
+              icon: const Icon(Icons.chevron_left_rounded, size: 24),
+              color: _primaryColor,
+              disabledColor: Colors.grey.shade300,
+              tooltip: "Previous Page",
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                "Page ${_currentPage + 1} of $totalPages",
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: _textColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _currentPage < totalPages - 1 ? () => setState(() => _currentPage++) : null,
+              icon: const Icon(Icons.chevron_right_rounded, size: 24),
+              color: _primaryColor,
+              disabledColor: Colors.grey.shade300,
+              tooltip: "Next Page",
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState({required String title, required String subtitle}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -621,8 +610,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             color: const Color(0xff5D4E4E),
           ),
         ),
-        actionsPadding:
-            const EdgeInsets.only(right: 16, bottom: 16, left: 16),
+        actionsPadding: const EdgeInsets.only(right: 16, bottom: 16, left: 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -660,7 +648,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
 
     if (confirm == true) {
-      // 2. Exception handling block for deletions
       try {
         await _productService.deleteProduct(product.id);
         if (!mounted) return;

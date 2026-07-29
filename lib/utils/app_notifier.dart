@@ -7,7 +7,7 @@ class AppNotifier {
     _show(
       context,
       message,
- const Color(0xff2E7D32),
+      const Color(0xff2E7D32),
     );
   }
 
@@ -26,30 +26,43 @@ class AppNotifier {
       Colors.grey.shade700,
     );
   }
-static void success(BuildContext context, String message) {
-  _show(
-    context,
-    message,
-    const Color(0xff2E7D32),
-  );
-}
-static void error(BuildContext context, String message) {
-  _show(
-    context,
-    message,
-    const Color(0xffD32F2F), // Material Red 700
-  );
-}
-static void info(
-  BuildContext context,
-  String message,
-) {
-  _show(
-    context,
-    message,
-    Colors.grey.shade700,
-  );
-}
+
+  static void success(BuildContext context, String message) {
+    _show(
+      context,
+      message,
+      const Color(0xff2E7D32),
+    );
+  }
+
+  static void error(BuildContext context, String message) {
+    _show(
+      context,
+      message,
+      const Color(0xffD32F2F), // Material Red 700
+    );
+  }
+
+  // NEW: Orange alert/warning notification method
+  static void alert(BuildContext context, String message) {
+    _show(
+      context,
+      message,
+      const Color(0xffED6C02), // Material Orange / Warning
+    );
+  }
+
+  static void info(
+    BuildContext context,
+    String message,
+  ) {
+    _show(
+      context,
+      message,
+      Colors.grey.shade700,
+    );
+  }
+
   static void _show(
     BuildContext context,
     String message,
@@ -88,7 +101,7 @@ static void info(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.2,
-                 decoration: TextDecoration.none,
+                decoration: TextDecoration.none,
               ),
             ),
           ),
