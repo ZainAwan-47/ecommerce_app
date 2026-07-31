@@ -4,146 +4,129 @@ import '../../categories/category_products_screen.dart';
 import '../../../models/category_model.dart';
 import '../../../services/category_service.dart';
 import '../../../utils/category_icons.dart';
+
 class CategoryCard extends StatelessWidget {
   CategoryCard({super.key});
 
   final CategoryService _categoryService = CategoryService();
 
-  IconData _getIcon(String name) {
-    switch (name) {
-      case "Skin Care":
-        return Icons.spa_rounded;
-
-      case "Makeup":
-        return Icons.face_retouching_natural_rounded;
-
-      case "Perfume":
-        return Icons.local_florist_rounded;
-
-      case "Hair Care":
-        return Icons.content_cut_rounded;
-
-      case "Hand Care":
-        return Icons.back_hand_rounded;
-
-      default:
-        return Icons.category_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 115,
       child: StreamBuilder<List<CategoryModel>>(
         stream: _categoryService.getCategories(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xff7F4F4F),
+              ),
             );
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const SizedBox.shrink();
           }
 
           final categories = snapshot.data!;
-
           return ListView.builder(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final category = categories[index];
 
-final selected = false;
               return GestureDetector(
-               onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => CategoryProductsScreen(
-        category: category.name,
-      ),
-    ),
-  );
-},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoryProductsScreen(
+                        category: category.name,
+                      ),
+                    ),
+                  );
+                },
                 child: Container(
-                  width: 90,
-                  margin:
-                      const EdgeInsets.only(right: 13),
+                  width: 86,
+                  margin: const EdgeInsets.only(right: 14),
                   decoration: BoxDecoration(
-                    color: selected
-                        ? const Color(0xff7F4F4F)
-                        : Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(22),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: const Color(0xff7F4F4F).withOpacity(0.12),
+                      width: 1.2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black
-                            .withOpacity(.05),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+                        color: const Color(0xff7F4F4F).withOpacity(0.06),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 21,
-                        backgroundColor: selected
-                            ? Colors.white24
-                            : const Color(
-                                0xffF8EEEB,
-                              ),
-                      child: Builder(
-  builder: (_) {
-    if (category.imageType == "icon") {
-      return Icon(
-        CategoryIcons.getIcon(category.image),
-        size: 21,
-        color: selected
-            ? Colors.white
-            : const Color(0xff7F4F4F),
-      );
-    }
-
-    return ClipOval(
-      child: Image.network(
-        category.image,
-        width: 42,
-        height: 42,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Icon(
-          Icons.category_outlined,
-          size: 21,
-          color: selected
-              ? Colors.white
-              : const Color(0xff7F4F4F),
-        ),
-      ),
-    );
-  },
-),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        category.name,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-  style: GoogleFonts.manrope(                          fontSize: 12,
-                          fontWeight:
-                              FontWeight.w600,
-                          color: selected
-                              ? Colors.white
-                              : const Color(
-                                  0xff2F2F2F,
-                                ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xff7F4F4F).withOpacity(0.08),
+                                const Color(0xff7F4F4F).withOpacity(0.18),
+                              ],
+                            ),
+                          ),
+                          child: Center(
+                            child: Builder(
+                              builder: (_) {
+                                if (category.imageType == "icon") {
+                                  return Icon(
+                                    CategoryIcons.getIcon(category.image),
+                                    size: 21,
+                                    color: const Color(0xff7F4F4F),
+                                  );
+                                }
+                                return ClipOval(
+                                  child: Image.network(
+                                    category.image,
+                                    width: 44,
+                                    height: 44,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.category_outlined,
+                                      size: 20,
+                                      color: Color(0xff7F4F4F),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        Text(
+                          category.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.5,
+                            letterSpacing: -0.3,
+                            color: const Color(0xff2D2323),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
