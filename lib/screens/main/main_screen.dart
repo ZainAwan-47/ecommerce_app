@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../core/tab_controller.dart';
 import '../../core/page_controller_holder.dart';
-
 import '../home/home_screen.dart';
 import '../product/products_screen.dart';
 import '../wishlist/wishlist_screen.dart';
@@ -12,17 +10,16 @@ import '../home/widgets/bottom_nav.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
-
   const MainScreen({
     super.key,
     this.initialIndex = 0,
   });
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   final pages = [
     const HomeScreen(),
     const ProductsScreen(),
@@ -34,10 +31,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedTab.value = widget.initialIndex;
-      appPageController.jumpToPage(widget.initialIndex);
+      if (appPageController.hasClients) {
+        appPageController.jumpToPage(widget.initialIndex);
+      }
     });
   }
 
@@ -60,6 +58,11 @@ class _MainScreenState extends State<MainScreen> {
             onTap: (value) {
               if (value != selectedTab.value) {
                 goToTab(value);
+                appPageController.animateToPage(
+                  value,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               }
             },
           ),

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../product/products_screen.dart';
 import '../../offers/offers_screen.dart';
+import '../../../core/page_controller_holder.dart';
+import '../../../core/tab_controller.dart';
 
 class OfferBanner extends StatelessWidget {
   const OfferBanner({super.key});
@@ -11,433 +13,255 @@ class OfferBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance
-      .collection("products")
-      .snapshots(),
+      stream: FirebaseFirestore.instance.collection("products").snapshots(),
       builder: (context, snapshot) {
         int maxDiscount = 0;
-       if (snapshot.connectionState ==
-    ConnectionState.waiting) {
-  return const SizedBox(
-    height: 187,
-    child: Center(
-      child: CircularProgressIndicator(),
-    ),
-  );
-}
-
-if (snapshot.hasError) {
-  return const SizedBox.shrink();
-}
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 180,
+            child: Center(
+              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xff7F4F4F)),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        }
         if (snapshot.hasData) {
           for (final doc in snapshot.data!.docs) {
-            final data =
-                doc.data() as Map<String, dynamic>;
-
-            final discount =
-                (data["discount"] as num?)
-                        ?.toInt() ??
-                    0;
-
+            final data = doc.data() as Map<String, dynamic>;
+            final discount = (data["discount"] as num?)?.toInt() ?? 0;
             if (discount > maxDiscount) {
               maxDiscount = discount;
             }
           }
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
-        child:Container(
-              height: 193,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(30),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xff6E4747),
-                    Color(0xff956767),
-                    Color(0xffC89797),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 600;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 180),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xff6E4747),
+                      Color(0xff956767),
+                      Color(0xffC89797),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xff7F4F4F).withOpacity(0.2),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
                   ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(
-                            0xff7F4F4F)
-                        .withOpacity(.18),
-                    blurRadius: 28,
-                    offset:
-                        const Offset(0, 12),
-                  ),
-                ],
-              ),
-
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(30),
-                child: Stack(
-                  children: [
-
-                    /// Top glossy light
-                    Positioned(
-                      top: -70,
-                      left: -40,
-                      child: Container(
-                        width: 250,
-                        height: 150,
-                        decoration:
-                            BoxDecoration(
-                          gradient:
-                              RadialGradient(
-                            colors: [
-                              Colors.white
-                                  .withOpacity(.22),
-                              Colors.transparent,
-                            ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Stack(
+                    children: [
+                      // Ambient background light orb for depth
+                      Positioned(
+                        top: -50,
+                        right: -30,
+                        child: Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
                           ),
                         ),
                       ),
-                    ),
-
-                    /// Bottom glow
-                    Positioned(
-                      right: -70,
-                      bottom: -70,
-                      child: Container(
-                        width: 210,
-                        height: 210,
-                        decoration:
-                            BoxDecoration(
-                          shape:
-                              BoxShape.circle,
-                          color: Colors.white
-                              .withOpacity(.05),
-                        ),
-                      ),
-                    ),
-
-                    /// Glass chip
-                    Positioned(
-                      top: 18,
-                      left: 18,
-                      child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(
-                                40),
-                        child: BackdropFilter(
-                          filter:
-                              ImageFilter.blur(
-                            sigmaX: 10,
-                            sigmaY: 10,
-                          ),
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration:
-                                BoxDecoration(
-                              color: Colors.white
-                                  .withOpacity(.14),
-                              borderRadius:
-                                  BorderRadius
-                                      .circular(
-                                          40),
-                              border:
-                                  Border.all(
-                                color: Colors
-                                    .white
-                                    .withOpacity(
-                                        .30),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize:
-                                  MainAxisSize
-                                      .min,
-                              children: [
-                                const Icon(
-                                  Icons
-                                      .workspace_premium_rounded,
-                                  color:
-                                      Colors.white,
-                                  size: 15,
-                                ),
-
-                                const SizedBox(
-                                    width: 6),
-
-                                Text(
-                                  "LIMITED OFFER",
-                                  style:
-                                      GoogleFonts
-                                          .manrope(
-                                    color: Colors
-                                        .white,
-                                    fontWeight:
-                                        FontWeight
-                                            .w800,
-                                    fontSize: 11,
-                                    letterSpacing:
-                                        1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                                        /// Main Content
-                                        const SizedBox(height: 16),
-                    Positioned.fill(
-                      child: Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(
-                          18,
-                          50,
-                          18,
-                          14,
-                        ),
+                      
+                      Padding(
+                        padding: EdgeInsets.all(isWide ? 28 : 22),
                         child: Row(
                           children: [
-
-                            /// Left Side
                             Expanded(
-                              flex: 6,
+                              flex: 7,
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment
-                                        .start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-
+                                  // Editorial Tag
                                   Text(
-                                    maxDiscount == 0
-                                        ? "NEW ARRIVALS"
-                                        : "SAVE UP TO",
-                                    style:
-                                        GoogleFonts.manrope(
+                                    maxDiscount == 0 ? "CURATED COLLECTION" : "LIMITED OFFER",
+                                    style: GoogleFonts.manrope(
                                       color: Colors.white70,
-                                      fontSize: 12,
-                                      letterSpacing: 2,
-                                      fontWeight:
-                                          FontWeight.w700,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10,
+                                      letterSpacing: 1.5,
                                     ),
                                   ),
-
-                                  const SizedBox(height: 4),
-
+                                  const SizedBox(height: 8),
+                                  
+                                  // Headline
                                   Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-
                                       Text(
-                                        maxDiscount == 0
-                                            ? "Premium"
-                                            : "$maxDiscount%",
-                                        style:
-                                            GoogleFonts
-                                                .manrope(
-                                          color:
-                                              Colors.white,
-                                          fontSize: 35,
-                                          height: .9,
-                                          fontWeight:
-                                              FontWeight.bold,
+                                        maxDiscount == 0 ? "New Arrivals" : "$maxDiscount%",
+                                        style: GoogleFonts.manrope(
+                                          color: Colors.white,
+                                          fontSize: isWide ? 38 : 32,
+                                          height: 0.95,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: -1,
                                         ),
                                       ),
-
                                       if (maxDiscount > 0)
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(
-                                            left: 6,
-                                            bottom: 5,
-                                          ),
+                                          padding: const EdgeInsets.only(left: 6, bottom: 4),
                                           child: Text(
                                             "OFF",
-                                            style:
-                                                GoogleFonts.manrope(
+                                            style: GoogleFonts.manrope(
                                               color: Colors.white,
-                                              fontSize: 13,
-                                              fontWeight:
-                                                  FontWeight.w800,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w800,
                                               letterSpacing: 1,
                                             ),
                                           ),
                                         ),
                                     ],
                                   ),
-
-                                  const SizedBox(height: 3),
-
+                                  const SizedBox(height: 6),
+                                  
+                                  // Subtitle description
+                                  Text(
+                                    maxDiscount == 0
+                                        ? "Explore our newest luxury additions crafted for timeless elegance."
+                                        : "Exclusive seasonal savings across our premier catalog.",
+                                    style: GoogleFonts.manrope(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 13,
+                                      height: 1.3,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  
+                                  // Action Button
                                   SizedBox(
-                                    width: 240,
-                                    child: Text(
-                                      maxDiscount == 0
-                                          ? "Explore our newest premium beauty collection."
-                                          : "Exclusive savings on skincare, makeup and fragrances.",
-                                      style:
-                                          GoogleFonts.manrope(
-                                        color: Colors.white
-                                            .withOpacity(.92),
-                                        fontSize: 12,
-                                        height: 1.25,
-                                        fontWeight:
-                                            FontWeight.w500,
+                                    height: 38,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        if (maxDiscount > 0) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const OffersScreen(),
+                                            ),
+                                          );
+                                        } else {
+                                          goToTab(1);
+                                          appPageController.animateToPage(
+                                            1,
+                                            duration: const Duration(milliseconds: 320),
+                                            curve: Curves.easeOutCubic,
+                                          );
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: const Color(0xff6E4747),
+                                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            maxDiscount > 0 ? "Claim Offer" : "Have a Look",
+                                            style: GoogleFonts.manrope(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 15,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
-
-const SizedBox(height: 4),
-                               if (maxDiscount > 0)
-  SizedBox(
-    height: 34,
-    child: ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const OffersScreen(),
-          ),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xff6E4747),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children:[
-          Text(
-            "Claim Offer",
-            style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(width: 6),
-          const Icon(
-            Icons.arrow_forward_rounded,
-            size: 16,
-          ),
-        ],
-      ),
-    ),
-  ),
                                 ],
                               ),
                             ),
-
-                            const SizedBox(width: 4),
-
-                            /// Right Decoration
+                            const SizedBox(width: 16),
+                            
+                            // Right Editorial Geometric Badge (Shows "SALE" when discounted, "PREMIUM" when new arrivals)
                             Expanded(
-                              flex: 4,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-
-                                  Container(
-                                    width: 110,
-                                    height: 110,
-                                    decoration:
-                                        BoxDecoration(
-                                      shape:
-                                          BoxShape.circle,
-                                      color: Colors.white
-                                          .withOpacity(.08),
-                                    ),
-                                  ),
-
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration:
-                                        BoxDecoration(
-                                      shape:
-                                          BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white
-                                            .withOpacity(.15),
-                                        width: 2,
+                              flex: 3,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 90,
+                                  height: 90,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.2),
+                                            width: 1,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-
-                                  Icon(
-                                    Icons.spa_rounded,
-                                    size: 68,
-                                    color: Colors.white
-                                        .withOpacity(.18),
-                                  ),
-
-                                  Positioned(
-                                    top: 12,
-                                    right: 18,
-                                    child: Icon(
-                                      Icons.auto_awesome,
-                                      color: Colors.white
-                                          .withOpacity(.45),
-                                      size: 16,
-                                    ),
-                                  ),
-
-                                  Positioned(
-                                    bottom: 18,
-                                    left: 12,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration:
-                                          BoxDecoration(
-                                        color: Colors.white
-                                            .withOpacity(.35),
-                                        shape:
-                                            BoxShape.circle,
+                                      Container(
+                                        width: 72,
+                                        height: 72,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(0.1),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.3),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            maxDiscount == 0 ? "PREMIUM" : "SALE",
+                                            style: GoogleFonts.manrope(
+                                              color: Colors.white,
+                                              fontSize: maxDiscount == 0 ? 10 : 13,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-
-                                  Positioned(
-                                    top: 35,
-                                    left: 18,
-                                    child: Container(
-                                      width: 5,
-                                      height: 5,
-                                      decoration:
-                                          BoxDecoration(
-                                        color: Colors.white
-                                            .withOpacity(.25),
-                                        shape:
-                                            BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-          ),
+            );
+          },
         );
       },
     );
