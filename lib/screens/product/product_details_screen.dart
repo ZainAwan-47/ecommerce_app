@@ -468,58 +468,58 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
                     /// FULL-WIDTH FROSTED GLASS DESCRIPTION CONTAINER
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          width: double.infinity,
-                          height: 130,
-                          padding: EdgeInsets.all(width * 0.045),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF9F7).withOpacity(0.55),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.black.withOpacity(0.12),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Description",
-                                style: GoogleFonts.manrope(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF1E1E1E),
-                                ),
-                              ),
-                              SizedBox(height: width * 0.02),
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  physics: const BouncingScrollPhysics(),
-                                  child: Text(
-                                    product.description,
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 14,
-                                      height: 1.6,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+  borderRadius: BorderRadius.circular(16),
+  child: BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+    child: Container(
+      width: double.infinity,
+      height: 130,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF9F7).withOpacity(0.75),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.black.withOpacity(0.08),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04), // Fixed: Soft, subtle shadow
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Description",
+            style: GoogleFonts.manrope(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E1E1E),
+            ),
+          ),
+          SizedBox(height: width * 0.02),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Text(
+                product.description,
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
                     SizedBox(height: width * 0.05),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
