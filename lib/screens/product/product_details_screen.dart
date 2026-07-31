@@ -1,8 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:share_plus/share_plus.dart';
-
 import '../../services/cart_service.dart';
 import '../../models/product_model.dart';
 import '../../services/wishlist_service.dart';
@@ -32,6 +33,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final WishlistService _wishlistService = WishlistService();
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final product = widget.product;
@@ -48,6 +55,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               pinned: true,
               elevation: 0,
               backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              systemOverlayStyle: SystemUiOverlayStyle.dark,
               leading: Padding(
                 padding: const EdgeInsets.all(8),
                 child: CircleAvatar(
@@ -83,45 +92,96 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ),
                           onPressed: () async {
                             final wasWishlisted = isWishlisted;
-                            final success = await _wishlistService.toggleWishlist(
-                              product,
-                            );
+                            final success = await _wishlistService
+                                .toggleWishlist(product);
                             if (!mounted) return;
                             if (!success) {
                               showDialog(
                                 context: context,
-                                builder: (_) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  title: const Text("Sign In Required"),
-                                  content: const Text(
-                                    "Please sign in to use Wishlist.",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Cancel"),
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(22),
                                     ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF7F4F4F),
+                                    titlePadding: const EdgeInsets.fromLTRB(
+                                        24, 24, 24, 8),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 8),
+                                    actionsPadding: const EdgeInsets.fromLTRB(
+                                        20, 8, 20, 20),
+                                    title: Text(
+                                      "Sign In Required",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xff2D2323),
                                       ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const LoginScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: const Text("Sign In"),
                                     ),
-                                  ],
-                                ),
+                                    content: Text(
+                                      "Please sign in to use Wishlist.",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xff8D7B7B),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text(
+                                          "Cancel",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xff8D7B7B),
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xff7F4F4F),
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Sign In",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                               return;
                             }
@@ -195,11 +255,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 child: Image.network(
                                   product.images[index],
                                   fit: BoxFit.contain,
-                                  loadingBuilder: (
-                                    context,
-                                    child,
-                                    progress,
-                                  ) {
+                                  loadingBuilder: (context, child, progress) {
                                     if (progress == null) return child;
                                     return const Center(
                                       child: CircularProgressIndicator(
@@ -207,11 +263,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       ),
                                     );
                                   },
-                                  errorBuilder: (
-                                    context,
-                                    error,
-                                    stackTrace,
-                                  ) {
+                                  errorBuilder: (context, error, stackTrace) {
                                     return const Icon(
                                       Icons.image_not_supported,
                                       size: 80,
@@ -318,7 +370,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: Padding(
                 padding: EdgeInsets.all(width * 0.05),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       "Shop by Tehreem",
@@ -413,40 +465,59 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ],
                     ),
                     SizedBox(height: width * 0.05),
-                    Container(
-                      padding: EdgeInsets.all(width * 0.045),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Description",
-                            style: GoogleFonts.manrope(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1E1E1E),
+
+                    /// FULL-WIDTH FROSTED GLASS DESCRIPTION CONTAINER
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          width: double.infinity,
+                          height: 130,
+                          padding: EdgeInsets.all(width * 0.045),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF9F7).withOpacity(0.55),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.black.withOpacity(0.12),
+                              width: 1,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.5),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: width * 0.02),
-                          Text(
-                            product.description,
-                            style: GoogleFonts.manrope(
-                              fontSize: 14,
-                              height: 1.6,
-                              color: Colors.grey.shade700,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Description",
+                                style: GoogleFonts.manrope(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1E1E1E),
+                                ),
+                              ),
+                              SizedBox(height: width * 0.02),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  physics: const BouncingScrollPhysics(),
+                                  child: Text(
+                                    product.description,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 14,
+                                      height: 1.6,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     SizedBox(height: width * 0.05),
@@ -461,67 +532,74 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             color: const Color(0xFF1E1E1E),
                           ),
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.grey.shade200),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.02),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  if (quantity > 1) {
-                                    setState(() {
-                                      quantity--;
-                                    });
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.remove_circle_outline,
-                                  color: Color(0xFF7F4F4F),
+
+                        /// FROSTED GLASS QUANTITY SELECTOR
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF9F7).withOpacity(0.55),
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                 color: Colors.black.withOpacity(0.12),
+                                  width: 1,
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Text(
-                                  quantity.toString(),
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1E1E1E),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.02),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
+                                ],
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    quantity++;
-                                  });
-                                },
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  color: Color(0xFF7F4F4F),
-                                ),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      if (quantity > 1) {
+                                        setState(() {
+                                          quantity--;
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Color(0xFF7F4F4F),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Text(
+                                      quantity.toString(),
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF1E1E1E),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        quantity++;
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      color: Color(0xFF7F4F4F),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: width * 0.06),
-                    
-                    // Out of stock check: If not in stock, display only 1 disabled Out of Stock button.
-                    // Otherwise, display Add to Cart and Buy Now buttons.
                     if (!product.inStock) ...[
                       SizedBox(
                         width: double.infinity,
@@ -530,11 +608,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           onPressed: null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.grey.shade300,
-                            disabledBackgroundColor: Colors.grey.shade300,
+                            disabledBackgroundColor:
+                                Colors.grey.shade300,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            elevation: 0,
                           ),
                           child: Text(
                             "Out Of Stock",
@@ -560,38 +639,94 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             if (!added) {
                               showDialog(
                                 context: context,
-                                builder: (_) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  title: const Text("Sign In Required"),
-                                  content: const Text(
-                                    "Please sign in to add products to your cart.",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Cancel"),
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(22),
                                     ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF7F4F4F),
+                                    titlePadding:
+                                        const EdgeInsets.fromLTRB(
+                                            24, 24, 24, 8),
+                                    contentPadding:
+                                        const EdgeInsets.symmetric(
+                                            horizontal: 24, vertical: 8),
+                                    actionsPadding:
+                                        const EdgeInsets.fromLTRB(
+                                            20, 8, 20, 20),
+                                    title: Text(
+                                      "Sign In Required",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xff2D2323),
                                       ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const LoginScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: const Text("Sign In"),
                                     ),
-                                  ],
-                                ),
+                                    content: Text(
+                                      "Please sign in to add products to your cart.",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xff8D7B7B),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text(
+                                          "Cancel",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xff8D7B7B),
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xff7F4F4F),
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          "Sign In",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                               return;
                             }
@@ -603,7 +738,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7F4F4F),
                             elevation: 2,
-                            shadowColor: const Color(0xFF7F4F4F).withOpacity(0.4),
+                            shadowColor: const Color(0xFF7F4F4F)
+                                .withOpacity(0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -624,7 +760,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         height: 56,
                         child: OutlinedButton(
                           onPressed: () {
-                            final user = FirebaseAuth.instance.currentUser;
+                            final user =
+                                FirebaseAuth.instance.currentUser;
                             if (user == null) {
                               Navigator.push(
                                 context,

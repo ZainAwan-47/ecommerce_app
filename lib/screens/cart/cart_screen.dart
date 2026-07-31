@@ -15,70 +15,59 @@ class CartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
-
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
-
         title: Text(
           "My Cart",
           style: GoogleFonts.manrope(
-            fontSize: 26,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: const Color(0xff2D2323),
           ),
         ),
-
         iconTheme: const IconThemeData(
-          color: Colors.black,
+          color: Color(0xff2D2323),
         ),
       ),
-
       body: StreamBuilder<QuerySnapshot>(
         stream: cartService.getCart(),
-
         builder: (context, snapshot) {
-
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xff7F4F4F),
+              ),
             );
           }
-
-          if (!snapshot.hasData ||
-              snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   Icon(
                     Icons.shopping_cart_outlined,
-                  size: width * 0.18,
-                    color: Colors.grey.shade400,
+                    size: 72,
+                    color: const Color(0xff8D7B7B).withOpacity(0.4),
                   ),
-
                   const SizedBox(height: 20),
-
                   Text(
                     "Your Cart is Empty",
-                    style: GoogleFonts.manrope(
-                   fontSize: width * 0.065,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.dmSerifDisplay(
+                      fontSize: 24,
+                      color: const Color(0xff2D2323),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 8),
                   Text(
                     "Looks like you haven't\nadded anything yet.",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
-                      color: Colors.grey,
-                   fontSize: width * 0.037,
+                      color: const Color(0xff8D7B7B),
+                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -87,180 +76,141 @@ class CartScreen extends StatelessWidget {
           }
 
           final cartItems = snapshot.data!.docs;
-
-          final subtotal =
-              cartService.calculateTotal(cartItems);
+          final subtotal = cartService.calculateTotal(cartItems);
 
           return Column(
             children: [
-
               Expanded(
                 child: ListView.builder(
-              padding: EdgeInsets.all(width * 0.04),
+                  padding: const EdgeInsets.all(16),
                   itemCount: cartItems.length,
-
                   itemBuilder: (context, index) {
-
                     final item = cartItems[index];
-
                     return Container(
-                    margin: EdgeInsets.only(bottom: width * 0.03),
-
-                  padding: EdgeInsets.symmetric(
-  horizontal: width * 0.03,
-  vertical: width * 0.018,
-),
-
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white,
-
-                        borderRadius:
-                         BorderRadius.circular(width * 0.04),
-
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.08),
+                          width: 0.8,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black
-                                .withOpacity(.05),
-                            blurRadius: 15,
-                            offset:
-                                const Offset(0, 8),
+                            color: const Color(0xff7F4F4F).withOpacity(0.04),
+                            blurRadius: 14,
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
-
                       child: Row(
                         children: [
-                                                      ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(18),
-                            child: Image.network(
-  item['image'],
-width: width * 0.16,
-height: width * 0.16,
-  fit: BoxFit.cover,
-
-  loadingBuilder: (context, child, loadingProgress) {
-    if (loadingProgress == null) {
-      return child;
-    }
-
-    return const SizedBox(
-      width: 90,
-      height: 90,
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-        ),
-      ),
-    );
-  },
-
-  errorBuilder: (context, error, stackTrace) {
-    return Container(
-      width: 90,
-      height: 90,
-      color: const Color(0xffF6F1EE),
-      child: const Icon(
-        Icons.image_not_supported_outlined,
-        color: Colors.grey,
-        size: 35,
-      ),
-    );
-  },
-),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              width: 75,
+                              height: 75,
+                              color: const Color(0xffFFF9F7),
+                              child: Image.network(
+                                item['image'] ?? '',
+                                fit: BoxFit.contain,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: Color(0xff7F4F4F),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: Color(0xff8D7B7B),
+                                      size: 28,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-
-                        SizedBox(width: width * 0.035),
-
+                          const SizedBox(width: 14),
                           Expanded(
-                        child: Column(
-  mainAxisSize: MainAxisSize.min,
-  crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
                                 Text(
-                                  item['name'],
+                                  item['name'] ?? '',
                                   maxLines: 2,
-                                  overflow:
-                                      TextOverflow.ellipsis,
+                                  overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.manrope(
-                              fontSize: width * 0.05,
-                                    fontWeight:
-                                        FontWeight.bold,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xff2D2323),
                                   ),
                                 ),
-
-                          SizedBox(height: width * 0.008),
-
+                                const SizedBox(height: 4),
                                 Text(
                                   "Rs ${item['price']}",
-  style: GoogleFonts.manrope(                                    color:
-                                        const Color(0xff7F4F4F),
-                                    fontWeight:
-                                        FontWeight.w600,
-                                fontSize: width * 0.042,
+                                  style: GoogleFonts.manrope(
+                                    color: const Color(0xff7F4F4F),
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
                                   ),
                                 ),
-
-                       SizedBox(height: width * 0.012),
-
+                                const SizedBox(height: 10),
                                 Row(
                                   children: [
-
                                     InkWell(
-onTap: () async {
-  final removed = await cartService.decreaseQuantity(item.id);
-
-  if (!context.mounted) return;
-
-  if (removed) {
-    AppNotifier.remove(
-      context,
-      "Item removed from cart",
-    );
-  }
-},
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () async {
+                                        final removed = await cartService
+                                            .decreaseQuantity(item.id);
+                                        if (!context.mounted) return;
+                                        if (removed) {
+                                          AppNotifier.remove(
+                                            context,
+                                            "Item removed from cart",
+                                          );
+                                        }
+                                      },
                                       child: CircleAvatar(
-                                      radius: width * 0.032,
-                                        backgroundColor:
-                                            Color(0xffF3ECE9),
-                                        child: Icon(
+                                        radius: 14,
+                                        backgroundColor: const Color(0xffF3ECE9),
+                                        child: const Icon(
                                           Icons.remove,
-                                        size: width * 0.04,
-                                          color:
-                                              Color(0xff7F4F4F),
+                                          size: 14,
+                                          color: Color(0xff7F4F4F),
                                         ),
                                       ),
                                     ),
-
-                                 SizedBox(width: width * 0.025),
-
-                                    Text(
-                                      item['quantity']
-                                          .toString(),
- style: GoogleFonts.manrope(
-  fontSize: width * 0.042,
-  fontWeight: FontWeight.bold,
-),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Text(
+                                        item['quantity'].toString(),
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xff2D2323),
+                                        ),
+                                      ),
                                     ),
-
-                                    const SizedBox(width: 14),
-
                                     InkWell(
+                                      borderRadius: BorderRadius.circular(12),
                                       onTap: () {
-                                        cartService
-                                            .increaseQuantity(
-                                          item.id,
-                                        );
+                                        cartService.increaseQuantity(item.id);
                                       },
-
-                                    child: CircleAvatar(
-  radius: width * 0.032,
-                                        backgroundColor:
-                                            Color(0xff7F4F4F),
-                                        child: Icon(
+                                      child: CircleAvatar(
+                                        radius: 14,
+                                        backgroundColor: const Color(0xff7F4F4F),
+                                        child: const Icon(
                                           Icons.add,
-                                     size: width * 0.04,
+                                          size: 14,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -270,78 +220,119 @@ onTap: () async {
                               ],
                             ),
                           ),
-
                           IconButton(
                             onPressed: () async {
-  final shouldDelete = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-  title: Text(
-    "Remove Item",
-    style: GoogleFonts.manrope(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    ),
-  ),
-  content: Text(
-    "Are you sure you want to remove this item from your cart?",
-    style: GoogleFonts.manrope(
-      fontSize: 15,
-    ),
-  ),
-  actions: [
-    TextButton(
-      onPressed: () {
-        Navigator.pop(context, false);
-      },
-      child: Text(
-        "Cancel",
-        style: GoogleFonts.manrope(
-          color: Colors.grey.shade700,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-      ),
-    ),
-    ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFB76E79),
-        foregroundColor: Colors.white,
-      ),
-      onPressed: () {
-        Navigator.pop(context, true);
-      },
-      child: Text(
-        "Delete",
-        style: GoogleFonts.manrope(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-      ),
-    ),
-  ],
-);
-    },
-  );
+                              final shouldDelete = await showDialog<bool>(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(22),
+                                    ),
+                                    titlePadding: const EdgeInsets.fromLTRB(
+                                      24,
+                                      24,
+                                      24,
+                                      8,
+                                    ),
+                                    contentPadding:
+                                        const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 8,
+                                    ),
+                                    actionsPadding:
+                                        const EdgeInsets.fromLTRB(
+                                      20,
+                                      8,
+                                      20,
+                                      20,
+                                    ),
+                                    title: Text(
+                                      "Remove Item",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xff2D2323),
+                                      ),
+                                    ),
+                                    content: Text(
+                                      "Are you sure you want to remove this item from your cart?",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xff8D7B7B),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context, false);
+                                        },
+                                        child: Text(
+                                          "Cancel",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xff8D7B7B),
+                                          ),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xff7F4F4F),
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context, true);
+                                        },
+                                        child: Text(
+                                          "Delete",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
 
-  if (shouldDelete == true) {
-    await cartService.removeFromCart(item.id);
-
-    if (context.mounted) {
-     AppNotifier.remove(
-  context,
-  "Item removed from cart",
-);
-    }
-  }
-},
-
+                              if (shouldDelete == true) {
+                                await cartService.removeFromCart(item.id);
+                                if (context.mounted) {
+                                  AppNotifier.remove(
+                                    context,
+                                    "Item removed from cart",
+                                  );
+                                }
+                              }
+                            },
                             icon: Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                          size: width * 0.06,
+                              Icons.delete_outline_rounded,
+                              color: Colors.red.shade400,
+                              size: 22,
                             ),
                           ),
                         ],
@@ -350,140 +341,133 @@ onTap: () async {
                   },
                 ),
               ),
-                           SafeArea(
-  top: false,
-  child: Container(
-    margin: EdgeInsets.fromLTRB(
-      width * 0.04,
-      width * 0.04,
-      width * 0.04,
-      width * 0.04,
-    ),
-            padding: EdgeInsets.all(width * 0.04),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-             borderRadius: BorderRadius.circular(width * 0.05),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.05),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
+              SafeArea(
+                top: false,
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.08),
+                      width: 0.8,
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                      children: [
-
-                        Text(
-                          "Subtotal",
-  style: GoogleFonts.manrope(                            fontSize: 14,
-                          ),
-                        ),
-
-                        Text(
-                          "Rs ${subtotal.toStringAsFixed(0)}",
-  style: GoogleFonts.manrope(                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                      children: [
-
-                        Text(
-                          "Delivery",
-  style: GoogleFonts.manrope(                            fontSize: 14,
-                          ),
-                        ),
-
-                        Text(
-                          "Free",
-  style: GoogleFonts.manrope(                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 18,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xff7F4F4F).withOpacity(0.04),
+                        blurRadius: 16,
+                        offset: const Offset(0, -4),
                       ),
-                      child: Divider(),
-                    ),
-
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                      children: [
-
-                        Text(
-                          "Total",
-                          style: GoogleFonts.manrope(
-                        fontSize: width * 0.055,
-                            fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Subtotal",
+                            style: GoogleFonts.manrope(
+                              fontSize: 14,
+                              color: const Color(0xff8D7B7B),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-
-                        Text(
-                          "Rs ${subtotal.toStringAsFixed(0)}",
-                          style: GoogleFonts.manrope(
-                            color: const Color(0xff7F4F4F),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            "Rs ${subtotal.toStringAsFixed(0)}",
+                            style: GoogleFonts.manrope(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: const Color(0xff2D2323),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 25),
-                                        SizedBox(
-                      width: double.infinity,
-                  height: width * 0.12,
-                      child: ElevatedButton(
-                        onPressed: cartItems.isEmpty? null
-                       : () {
-                       Navigator.push(
-                          context,
-                        MaterialPageRoute(
-                         builder: (_) => CheckoutScreen(),
-                           ),
-                          );
-                       },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff7F4F4F),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(18),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Delivery",
+                            style: GoogleFonts.manrope(
+                              fontSize: 14,
+                              color: const Color(0xff8D7B7B),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "Proceed to Checkout",
-  style: GoogleFonts.manrope(                            color: Colors.white,
-                          fontSize: width * 0.043,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            "Free",
+                            style: GoogleFonts.manrope(
+                              color: Colors.green.shade600,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Divider(height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total",
+                            style: GoogleFonts.manrope(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xff2D2323),
+                            ),
+                          ),
+                          Text(
+                            "Rs ${subtotal.toStringAsFixed(0)}",
+                            style: GoogleFonts.manrope(
+                              color: const Color(0xff7F4F4F),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: cartItems.isEmpty
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const CheckoutScreen(),
+                                    ),
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff7F4F4F),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            "Proceed to Checkout",
+                            style: GoogleFonts.manrope(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                          ),
-            ),
-        ],
+              ),
+            ],
           );
         },
       ),

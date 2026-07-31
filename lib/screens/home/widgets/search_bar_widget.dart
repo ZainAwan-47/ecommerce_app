@@ -52,7 +52,7 @@ class SearchBarWidget extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        "Search Products",
+                        "Search Product",
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.manrope(
                           color: const Color(0xff8D7B7B),

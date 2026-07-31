@@ -275,55 +275,75 @@ onTap: () async {
                             onPressed: () async {
   final shouldDelete = await showDialog<bool>(
     context: context,
-    builder: (context) {
-      return AlertDialog(
-  title: Text(
-    "Remove Item",
-    style: GoogleFonts.manrope(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
+builder: (context) {
+  return AlertDialog(
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(22),
     ),
-  ),
-  content: Text(
-    "Are you sure you want to remove this item from your cart?",
-    style: GoogleFonts.manrope(
-      fontSize: 15,
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+    actionsPadding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+    title: Text(
+      "Remove Item",
+      style: GoogleFonts.manrope(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xff2D2323),
+      ),
     ),
-  ),
-  actions: [
-    TextButton(
-      onPressed: () {
-        Navigator.pop(context, false);
-      },
-      child: Text(
-        "Cancel",
-        style: GoogleFonts.manrope(
-          color: Colors.grey.shade700,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
+    content: Text(
+      "Are you sure you want to remove this item from your cart?",
+      style: GoogleFonts.manrope(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: const Color(0xff8D7B7B),
+      ),
+    ),
+    actions: [
+      TextButton(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          Navigator.pop(context, false);
+        },
+        child: Text(
+          "Cancel",
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xff8D7B7B),
+          ),
         ),
       ),
-    ),
-    ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFB76E79),
-        foregroundColor: Colors.white,
-      ),
-      onPressed: () {
-        Navigator.pop(context, true);
-      },
-      child: Text(
-        "Delete",
-        style: GoogleFonts.manrope(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xff7F4F4F),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          Navigator.pop(context, true);
+        },
+        child: Text(
+          "Delete",
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
       ),
-    ),
-  ],
-);
-    },
+    ],
+  );
+},
   );
 
   if (shouldDelete == true) {

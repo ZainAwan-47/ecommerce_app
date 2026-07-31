@@ -17,16 +17,19 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xff3A2B2B),
+            size: 18,
           ),
           onPressed: () {
             goBackTab();
@@ -35,9 +38,9 @@ class WishlistScreen extends StatelessWidget {
         title: Text(
           "My Wishlist",
           style: GoogleFonts.manrope(
-            fontSize: 30,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: const Color(0xff2D2323),
           ),
         ),
       ),
@@ -46,7 +49,10 @@ class WishlistScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xff7F4F4F),
+              ),
             );
           }
           if (snapshot.hasError) {
@@ -54,8 +60,9 @@ class WishlistScreen extends StatelessWidget {
               child: Text(
                 snapshot.error.toString(),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.red,
+                style: GoogleFonts.manrope(
+                  color: Colors.red.shade300,
+                  fontSize: 14,
                 ),
               ),
             );
@@ -66,24 +73,26 @@ class WishlistScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.favorite_border,
-                    size: 90,
-                    color: Colors.grey.shade400,
+                    Icons.favorite_border_rounded,
+                    size: 72,
+                    color: const Color(0xff8D7B7B).withOpacity(0.4),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     "Your Wishlist is Empty",
                     style: GoogleFonts.dmSerifDisplay(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
+                      color: const Color(0xff2D2323),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Text(
                     "Save products you love\nand they'll appear here.",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
-                      color: Colors.grey,
+                      color: const Color(0xff8D7B7B),
+                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -92,68 +101,73 @@ class WishlistScreen extends StatelessWidget {
           }
 
           final wishlist = snapshot.data!.docs;
-
           return ListView.builder(
-            padding: EdgeInsets.all(width * 0.028),
+            padding: const EdgeInsets.all(16),
             itemCount: wishlist.length,
             itemBuilder: (context, index) {
               final item = wishlist[index];
               final data = item.data() as Map<String, dynamic>? ?? {};
-
-              // Safe check for inStock parameter defaulting to true if null
-              final bool inStock = data.containsKey('inStock') 
-                  ? (data['inStock'] ?? true) 
+              
+              // Safe check for inStock parameter defaulting to true if missing
+              final bool inStock = data.containsKey('inStock')
+                  ? (data['inStock'] ?? true)
                   : true;
 
               return Container(
-                margin: EdgeInsets.only(bottom: width * 0.025),
-                padding: EdgeInsets.all(width * 0.04),
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.black.withOpacity(0.08),
+                    width: 0.8,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      color: const Color(0xff7F4F4F).withOpacity(0.04),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Image.network(
-                        data['image'] ?? '',
-                        width: width * 0.17,
-                        height: width * 0.17,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return SizedBox(
-                            width: width * 0.17,
-                            height: width * 0.17,
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: 75,
+                        height: 75,
+                        color: const Color(0xffFFF9F7),
+                        child: Image.network(
+                          data['image'] ?? '',
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: Color(0xff7F4F4F),
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: width * 0.17,
-                            height: width * 0.17,
-                            color: const Color(0xffF6F1EE),
-                            child: const Icon(
-                              Icons.image_not_supported_outlined,
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Color(0xff8D7B7B),
+                                size: 28,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
-                    SizedBox(width: width * 0.03),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,44 +177,49 @@ class WishlistScreen extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.manrope(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xff2D2323),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           Text(
                             "Rs ${data['price'] ?? 0}",
                             style: GoogleFonts.manrope(
                               color: const Color(0xff7F4F4F),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               const Icon(
-                                Icons.star,
+                                Icons.star_rounded,
                                 color: Colors.amber,
-                                size: 18,
+                                size: 15,
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 3),
                               Text(
                                 (data['rating'] ?? 0).toString(),
-                                style: GoogleFonts.manrope(),
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xff8D7B7B),
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 7),
+                          const SizedBox(height: 10),
                           SizedBox(
                             width: double.infinity,
-                            height: width * 0.085,
+                            height: 38,
                             child: ElevatedButton.icon(
                               onPressed: !inStock
                                   ? null
                                   : () async {
-                                      // Safely construct ProductModel using fromFirestore factory
-                                      final product = ProductModel.fromFirestore(
+                                      final product =
+                                          ProductModel.fromFirestore(
                                         item.id,
                                         data,
                                       );
@@ -214,9 +233,9 @@ class WishlistScreen extends StatelessWidget {
 
                                       if (!added) {
                                         AppNotifier.error(
-                                        context,
-                                        "Please Sign In",
-                                      );
+                                          context,
+                                          "Please Sign In",
+                                        );
                                         return;
                                       }
 
@@ -234,31 +253,31 @@ class WishlistScreen extends StatelessWidget {
                                       await wishlistService.removeFromWishlist(
                                         item.id,
                                       );
-
-                                      if (!context.mounted) return;
-                                      
-                                      try {
-                                        goToTab(2);
-                                      } catch (_) {}
                                     },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xff7F4F4F),
-                                disabledBackgroundColor: Colors.grey.shade300,
+                                disabledBackgroundColor:
+                                    Colors.grey.shade200,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                               icon: Icon(
                                 Icons.shopping_cart_outlined,
-                                color: inStock ? Colors.white : Colors.grey.shade600,
-                                size: 14,
+                                color: inStock
+                                    ? Colors.white
+                                    : Colors.grey.shade500,
+                                size: 15,
                               ),
                               label: Text(
                                 inStock ? "Add to Cart" : "Out of Stock",
                                 style: GoogleFonts.manrope(
-                                  color: inStock ? Colors.white : Colors.grey.shade600,
-                                  fontWeight: FontWeight.w400,
+                                  color: inStock
+                                      ? Colors.white
+                                      : Colors.grey.shade600,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
                                 ),
                               ),
                             ),
@@ -266,27 +285,22 @@ class WishlistScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     IconButton(
                       onPressed: () async {
-                        if (!context.mounted) return;
-
                         AppNotifier.remove(
                           context,
                           "Removed from Wishlist",
                         );
-
                         await Future.delayed(
                           const Duration(milliseconds: 200),
                         );
-
-                        await wishlistService.removeFromWishlist(
-                          item.id,
-                        );
+                        await wishlistService.removeFromWishlist(item.id);
                       },
                       icon: Icon(
-                        Icons.favorite,
-                        color: Colors.red,
-                        size: width * 0.07,
+                        Icons.favorite_rounded,
+                        color: Colors.red.shade400,
+                        size: 24,
                       ),
                     ),
                   ],

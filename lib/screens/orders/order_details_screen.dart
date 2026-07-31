@@ -53,14 +53,23 @@ class OrderDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Color(0xff3A2B2B)),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xff3A2B2B),
+            size: 18,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           "Order Details",
           style: GoogleFonts.manrope(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: const Color(0xff2D2323),
           ),
         ),
       ),
@@ -72,41 +81,61 @@ class OrderDetailsScreen extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text("Error loading order details: ${snapshot.error}"));
+            return Center(
+              child: Text(
+                "Error loading order details: ${snapshot.error}",
+                style: GoogleFonts.manrope(color: Colors.red.shade300),
+              ),
+            );
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xff7F4F4F),
+              ),
+            );
           }
 
           // Use live snapshot if available, fallback to initial snapshot
           final doc = snapshot.data ?? order;
           final data = doc.data() as Map<String, dynamic>? ?? {};
-
-          final List products = data['products'] ?? order['products'] ?? [];
-          final String orderStatus = data['status'] ?? order['status'] ?? 'Pending';
-          final String paymentStatus = data['paymentStatus'] ?? data['payment_status'] ?? 'Pending';
-          final String? rejectionReason = data['rejectionReason'] ?? data['rejection_reason'];
+          final List products =
+              data['products'] ?? (order.data() as Map<String, dynamic>?)?['products'] ?? [];
+          final String orderStatus =
+              data['status'] ?? (order.data() as Map<String, dynamic>?)?['status'] ?? 'Pending';
+          final String paymentStatus = data['paymentStatus'] ??
+              data['payment_status'] ??
+              'Pending';
+          final String? rejectionReason =
+              data['rejectionReason'] ?? data['rejection_reason'];
 
           // Dynamically override display status if payment proof was rejected
-          final String displayOrderStatus = (paymentStatus.toLowerCase() == 'rejected')
-              ? 'Rejected'
-              : orderStatus;
+          final String displayOrderStatus =
+              (paymentStatus.toLowerCase() == 'rejected')
+                  ? 'Rejected'
+                  : orderStatus;
 
-          final bool isPaymentRejected = paymentStatus.toLowerCase() == 'rejected';
-          final bool isOrderCancelled = orderStatus.toLowerCase() == 'cancelled';
+          final bool isPaymentRejected =
+              paymentStatus.toLowerCase() == 'rejected';
+          final bool isOrderCancelled =
+              orderStatus.toLowerCase() == 'cancelled';
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(width * 0.04),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // -------------------------------------------------------------
                 // 1. REAL-TIME ALERT BANNER (If Payment Rejected or Cancelled)
-                // -------------------------------------------------------------
                 if (isPaymentRejected || isOrderCancelled) ...[
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: const Color(0xFFFECACA)),
                     ),
                     child: Row(
@@ -129,13 +158,14 @@ class OrderDetailsScreen extends StatelessWidget {
                                 style: GoogleFonts.manrope(
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF991B1B),
-                                  fontSize: 16,
+                                  fontSize: 15,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 isPaymentRejected
-                                    ? (rejectionReason != null && rejectionReason.isNotEmpty
+                                    ? (rejectionReason != null &&
+                                            rejectionReason.isNotEmpty
                                         ? "Reason: $rejectionReason"
                                         : "Your payment proof could not be verified by the admin. Please contact support or upload a valid receipt.")
                                     : "This order has been cancelled by the administration.",
@@ -154,100 +184,123 @@ class OrderDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // -------------------------------------------------------------
                 // 2. PRODUCTS SECTION
-                // -------------------------------------------------------------
                 Text(
                   "Products",
                   style: GoogleFonts.manrope(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: const Color(0xff2D2323),
                   ),
                 ),
-                const SizedBox(height: 8),
-
+                const SizedBox(height: 10),
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: Colors.grey.shade200),
+                    final product = products[index] as Map<String, dynamic>;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.08),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xff7F4F4F).withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            product['image'] ?? '',
-                            width: width * 0.12,
-                            height: width * 0.12,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: width * 0.12,
-                              height: width * 0.12,
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.image_not_supported, size: 20),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: const Color(0xffFFF9F7),
+                            child: Image.network(
+                              product['image'] ?? '',
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => const Center(
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 24,
+                                  color: Color(0xff8D7B7B),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                         title: Text(
                           product['name'] ?? 'Item',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.manrope(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
+                            color: const Color(0xff2D2323),
                           ),
                         ),
-                        subtitle: Text(
-                          "Qty : ${product['quantity'] ?? 1}",
-                          style: GoogleFonts.manrope(fontSize: 13),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            "Qty : ${product['quantity'] ?? 1}",
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              color: const Color(0xff8D7B7B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                         trailing: Text(
                           "Rs ${product['price']}",
                           style: GoogleFonts.manrope(
                             color: const Color(0xff7F4F4F),
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
                     );
                   },
                 ),
+                const SizedBox(height: 16),
 
-                const SizedBox(height: 12),
-
-                // -------------------------------------------------------------
                 // 3. DELIVERY & STATUS CARD
-                // -------------------------------------------------------------
                 Text(
                   "Delivery Information",
                   style: GoogleFonts.manrope(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: const Color(0xff2D2323),
                   ),
                 ),
-                const SizedBox(height: 12),
-
+                const SizedBox(height: 10),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: width * 0.04,
-                    vertical: width * 0.04,
-                  ),
+                  padding: EdgeInsets.all(width * 0.045),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.08),
+                      width: 0.8,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xff7F4F4F).withOpacity(0.04),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
@@ -256,38 +309,49 @@ class OrderDetailsScreen extends StatelessWidget {
                     children: [
                       // Address
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Icon(
                             Icons.location_on_outlined,
                             color: Color(0xff7F4F4F),
+                            size: 20,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              data['address'] ?? order['address'] ?? 'N/A',
-                              style: GoogleFonts.manrope(),
+                              data['address'] ??
+                                  (order.data() as Map<String, dynamic>?)?['address'] ??
+                                  'N/A',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13.5,
+                                color: const Color(0xff2D2323),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
+                      const SizedBox(height: 12),
                       // Phone
                       Row(
                         children: [
                           const Icon(
                             Icons.phone_outlined,
                             color: Color(0xff7F4F4F),
+                            size: 20,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Text(
-                            data['phone'] ?? order['phone'] ?? 'N/A',
-                            style: GoogleFonts.manrope(),
+                            data['phone'] ??
+                                (order.data() as Map<String, dynamic>?)?['phone'] ??
+                                'N/A',
+                            style: GoogleFonts.manrope(
+                              fontSize: 13.5,
+                              color: const Color(0xff2D2323),
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
+                      const SizedBox(height: 12),
                       // Payment Method & Status Badge
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -297,19 +361,28 @@ class OrderDetailsScreen extends StatelessWidget {
                               const Icon(
                                 Icons.payments_outlined,
                                 color: Color(0xff7F4F4F),
+                                size: 20,
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 12),
                               Text(
-                                data['paymentMethod'] ?? order['paymentMethod'] ?? 'N/A',
-                                style: GoogleFonts.manrope(),
+                                data['paymentMethod'] ??
+                                    (order.data() as Map<String, dynamic>?)?['paymentMethod'] ??
+                                    'N/A',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13.5,
+                                  color: const Color(0xff2D2323),
+                                ),
                               ),
                             ],
                           ),
-                          // Live Payment Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getPaymentColor(paymentStatus).withOpacity(0.12),
+                              color: _getPaymentColor(paymentStatus)
+                                  .withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -323,8 +396,7 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-
+                      const SizedBox(height: 12),
                       // Order Delivery Status Badge
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -334,21 +406,27 @@ class OrderDetailsScreen extends StatelessWidget {
                               const Icon(
                                 Icons.local_shipping_outlined,
                                 color: Color(0xff7F4F4F),
+                                size: 20,
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 12),
                               Text(
                                 "Order Status",
                                 style: GoogleFonts.manrope(
-                                  color: Colors.grey.shade700,
+                                  fontSize: 13.5,
+                                  color: const Color(0xff8D7B7B),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
-                          // Live Order Status Badge using dynamic displayOrderStatus
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(displayOrderStatus).withOpacity(0.12),
+                              color: _getStatusColor(displayOrderStatus)
+                                  .withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -362,9 +440,10 @@ class OrderDetailsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
-                      const Divider(height: 24),
-
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1),
+                      ),
                       // Grand Total
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -372,16 +451,17 @@ class OrderDetailsScreen extends StatelessWidget {
                           Text(
                             "Grand Total",
                             style: GoogleFonts.manrope(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: const Color(0xff2D2323),
                             ),
                           ),
                           Text(
-                            "Rs ${((data['total'] ?? order['total'] ?? 0) as num).toStringAsFixed(0)}",
+                            "Rs ${(((data['total'] ?? (order.data() as Map<String, dynamic>?)?['total']) ?? 0) as num).toStringAsFixed(0)}",
                             style: GoogleFonts.manrope(
-                              fontSize: 20,
+                              fontSize: 18,
                               color: const Color(0xff7F4F4F),
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],
@@ -389,7 +469,7 @@ class OrderDetailsScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 24),
               ],
             ),
           );

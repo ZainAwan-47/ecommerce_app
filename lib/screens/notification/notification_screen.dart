@@ -1,26 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
   @override
-  State<NotificationScreen> createState() =>
-      _NotificationScreenState();
+  State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState
-    extends State<NotificationScreen> {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
-
-  final User? user =
-      FirebaseAuth.instance.currentUser;
-
+class _NotificationScreenState extends State<NotificationScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final User? user = FirebaseAuth.instance.currentUser;
+  
   List<DocumentSnapshot> notifications = [];
-
   bool isLoading = true;
 
   @override
@@ -30,47 +25,59 @@ class _NotificationScreenState
   }
 
   Future<void> loadNotifications() async {
-    if (user == null) return;
+    if (user == null) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      return;
+    }
 
-    final snapshot = await _firestore
-        .collection("notifications")
-        .where("userId", isEqualTo: user!.uid)
-        .orderBy("createdAt", descending: true)
-        .get();
+    try {
+      final snapshot = await _firestore
+          .collection("notifications")
+          .where("userId", isEqualTo: user!.uid)
+          .orderBy("createdAt", descending: true)
+          .get();
 
-    if (!mounted) return;
-
-    setState(() {
-      notifications = snapshot.docs;
-      isLoading = false;
-    });
+      if (!mounted) return;
+      setState(() {
+        notifications = snapshot.docs;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> deleteNotification(int index) async {
     final deletedDoc = notifications[index];
-    final deletedData =
-        deletedDoc.data() as Map<String, dynamic>;
-
+    
     setState(() {
       notifications.removeAt(index);
     });
 
     bool undoPressed = false;
-
+    
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
-        content: const Text(
+        content: Text(
           "Notification deleted",
+          style: GoogleFonts.manrope(fontSize: 14),
         ),
         action: SnackBarAction(
           label: "UNDO",
+          textColor: const Color(0xff7F4F4F),
           onPressed: () {
             undoPressed = true;
-
             setState(() {
               notifications.insert(index, deletedDoc);
             });
@@ -79,54 +86,92 @@ class _NotificationScreenState
       ),
     );
 
-    await Future.delayed(
-      const Duration(seconds: 4),
-    );
+    await Future.delayed(const Duration(seconds: 4));
 
     if (!undoPressed) {
-      await _firestore
-          .collection("notifications")
-          .doc(deletedDoc.id)
-          .delete();
+      try {
+        await _firestore
+            .collection("notifications")
+            .doc(deletedDoc.id)
+            .delete();
+      } catch (_) {}
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: const Color(0xffFFF9F7),
+        appBar: AppBar(
+          backgroundColor: const Color(0xffFFF9F7),
+          elevation: 0,
+          centerTitle: true,
+          iconTheme: const IconThemeData(color: Color(0xff2D2323)),
+          title: Text(
+            "Notifications",
+            style: GoogleFonts.manrope(
+              color: const Color(0xff2D2323),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         body: Center(
-          child: Text("Please sign in."),
+          child: Text(
+            "Please sign in.",
+            style: GoogleFonts.manrope(
+              fontSize: 16,
+              color: const Color(0xff8D7B7B),
+            ),
+          ),
         ),
       );
     }
 
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
-
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        surfaceTintColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Color(0xff2D2323)),
+        title: Text(
           "Notifications",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
+          style: GoogleFonts.manrope(
+            color: const Color(0xff2D2323),
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-
       body: isLoading
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Color(0xff7F4F4F),
+              ),
             )
-                      : notifications.isEmpty
-              ? const Center(
-                  child: Text(
-                    "No notifications yet",
-                    style: TextStyle(fontSize: 18),
+          : notifications.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.notifications_off_outlined,
+                        size: 70,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No notifications yet",
+                        style: GoogleFonts.manrope(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xff2D2323),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               : ListView.builder(
@@ -135,10 +180,8 @@ class _NotificationScreenState
                   itemBuilder: (context, index) {
                     final data = notifications[index].data()
                         as Map<String, dynamic>;
-
                     final Timestamp? timestamp =
                         data["createdAt"] as Timestamp?;
-
                     final formattedDate = timestamp == null
                         ? ""
                         : DateFormat(
@@ -148,112 +191,90 @@ class _NotificationScreenState
                     return Dismissible(
                       key: Key(notifications[index].id),
                       direction: DismissDirection.horizontal,
-
-                      onDismissed: (_) {
+                      onDismissed: (direction) {
                         deleteNotification(index);
                       },
-
                       background: Container(
                         alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius:
-                              BorderRadius.circular(18),
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(
                           Icons.delete_outline,
                           color: Colors.white,
-                          size: 28,
+                          size: 26,
                         ),
                       ),
-
                       secondaryBackground: Container(
                         alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius:
-                              BorderRadius.circular(18),
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(
                           Icons.delete_outline,
                           color: Colors.white,
-                          size: 28,
+                          size: 26,
                         ),
                       ),
-
                       child: Container(
-                        margin:
-                            const EdgeInsets.only(bottom: 14),
+                        margin: const EdgeInsets.only(bottom: 14),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color:
-                                  Colors.black.withOpacity(.05),
-                              blurRadius: 12,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
                         child: Row(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const CircleAvatar(
-                              radius: 24,
-                              backgroundColor:
-                                  Color(0xffF6E8E6),
+                              radius: 22,
+                              backgroundColor: Color(0xffF6E8E6),
                               child: Icon(
-                                Icons.notifications_none,
-                                color:
-                                    Color(0xff7F4F4F),
+                                Icons.notifications_none_rounded,
+                                color: Color(0xff7F4F4F),
+                                size: 22,
                               ),
                             ),
-
                             const SizedBox(width: 14),
-
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment
-                                        .start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     data["title"] ?? "",
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight:
-                                          FontWeight.bold,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xff2D2323),
                                     ),
                                   ),
-
-                                  const SizedBox(height: 6),
-
+                                  const SizedBox(height: 4),
                                   Text(
                                     data["body"] ?? "",
-                                    style: TextStyle(
-                                      color: Colors
-                                          .grey.shade700,
+                                    style: GoogleFonts.manrope(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 13.5,
                                       height: 1.4,
                                     ),
                                   ),
-
-                                  const SizedBox(height: 10),
-
+                                  const SizedBox(height: 8),
                                   Text(
                                     formattedDate,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors
-                                          .grey.shade500,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade500,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],

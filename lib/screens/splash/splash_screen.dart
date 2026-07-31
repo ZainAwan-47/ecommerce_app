@@ -7,39 +7,29 @@ import '../../services/admin_service.dart';
 import '../auth/login_screen.dart';
 import '../main/main_screen.dart';
 import '../onboarding/onboarding_screen.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
-
 class _SplashScreenState extends State<SplashScreen> {
-
 @override
 void initState() {
   super.initState();
   _checkAppState();
 }
-
 Future<void> _checkAppState() async {
   await Future.delayed(
     const Duration(seconds: 3),
   );
-
   final prefs =
       await SharedPreferences.getInstance();
-
   final seenOnboarding =
       prefs.getBool('onboardingCompleted') ??
           false;
-
   final user =
       FirebaseAuth.instance.currentUser;
-
   if (!mounted) return;
-
   if (!seenOnboarding) {
     Navigator.pushReplacement(
       context,
@@ -49,12 +39,9 @@ Future<void> _checkAppState() async {
     );
     return;
   }
-
  if (user != null) {
   final isAdmin = await AdminService().isAdmin();
-
   if (!mounted) return;
-
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
@@ -72,7 +59,6 @@ Future<void> _checkAppState() async {
     );
   }
 }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,10 +75,8 @@ Future<void> _checkAppState() async {
             ],
           ),
         ),
-
         child: Stack(
           children: [
-
             /// Top Left Circle
             Positioned(
               top: -120,
@@ -106,7 +90,6 @@ Future<void> _checkAppState() async {
                 ),
               ),
             ),
-
             /// Bottom Right Circle
             Positioned(
               bottom: -150,
@@ -120,21 +103,17 @@ Future<void> _checkAppState() async {
                 ),
               ),
             ),
-
             SafeArea(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     /// Logo
                     Image.asset(
                       "assets/logo/applogo.png",
                       width: 220,
                     ),
-
                     const SizedBox(height: 30),
-
                     const Text(
                       "Shop by Tehreem",
                       style: TextStyle(
@@ -143,9 +122,7 @@ Future<void> _checkAppState() async {
                         color: Color(0xff7F4F4F),
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     const Text(
                       "Luxury Beauty, Delivered to Your Door",
                       textAlign: TextAlign.center,
@@ -155,9 +132,7 @@ Future<void> _checkAppState() async {
                         letterSpacing: 1,
                       ),
                     ),
-
                     const SizedBox(height: 60),
-
                     const SizedBox(
                       width: 35,
                       height: 35,
@@ -166,9 +141,7 @@ Future<void> _checkAppState() async {
                         color: Color(0xff7F4F4F),
                       ),
                     ),
-
                     const SizedBox(height: 18),
-
                     const Text(
                       "Enhancing your ritual",
                       style: TextStyle(
