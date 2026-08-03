@@ -7,10 +7,10 @@ import 'payment_service.dart';
 import 'receipt_service.dart';
 
 class OrderService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late final CollectionReference<Map<String, dynamic>> _ordersRef =
-      _firestore.collection("orders");
+      firestore.collection("orders");
 
   String generateOrderId() {
     return _ordersRef.doc().id;
@@ -19,15 +19,30 @@ class OrderService {
   Future<void> clearCart() async {
     final user = _auth.currentUser;
     if (user == null) return;
-    final cartSnapshot = await _firestore
+    final cartSnapshot = await firestore
         .collection("users")
         .doc(user.uid)
         .collection("cart")
         .get();
     if (cartSnapshot.docs.isEmpty) return;
-    final batch = _firestore.batch();
+    final batch = firestore.batch();
     for (final item in cartSnapshot.docs) {
       batch.delete(item.reference);
+    }
+    await batch.commit();
+  }
+
+  Future<void> clearPurchasedCartItems(List<String> purchasedProductIds) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final batch = firestore.batch();
+    for (final productId in purchasedProductIds) {
+      final docRef = firestore
+          .collection("users")
+          .doc(user.uid)
+          .collection("cart")
+          .doc(productId);
+      batch.delete(docRef);
     }
     await batch.commit();
   }
@@ -48,9 +63,8 @@ class OrderService {
     if (user == null) {
       throw Exception("User not logged in.");
     }
-
     try {
-      final settingsDoc = await _firestore.collection('settings').doc('general').get();
+      final settingsDoc = await firestore.collection('settings').doc('general').get();
       final bool allowCheckout = settingsDoc.data()?['allowCheckout'] ?? true;
 
       if (!allowCheckout) {
@@ -62,7 +76,7 @@ class OrderService {
         receipt: receipt,
         orderId: orderId,
       );
-      
+
       await PaymentService.instance.submitPayment(
         orderId: orderId,
         userName: userName,
@@ -76,8 +90,10 @@ class OrderService {
         paymentMethod: paymentMethod,
         receiptUrl: receiptUrl,
       );
-      
-      await clearCart();
+
+      // Clear ONLY the purchased in-stock items, leaving out-of-stock items in the cart
+      final purchasedIds = products.map((p) => p['productId'] as String).toList();
+      await clearPurchasedCartItems(purchasedIds);
     } catch (e) {
       rethrow;
     }
@@ -134,7 +150,6 @@ class OrderService {
       "updatedAt": FieldValue.serverTimestamp(),
     };
 
-    // If order is cancelled, automatically ensure payment status is marked rejected/cancelled
     if (orderStatus == OrderStatus.cancelled) {
       updateData["paymentStatus"] = PaymentStatus.rejected;
     }
@@ -151,7 +166,6 @@ class OrderService {
       "updatedAt": FieldValue.serverTimestamp(),
     };
 
-    // If payment is rejected, automatically force order status to cancelled so it leaves pending
     if (paymentStatus == PaymentStatus.rejected) {
       updateData["orderStatus"] = OrderStatus.cancelled;
     }
