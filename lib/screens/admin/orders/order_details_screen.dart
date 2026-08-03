@@ -15,7 +15,6 @@ import 'widgets/shipping_address_card.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
   final OrderModel order;
-
   const OrderDetailsScreen({
     super.key,
     required this.order,
@@ -64,7 +63,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -108,8 +106,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF475569),
                   side: const BorderSide(color: Color(0xFFE2E8F0)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -120,8 +117,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: confirmColor,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -137,7 +133,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Future<void> _updateOrderStatus(String orderId, String status, String userId) async {
     if (_isUpdating) return;
-
     if (status == OrderStatus.confirmed) {
       final confirmed = await _showConfirmationDialog(
         title: 'Confirm Order',
@@ -148,7 +143,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       );
       if (!confirmed) return;
     }
-
     if (status == OrderStatus.cancelled) {
       final confirmed = await _showConfirmationDialog(
         title: 'Cancel Order',
@@ -167,7 +161,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         orderStatus: status,
       );
 
-      // If order is cancelled, automatically reject/cancel payment status too
+      // If order is cancelled, automatically reject payment status to exit pending state
       if (status == OrderStatus.cancelled) {
         await _orderService.updatePaymentStatus(
           orderId: orderId,
@@ -198,7 +192,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Future<void> _updatePaymentStatus(String orderId, String status, String userId) async {
     if (_isUpdating) return;
-
     if (status == PaymentStatus.rejected) {
       final confirmed = await _showConfirmationDialog(
         title: 'Reject Payment',
@@ -209,7 +202,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       );
       if (!confirmed) return;
     }
-
     if (status == PaymentStatus.verified) {
       final confirmed = await _showConfirmationDialog(
         title: 'Verify Payment',
@@ -224,7 +216,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     setState(() => _isUpdating = true);
     try {
       final bool isRejected = status == PaymentStatus.rejected;
-
       await _orderService.updatePaymentStatus(
         orderId: orderId,
         paymentStatus: status,
@@ -422,18 +413,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget? _buildBottomActionDock(OrderModel order) {
-    // If the order is cancelled, delivered, or payment is rejected, 
-    // hide the bottom action dock completely so no payment prompts appear.
     final bool isTerminal = order.orderStatus == OrderStatus.delivered ||
         order.orderStatus == OrderStatus.cancelled ||
         order.paymentStatus == PaymentStatus.rejected;
-
     if (isTerminal) {
       return null;
     }
 
     final String userId = order.userId;
-
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -509,9 +496,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ),
               ],
             ),
-          ],
-          if (order.paymentStatus == PaymentStatus.pending)
             const SizedBox(height: 10),
+          ],
           Row(
             children: [
               Expanded(

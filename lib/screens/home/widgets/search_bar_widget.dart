@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../search/search_screen.dart';
-import 'filter_bottom_sheet.dart';
 
 class SearchBarWidget extends StatelessWidget {
   const SearchBarWidget({super.key});
@@ -29,7 +28,6 @@ class SearchBarWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            /// SEARCH BAR
             Expanded(
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
@@ -61,41 +59,8 @@ class SearchBarWidget extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 14),
                   ],
-                ),
-              ),
-            ),
-            
-            /// FILTER BUTTON
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Material(
-                color: const Color(0xff7F4F4F),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      builder: (_) => const FilterBottomSheet(),
-                    );
-                  },
-                  child: const SizedBox(
-                    width: 38,
-                    height: 38,
-                    child: Icon(
-                      Icons.tune_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
                 ),
               ),
             ),

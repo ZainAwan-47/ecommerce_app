@@ -19,10 +19,10 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -32,27 +32,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? photoUrl;
   bool uploading = false;
 
+  // Dynamic Store Settings Cache
+  String storeName = "Shop by Tehreem";
+  String supportEmail = "support@shopbytehreem.com";
+  String supportPhone = "03475614133";
+  bool loadingSettings = true;
+
   @override
   void initState() {
     super.initState();
     nameController.text = user?.displayName ?? "";
     loadProfile();
+    loadStoreSettings();
   }
 
   Future<void> loadProfile() async {
     if (user == null) return;
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .get();
-    if (!doc.exists) return;
-    final data = doc.data()!;
-    setState(() {
-      photoUrl = data['photoUrl'];
-      nameController.text = data['displayName'] ?? user?.displayName ?? "";
-      phoneController.text = data['phoneNumber'] ?? "";
-      addressController.text = data['address'] ?? "";
-    });
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+      if (!doc.exists) return;
+      final data = doc.data()!;
+      if (!mounted) return;
+      setState(() {
+        photoUrl = data['photoUrl'];
+        nameController.text = data['displayName'] ?? user?.displayName ?? "";
+        phoneController.text = data['phoneNumber'] ?? "";
+        addressController.text = data['address'] ?? "";
+      });
+    } catch (_) {}
+  }
+
+  Future<void> loadStoreSettings() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('general')
+          .get();
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        if (!mounted) return;
+        setState(() {
+          storeName = data['storeName'] ?? "Shop by Tehreem";
+          supportEmail = data['supportEmail'] ?? "support@shopbytehreem.com";
+          supportPhone = data['supportPhone'] ?? "03475614133";
+          loadingSettings = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          loadingSettings = false;
+        });
+      }
+    }
   }
 
   Future<void> pickProfileImage() async {
@@ -95,13 +130,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final isEmailUser = user?.providerData.any(
           (provider) => provider.providerId == "password",
         ) ??
         false;
-
     return Scaffold(
       backgroundColor: const Color(0xffFFF9F7),
       appBar: AppBar(
@@ -221,10 +263,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelStyle: GoogleFonts.manrope(color: const Color(0xff8D7B7B)),
                 hintText: "03XXXXXXXXX",
                 hintStyle: GoogleFonts.manrope(color: Colors.grey.shade400),
-                prefixIcon: const Icon(Icons.phone_outlined, color: Color(0xff7F4F4F)),
+                prefixIcon:
+                    const Icon(Icons.phone_outlined, color: Color(0xff7F4F4F)),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade200),
@@ -235,7 +279,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xff7F4F4F), width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Color(0xff7F4F4F), width: 1.5),
                 ),
               ),
             ),
@@ -250,11 +295,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelStyle: GoogleFonts.manrope(color: const Color(0xff8D7B7B)),
                 hintText: "House, Street, Area, City",
                 hintStyle: GoogleFonts.manrope(color: Colors.grey.shade400),
-                prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xff7F4F4F)),
+                prefixIcon: const Icon(Icons.location_on_outlined,
+                    color: Color(0xff7F4F4F)),
                 alignLabelWithHint: true,
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade200),
@@ -265,7 +312,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xff7F4F4F), width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Color(0xff7F4F4F), width: 1.5),
                 ),
               ),
             ),
@@ -365,13 +413,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.support_agent,
               title: "Contact Us",
               onTap: () {
-                showAboutDialog(
+                showDialog(
                   context: context,
-                  applicationName: "Shop by Tehreem",
-                  applicationVersion: "1.0.0",
-                  children: const [
-                    Text("Need help? Contact us anytime."),
-                  ],
+                  builder: (context) => AlertDialog(
+                    backgroundColor: Colors.white,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    title: Text(
+                      "Contact Support",
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: const Color(0xff2D2323),
+                      ),
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Need help with your order from $storeName? Reach out to our support team:",
+                          style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            color: const Color(0xff8D7B7B),
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_outlined,
+                                size: 18, color: Color(0xff7F4F4F)),
+                            const SizedBox(width: 10),
+                            Text(
+                              supportPhone,
+                              style: GoogleFonts.manrope(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: const Color(0xff2D2323),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Icon(Icons.email_outlined,
+                                size: 18, color: Color(0xff7F4F4F)),
+                            const SizedBox(width: 10),
+                            Text(
+                              supportEmail,
+                              style: GoogleFonts.manrope(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: const Color(0xff2D2323),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Close",
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xff7F4F4F),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -382,9 +498,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 showAboutDialog(
                   context: context,
-                  applicationName: "Shop by Tehreem",
+                  applicationName: storeName,
                   applicationVersion: "1.0.0",
-                  applicationLegalese: "© 2026 Shop by Tehreem",
+                  applicationLegalese: "© 2026 $storeName. All rights reserved.",
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        "Welcome to $storeName! Your premier destination for quality products and a seamless shopping experience.",
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          color: Colors.grey.shade700,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -397,7 +526,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xff7F4F4F),
                   elevation: 0,
-                  side: BorderSide(color: const Color(0xff7F4F4F).withOpacity(0.3), width: 1.2),
+                  side: BorderSide(
+                    color: const Color(0xff7F4F4F).withOpacity(0.3),
+                    width: 1.2,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -412,7 +544,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                        contentPadding:
+                            const EdgeInsets.fromLTRB(24, 24, 24, 24),
                         title: Row(
                           children: [
                             Container(
@@ -447,14 +580,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                        actionsPadding:
+                            const EdgeInsets.fromLTRB(24, 0, 24, 24),
                         actions: [
                           Row(
                             children: [
                               Expanded(
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -478,7 +613,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xff7F4F4F),
                                     elevation: 0,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -504,15 +640,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                   if (shouldLogout == true) {
                     await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        ),
-                        (route) => false,
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                      (route) => false,
+                    );
                   }
                 },
                 icon: const Icon(Icons.logout_rounded, size: 18),

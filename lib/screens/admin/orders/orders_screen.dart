@@ -50,39 +50,45 @@ class _OrdersScreenState extends State<OrdersScreen> {
       counts[status] = 0;
     }
     for (final order in orders) {
-      if (counts.containsKey(order.orderStatus)) {
-        counts[order.orderStatus] = counts[order.orderStatus]! + 1;
+      String effectiveStatus = order.orderStatus;
+      if (order.paymentStatus == PaymentStatus.rejected && effectiveStatus == OrderStatus.pending) {
+        effectiveStatus = OrderStatus.cancelled;
+      }
+      if (counts.containsKey(effectiveStatus)) {
+        counts[effectiveStatus] = counts[effectiveStatus]! + 1;
       }
     }
     return counts;
   }
 
-  List<OrderModel> _filterAndSortOrders(List<OrderModel> rawOrders) {
+  List<OrderModel> filterAndSortOrders(List<OrderModel> rawOrders) {
     var filtered = List<OrderModel>.from(rawOrders);
-    
+
     // 1. Status Filter
     if (_selectedStatus != "All") {
-      filtered = filtered
-          .where((order) => order.orderStatus == _selectedStatus)
-          .toList();
+      filtered = filtered.where((order) {
+        if (_selectedStatus == OrderStatus.pending) {
+          return order.orderStatus == OrderStatus.pending && order.paymentStatus != PaymentStatus.rejected;
+        }
+        return order.orderStatus == _selectedStatus;
+      }).toList();
     }
-    
-    // 2. Search Query Filter (Aligned with Firestore fields: orderId, name, email, phoneNumber)
+
+    // 2. Search Query Filter
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((order) {
         final orderId = (order.orderId ?? '').toLowerCase();
-        final userName = (order.userName ?? '').toLowerCase(); // Maps to 'name' in Firestore
+        final userName = (order.userName ?? '').toLowerCase();
         final userEmail = (order.email ?? '').toLowerCase();
-        final phone = (order.phone ?? '').toLowerCase(); // Maps to 'phoneNumber' in Firestore
-
+        final phone = (order.phone ?? '').toLowerCase();
         return orderId.contains(query) ||
             userName.contains(query) ||
             userEmail.contains(query) ||
             phone.contains(query);
       }).toList();
     }
-    
+
     // 3. Sorting
     filtered.sort((a, b) {
       switch (_selectedSort) {
@@ -96,7 +102,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           return a.total.compareTo(b.total);
       }
     });
-    
+
     return filtered;
   }
 
@@ -106,7 +112,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return DateTime.now();
   }
 
-  /// Delete Confirmation Dialog
   Future<void> _confirmAndDeleteOrder(String orderId) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -115,11 +120,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
-        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         title: Row(
           children: [
             Container(
@@ -127,7 +128,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFFFEF2F2),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFFEE2E2)),
               ),
               child: const Icon(
                 Icons.delete_outline_rounded,
@@ -184,7 +184,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
     ) ?? false;
 
     if (!confirmed || !mounted) return;
-
     try {
       await FirebaseFirestore.instance.collection('orders').doc(orderId).delete();
       if (!mounted) return;
@@ -236,7 +235,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             }
             final allOrders = snapshot.data!;
             final statusCounts = _calculateStatusCounts(allOrders);
-            final filteredOrders = _filterAndSortOrders(allOrders);
+            final filteredOrders = filterAndSortOrders(allOrders);
             final totalPages = max(
               1,
               (filteredOrders.length / _itemsPerPage).ceil(),
@@ -256,7 +255,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  /// Search Input & Sort Button Row
                   Row(
                     children: [
                       Expanded(
@@ -322,7 +320,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      /// Sort By Filter Popup Menu
                       PopupMenuButton<OrderSortOption>(
                         initialValue: _selectedSort,
                         tooltip: "Sort Orders",
@@ -396,13 +393,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  /// Status Filter Chips
                   SizedBox(
                     height: 36,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: statusList.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         final status = statusList[index];
                         final count = statusCounts[status] ?? 0;
@@ -441,7 +437,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  /// Header Counter & Active Sort Indicator
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -464,7 +459,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  /// Orders List View
                   Expanded(
                     child: filteredOrders.isEmpty
                         ? _buildEmptyState()
@@ -482,9 +476,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => OrderDetailsScreen(
-                                        order: order,
-                                      ),
+                                      builder: (_) =>
+                                          OrderDetailsScreen(order: order),
                                     ),
                                   );
                                 },
@@ -494,7 +487,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             },
                           ),
                   ),
-                  /// Pagination Footer Dock
                   if (filteredOrders.isNotEmpty && totalPages > 1) ...[
                     Container(
                       margin: const EdgeInsets.only(bottom: 8, top: 4),
@@ -510,8 +502,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                       ),
                       child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             onPressed: _currentPage > 1
@@ -520,8 +511,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             icon: const Icon(
                               Icons.arrow_back_ios_new,
                               size: 16,
+                              color: Color(0xFF0F172A),
                             ),
-                            color: const Color(0xFF0F172A),
                           ),
                           Text(
                             "Page $_currentPage of $totalPages",
@@ -538,8 +529,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             icon: const Icon(
                               Icons.arrow_forward_ios,
                               size: 16,
+                              color: Color(0xFF0F172A),
                             ),
-                            color: const Color(0xFF0F172A),
                           ),
                         ],
                       ),
@@ -596,11 +587,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
           const SizedBox(height: 4),
           const Text(
             "Try adjusting your active filter or search keywords.",
+            textAlign: TextAlign.center, // Fixed: textAlign placed correctly on Text widget
             style: TextStyle(
               color: Color(0xFF64748B),
               fontSize: 13,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

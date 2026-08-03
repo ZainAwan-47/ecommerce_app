@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../models/product_model.dart';
@@ -18,10 +19,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
   final ProductService _productService = ProductService();
   final TextEditingController _searchController = TextEditingController();
 
-  // Pagination State
   int _currentPage = 0;
+  String? _selectedAdminCategory;
   static const int _itemsPerPage = 10;
-
   static const Color _primaryColor = Color(0xff7F4F4F);
   static const Color _backgroundColor = Color(0xffFFF9F7);
   static const Color _textColor = Color(0xff2D2323);
@@ -159,39 +159,110 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
+
+              // Dynamic Category Filter Chips (Hiding Empty Categories)
+              StreamBuilder<List<ProductModel>>(
+                stream: _productService.getProducts(),
+                builder: (context, catSnapshot) {
+                  List<String> activeCategories = [];
+                  if (catSnapshot.hasData && catSnapshot.data != null) {
+                    activeCategories = catSnapshot.data!
+                        .map((p) => p.category.trim())
+                        .where((c) => c.isNotEmpty)
+                        .toSet()
+                        .toList();
+                  }
+                  if (activeCategories.isEmpty) return const SizedBox();
+
+                  return SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: const Text("All"),
+                            selected: _selectedAdminCategory == null,
+                            selectedColor: _primaryColor,
+                            backgroundColor: Colors.white,
+                            labelStyle: GoogleFonts.manrope(
+                              color: _selectedAdminCategory == null
+                                  ? Colors.white
+                                  : _textColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                            onSelected: (_) =>
+                                setState(() => _selectedAdminCategory = null),
+                          ),
+                        ),
+                        ...activeCategories.map((cat) {
+                          final isSel = _selectedAdminCategory == cat;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text(cat),
+                              selected: isSel,
+                              selectedColor: _primaryColor,
+                              backgroundColor: Colors.white,
+                              labelStyle: GoogleFonts.manrope(
+                                color: isSel ? Colors.white : _textColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                              onSelected: (_) =>
+                                  setState(() => _selectedAdminCategory = cat),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
 
               // Product Stream & Tile View
               Expanded(
                 child: StreamBuilder<List<ProductModel>>(
                   stream: _productService.getProducts(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          color: _primaryColor,
                           strokeWidth: 2.5,
+                          color: _primaryColor,
                         ),
                       );
                     }
-
                     if (snapshot.hasError) {
                       return _buildErrorState(
                         message: "Failed to load products: ${snapshot.error}",
                       );
                     }
-
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return _buildEmptyState(
                         title: "No products found",
-                        subtitle: "Tap the button below to add your first product.",
+                        subtitle:
+                            "Tap the button below to add your first product.",
                       );
                     }
-
                     List<ProductModel> products = snapshot.data!;
 
+                    // Filter by category if selected
+                    if (_selectedAdminCategory != null) {
+                      products = products
+                          .where((p) => p.category == _selectedAdminCategory)
+                          .toList();
+                    }
+
+                    // Filter by search query
                     if (_searchController.text.isNotEmpty) {
-                      final query = _searchController.text.toLowerCase().trim();
+                      final query =
+                          _searchController.text.toLowerCase().trim();
                       products = products
                           .where((p) =>
                               p.name.toLowerCase().contains(query) ||
@@ -202,29 +273,33 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     if (products.isEmpty) {
                       return _buildEmptyState(
                         title: "No matching products",
-                        subtitle: 'No results found for "${_searchController.text}".',
+                        subtitle:
+                            'No results found for "${_searchController.text}".',
                       );
                     }
-
-                    final totalPages = (products.length / _itemsPerPage).ceil();
+                    final totalPages =
+                        (products.length / _itemsPerPage).ceil();
                     if (_currentPage >= totalPages) {
                       _currentPage = (totalPages > 0) ? totalPages - 1 : 0;
                     }
-
                     final startIndex = _currentPage * _itemsPerPage;
-                    final endIndex = (startIndex + _itemsPerPage < products.length)
+                    final endIndex = (startIndex + _itemsPerPage <
+                            products.length)
                         ? startIndex + _itemsPerPage
                         : products.length;
-                    final currentPageProducts = products.sublist(startIndex, endIndex);
+                    final currentPageProducts =
+                        products.sublist(startIndex, endIndex);
 
                     return Column(
                       children: [
                         Expanded(
                           child: ListView.separated(
-                            padding: const EdgeInsets.only(bottom: 90, top: 4),
+                            padding:
+                                const EdgeInsets.only(bottom: 90, top: 4),
                             physics: const BouncingScrollPhysics(),
                             itemCount: currentPageProducts.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final product = currentPageProducts[index];
                               return _buildEliteTileItem(product);
@@ -254,7 +329,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Product Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: Container(
@@ -279,8 +353,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
             const SizedBox(width: 14),
-
-            // Product Information
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +399,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100, // Light greyish background
+                            color: Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: Colors.grey.shade300,
@@ -343,13 +415,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             ),
                           ),
                         ),
+                      if (product.isBestSeller)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.orange.shade300,
+                              width: 1.2,
+                            ),
+                          ),
+                          child: Text(
+                            "Best Seller",
+                            style: GoogleFonts.manrope(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                        ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100, // Light greyish background instead of green/red
+                          color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: Colors.grey.shade300,
@@ -371,8 +466,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
             const SizedBox(width: 8),
-
-            // Action Buttons Column
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -426,7 +519,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   Widget _buildPaginationControls(int totalPages) {
     return Align(
-      alignment: Alignment.centerLeft, // Moved to total left
+      alignment: Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
@@ -446,7 +539,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
           children: [
             IconButton(
               visualDensity: VisualDensity.compact,
-              onPressed: _currentPage > 0 ? () => setState(() => _currentPage--) : null,
+              onPressed: _currentPage > 0
+                  ? () => setState(() => _currentPage--)
+                  : null,
               icon: const Icon(Icons.chevron_left_rounded, size: 24),
               color: _primaryColor,
               disabledColor: Colors.grey.shade300,
@@ -454,7 +549,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: _primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
@@ -471,7 +567,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
             const SizedBox(width: 8),
             IconButton(
               visualDensity: VisualDensity.compact,
-              onPressed: _currentPage < totalPages - 1 ? () => setState(() => _currentPage++) : null,
+              onPressed: _currentPage < totalPages - 1
+                  ? () => setState(() => _currentPage++)
+                  : null,
               icon: const Icon(Icons.chevron_right_rounded, size: 24),
               color: _primaryColor,
               disabledColor: Colors.grey.shade300,
@@ -610,7 +708,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
             color: const Color(0xff5D4E4E),
           ),
         ),
-        actionsPadding: const EdgeInsets.only(right: 16, bottom: 16, left: 16),
+        actionsPadding:
+            const EdgeInsets.only(right: 16, bottom: 16, left: 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

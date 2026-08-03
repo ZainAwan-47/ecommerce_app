@@ -17,7 +17,6 @@ import '../../../widgets/admin/responsive.dart';
 class AddProductScreen extends StatefulWidget {
   final ProductModel? product;
   const AddProductScreen({super.key, this.product});
-
   bool get isEditing => product != null;
 
   @override
@@ -27,7 +26,6 @@ class AddProductScreen extends StatefulWidget {
 class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Text Controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -36,13 +34,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController ratingController = TextEditingController();
   final TextEditingController imageUrlController = TextEditingController();
 
-  // Pickers & Services
   final ImagePicker picker = ImagePicker();
   final ProductService _productService = ProductService();
   final StorageService _storageService = StorageService.instance;
   final CategoryService _categoryService = CategoryService();
 
-  // State Variables
   bool showGalleryPicker = true;
   bool showUrlField = true;
   String? selectedCategory;
@@ -50,6 +46,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   List<String> imageUrls = [];
   bool featured = false;
   bool inStock = true;
+  bool isBestSeller = false; // Added variable
   bool isLoading = false;
 
   @override
@@ -66,6 +63,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     ratingController.text = product.rating.toString();
     featured = product.featured;
     inStock = product.inStock;
+    isBestSeller = product.isBestSeller; // Loaded for editing
     imageUrls = List<String>.from(product.images);
     if (imageUrls.isNotEmpty) {
       showGalleryPicker = false;
@@ -119,11 +117,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       );
       return;
     }
-
     setState(() {
       isLoading = true;
     });
-
     try {
       List<String> finalImageUrls = [];
       if (images.isNotEmpty) {
@@ -133,11 +129,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       } else {
         finalImageUrls = imageUrls;
       }
-
       final productId = widget.isEditing
           ? widget.product!.id
           : await _productService.generateProductId();
-
       final product = ProductModel(
         id: productId,
         name: nameController.text.trim(),
@@ -150,8 +144,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
         featured: featured,
         discount: int.tryParse(discountController.text) ?? 0,
         inStock: inStock,
+        isBestSeller: isBestSeller, // Saved to Firestore
       );
-
       if (widget.isEditing) {
         await _productService.updateProduct(product);
         if (!mounted) return;
@@ -167,7 +161,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
           "Product added successfully.",
         );
       }
-
       if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
@@ -186,7 +179,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffFFF9F7), // Warm luxury canvas
+      backgroundColor: const Color(0xffFFF9F7),
       appBar: AppBar(
         backgroundColor: const Color(0xffFFF9F7),
         surfaceTintColor: Colors.transparent,
@@ -295,7 +288,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 // SECTION 2: GENERAL INFORMATION CARD
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -405,7 +397,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 // SECTION 3: PRICING & INVENTORY CARD
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -530,12 +521,35 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           });
                         },
                       ),
+                      SwitchListTile(
+                        value: isBestSeller,
+                        activeColor: const Color(0xff7F4F4F),
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          "Best Seller Product",
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: const Color(0xff2D2323),
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Highlight as best seller on home screen",
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            color: const Color(0xff8D7B7B),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            isBestSeller = value;
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // SUBMIT ACTION BUTTON (Signature Brand Tone: 0xff7F4F4F)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
